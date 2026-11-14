@@ -15,7 +15,7 @@ const app = initializeApp({
 const auth = getAuth(app), db = getFirestore(app);
 /* quem é administrador fica só nas regras do Firestore (não é público): o site descobre tentando ler os nomes */
 const JANELA = 150000, PULSO = 60000;
-let souAdmin = false;
+let souAdmin = false, parado = false;
 let user = null, onde = "inicio", ouvintes = [], aoOnline = null, timer = null;
 
 function google(u) { return (u.providerData || []).find(p => p.providerId === "google.com") || {}; }
@@ -40,7 +40,7 @@ async function contar() {
   } catch (e) { aoOnline(null); }
 }
 async function pulso() {
-  if (!user || document.hidden) return;
+  if (!user || document.hidden || parado) return;
   try {
     await setDoc(doc(db, "online", user.uid), { ts: serverTimestamp() });
     await setDoc(doc(db, "online_nomes", user.uid), { nome: info(user).nome || "Visitante", onde: String(onde).slice(0, 60), ts: serverTimestamp() });
@@ -51,7 +51,8 @@ function sai() { if (!user) return; deleteDoc(doc(db, "online", user.uid)).catch
 
 onAuthStateChanged(auth, u => {
   user = u; souAdmin = false; avisa();
-  if (!u) { signInAnonymously(auth).catch(() => { aoOnline && aoOnline(null); }); return; }
+  if (!u) { if (!parado) signInAnonymously(auth).catch(() => { aoOnline && aoOnline(null); }); return; }
+  if (parado) return;
   clearInterval(timer); timer = setInterval(pulso, PULSO); pulso();
 });
 document.addEventListener("visibilitychange", () => { if (document.hidden) sai(); else pulso(); });
@@ -70,6 +71,16 @@ window.NUVEM = {
   async ler() { if (!user || user.isAnonymous) return null; const s = await getDoc(doc(db, "usuarios", user.uid)); return s.exists() ? s.data() : null; },
   async gravar(json, ts) { if (!user || user.isAnonymous) return false; await setDoc(doc(db, "usuarios", user.uid), { json, ts }); return true; },
   presenca(o) { onde = o || "inicio"; },
+  /* a pessoa retirou o aceite: para de enviar presença e sai da conta */
+  async desligar() { parado = true; clearInterval(timer); sai(); aoOnline && aoOnline(null); try { await signOut(auth); } catch (e) {} },
+  religar() { if (!parado) return; parado = false; if (!user) signInAnonymously(auth).catch(() => {}); else { timer = setInterval(pulso, PULSO); pulso(); } },
+  /* apagar meus dados: progresso, presença e a conta do Firebase */
+  async apagar() {
+    if (!user) return true; const uid = user.uid;
+    await Promise.all(["usuarios", "online", "online_nomes"].map(c => deleteDoc(doc(db, c, uid)).catch(() => {})));
+    parado = true; clearInterval(timer);
+    try { await user.delete(); return true; } catch (e) { try { await signOut(auth); } catch (x) {} return e && e.code === "auth/requires-recent-login" ? "relogin" : true; }
+  },
   onOnline(f) { aoOnline = f; contar(); }
 };
 dispatchEvent(new Event("nuvem"));

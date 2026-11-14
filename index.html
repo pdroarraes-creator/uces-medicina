@@ -4,7 +4,6 @@
 <title>Atlas de Medicina</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<script type="module" src="nuvem.js"></script>
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
 <link rel="apple-touch-icon" href="icone-192.png">
 <link rel="manifest" href="manifest.json">
@@ -275,6 +274,8 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
 .onl .dot, .online .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gr); flex: 0 0 auto }
 .conta { display: flex; flex-direction: column; gap: 10px; margin-top: 16px }
 .anoh { display: flex; flex-direction: column; gap: 10px }
+.linkb { background: none; border: 0; padding: 0; font: inherit; color: var(--c, var(--vi)); text-decoration: underline; cursor: pointer }
+.priv h2 { font-size: 1.5rem; font-weight: 800 } .priv ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px }
 /* barra inferior (celular) */
 .bn { display: none }
 @media (max-width: 760px) {
@@ -322,7 +323,7 @@ const TIPO = { p: ["Parcial", "Parcial"], f: ["Final", "Final"], fc: ["Final (da
 
 /* ===== estado: salvo neste aparelho e, quando a conta permite, também na conta ===== */
 const KEY = "atlas-medicina-v1";
-let S = { lang: "pt", nick: "", cards: {}, rev: {}, quiz: {}, draft: {}, fb: {}, plano: null, today: { date: "", n: 0 }, ts: 0 };
+let S = { lang: "es", nick: "", cards: {}, rev: {}, quiz: {}, draft: {}, fb: {}, plano: null, today: { date: "", n: 0 }, ts: 0 };
 try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.cards) S = Object.assign(S, s); } catch (e) {}
 const CAP = { db: null, user: null, room: null, dic: null, id: null };
 let syncT = null, syncBusy = false;
@@ -546,7 +547,7 @@ function cs(mid, i) { const k = mid + ":" + M[mid].ck[i]; return S.cards[k] || (
 /* data de estudo: na versão privada é a do tema; na pública é o dia em que cada aluno abriu o tema pela primeira vez */
 function dataEstudo(mid, t) { return PUBLICO ? (S.vistos || {})[mid + ":" + t.id] : t.estudado; }
 function proxRev(mid, t) { const d = dataEstudo(mid, t); if (!d) return null; const k = S.rev[mid + ":" + t.id] || 0; return k >= 3 ? null : { passo: k, data: addDays(d, [1, 3, 7][k]) }; }
-function provas() { return CATALOGO.flatMap(c => c.provas.map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
+function provas() { return CATALOGO.flatMap(c => (c.provas || []).map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
 function nFlags() { return Object.keys(M).reduce((a, mid) => a + M[mid].cartoes.filter((_, i) => cs(mid, i).flag).length, 0); }
 function falar(txt) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt.replace(/\(!\)/g, "")); u.lang = S.lang === "es" ? "es-AR" : "pt-BR"; u.rate = .95; speechSynthesis.speak(u); } catch (e) {} }
 
@@ -702,14 +703,14 @@ function vInicio() {
     : el("p", { class: "muted", style: "margin-top:12px" }, T("Nada vence hoje. As revisões aparecem 1, 3 e 7 dias depois de cada tema estudado.", "Nada vence hoy. Los repasos aparecen 1, 3 y 7 días después de cada tema estudiado."));
   const doAno = CATALOGO.filter(c => c.ano === anoSel()), comConteudo = doAno.filter(c => M[c.id]), semConteudo = doAno.filter(c => !M[c.id]);
   const anoInfo = IDX.anos.find(a => a.ano === anoSel()) || {};
-  const tile = c => { const m = M[c.id], p = c.provas.find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [];
+  const tile = c => { const m = M[c.id], p = (c.provas || []).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [];
     return el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, disabled: !m, onclick: () => { location.hash = "#m-" + c.id; } },
       el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, nomeM(c)),
       el("span", { class: "ts" }, m ? ts.length + T(" temas estudados · ", " temas estudiados · ") + m.cartoes.length + T(" cartões", " tarjetas") : T("Sem conteúdo ainda. Entra quando você estudar o primeiro tema.", "Sin contenido todavía. Entra cuando estudies el primer tema.")),
       m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("A começar", "Por empezar"))); };
   const tl = pv.map(p => el("li", { "data-m": p.c.id }, el("span", { class: "d" }, fmt(p.dt)), el("span", { class: "dot" }),
     el("span", null, el("b", null, nomeM(p.c)), " · " + T(...TIPO[p.tipo])), el("span", { class: "in" }, T("em ", "en ") + dias(falta(p.dt).d))));
-  return el("div", { class: "inner" }, caixaImport(),
+  return el("div", { class: "inner" }, avisoTopo ? el("p", { class: "note", style: "margin-top:16px", role: "status" }, avisoTopo) : null, caixaImport(),
     el("section", { class: "hero" },
       el("div", null, el("div", { class: "htop" }, el("div", null, el("div", { class: "kicker" }, "Medicina · " + rotAno(anoAtual()) + " · UCES"),
         el("h1", { html: T("Seu plano de <em>hoje</em>", "Tu plan de <em>hoy</em>") })), emblema()), lista,
@@ -727,7 +728,7 @@ function vInicio() {
     el("section", { class: "sec" }, el("div", { class: "anoh" }, el("h2", null, T("Matérias do ", "Materias de ") + rotAno(anoSel())),
         IDX.anos.length > 1 ? el("div", { class: "chips", role: "group", "aria-label": T("Ano do curso", "Año de la carrera") }, IDX.anos.map(a => el("button", { class: "chip", "aria-pressed": String(a.ano === anoSel()),
           onclick: () => { anoVer = a.ano === anoAtual() ? null : a.ano; render(); const h = document.querySelector(".anoh"); if (h) h.scrollIntoView({ block: "nearest" }); } }, a.ano + "º" + (a.ano === anoAtual() ? T(" · atual", " · actual") : "")))) : null),
-      doAno.length ? el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(1, comConteudo.length), T("Ver matérias sem conteúdo", "Ver materias sin contenido")))
+      doAno.length ? el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(comConteudo.length, innerWidth > 760 ? 4 : 2), T("Ver mais matérias", "Ver más materias")))
         : el("p", { class: "muted" }, anoInfo.inicio > hoje() ? T("Este ano ainda não começou. As matérias entram aqui quando você estudar o primeiro tema.", "Este año todavía no empezó. Las materias entran aquí cuando estudies el primer tema.") : T("Nenhuma matéria deste ano no atlas ainda.", "Ninguna materia de este año en el atlas todavía."))),
     el("section", { class: "sec" }, el("h2", null, T("Calendário de provas", "Calendario de exámenes")),
       el("ul", { class: "tl" }, verMais(tl, 3, T("Ver todas as provas", "Ver todos los exámenes")))),
@@ -763,7 +764,7 @@ function vMateria(mid, abaIni) {
         u.mapa ? el("details", { class: "mini-sec" }, el("summary", null, T("Mapa mental da unidade", "Mapa mental de la unidad")), el("div", { class: "in" }, mapa(u.mapa))) : null]; } }; });
   return el("div", { class: "inner", "data-m": mid },
     el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
-      el("span", { class: "kicker" }, c.provas.filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]) + " " + fmt(p[1])).join(" · ")),
+      el("span", { class: "kicker" }, (c.provas || []).filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]) + " " + fmt(p[1])).join(" · ")),
       el("h1", null, m.nome), el("p", { class: "muted" }, m.sub)),
     abas("materia", lista, ini, id => marcaAba("m-" + mid, id)));
 }
@@ -852,7 +853,8 @@ function vCartoes() {
 }
 function render() {
   const h = location.hash.slice(1), p = h.split("-"); let v, nav = "inicio";
-  if (p[0] === "m" && M[p[1]]) { v = vMateria(p[1], p[2]); nav = "m"; } else if (p[0] === "t" && tema(p[1], p[2])) { v = vTema(p[1], p[2], p[3]); nav = "m"; }
+  if (PUBLICO && (!S.aceite || verPriv)) v = vPriv();
+  else if (p[0] === "m" && M[p[1]]) { v = vMateria(p[1], p[2]); nav = "m"; } else if (p[0] === "t" && tema(p[1], p[2])) { v = vTema(p[1], p[2], p[3]); nav = "m"; }
   else if (h === "cartoes") { v = vCartoes(); nav = "cartoes"; } else v = vInicio();
   view.replaceChildren(v); document.documentElement.style.setProperty("--barh", barh() + "px");
   document.documentElement.lang = S.lang === "es" ? "es" : "pt-BR";
@@ -860,6 +862,7 @@ function render() {
   document.getElementById("navC").textContent = document.getElementById("bnC").textContent = T("Cartões", "Tarjetas");
   const bm = document.getElementById("bnM"); bm.textContent = T("Matéria", "Materia"); if (nav === "m") bm.setAttribute("href", "#m-" + p[1]);
   document.getElementById("foot").textContent = PUBLICO ? T("Resumos de estudo feitos por alunos, com base no Costanzo e em guias de estudo. Não substituem o livro nem as aulas: confira sempre com o material oficial. Sem entrar com Google, o progresso fica só neste aparelho.", "Resúmenes de estudio hechos por alumnos, basados en el Costanzo y en guías de estudio. No reemplazan el libro ni las clases: confirma siempre con el material oficial. Sin entrar con Google, el progreso queda solo en este dispositivo.") : T("Modelo simplificado para estudo, feito a partir das suas anotações. Confira sempre com o livro adotado ou com o professor.", "Modelo simplificado para estudiar, hecho a partir de tus apuntes. Confirma siempre con el libro adoptado o con el profesor.");
+  if (PUBLICO) document.getElementById("foot").append(" ", el("button", { class: "linkb", onclick: () => { verPriv = true; render(); scrollTo(0, 0); } }, T("Privacidade e dados", "Privacidad y datos")));
   document.querySelectorAll(".bn a").forEach(a => { if (a.dataset.n === nav) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   document.querySelectorAll(".lang").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.l === S.lang)));
   presenca();
@@ -883,6 +886,40 @@ async function renderOnline() {
         el("span", null, nm + (p.isMe ? T(" (você)", " (tú)") : "")), onde && !p.isMe ? el("small", null, T("em ", "en ") + ondeTxt(onde)) : null); return node; }),
     list.length < 2 ? el("span", { class: "sm muted" }, T("Só você por enquanto.", "Solo tú por ahora.")) : null].flat().filter(Boolean));
 }
+/* ===== aceite de dados (Ley 25.326 da Argentina; LGPD no Brasil): nada vai para a nuvem antes do aceite ===== */
+let verPriv = false;
+function ativarNuvem() { if (!PUBLICO) return; if (CAP.nuvem) { CAP.nuvem.religar(); return; } if (CAP.nuvemCarregando) return; CAP.nuvemCarregando = true; ligarNuvem(); import("./nuvem.js").catch(() => { CAP.nuvemCarregando = false; }); }
+function escolher(nuvem) {
+  S.aceite = { v: 1, em: new Date().toISOString(), nuvem }; verPriv = false; save();
+  if (nuvem) ativarNuvem(); else if (CAP.nuvem) { CAP.nuvem.desligar(); CAP.conta = null; CAP.online = null; renderOnline(); }
+  render(); scrollTo(0, 0);
+}
+function vPriv() {
+  const P = IDX.privacidade || {}, li = (pt, es) => el("li", null, T(pt, es));
+  const contato = P.contato ? T("Contato: ", "Contacto: ") + P.contato : T("Contato: pela pessoa que te mandou o link do atlas.", "Contacto: a través de la persona que te envió el enlace del atlas.");
+  const ja = S.aceite, logado = CAP.conta && !CAP.conta.anon;
+  return el("div", { class: "inner priv" }, el("section", { class: "card rail", style: "margin-top:20px" },
+    el("span", { class: "ct" }, T("Seus dados", "Tus datos")),
+    el("h2", null, ja ? T("Privacidade e dados", "Privacidad y datos") : T("Antes de começar", "Antes de empezar")),
+    el("p", null, T("Este atlas é um material de estudo feito por alunos. Ele guarda o seu progresso (cartões, revisões e respostas do quiz) neste aparelho.", "Este atlas es un material de estudio hecho por alumnos. Guarda tu progreso (tarjetas, repasos y respuestas del quiz) en este dispositivo.")),
+    el("p", null, el("b", null, T("Se você aceitar a conexão online:", "Si aceptás la conexión en línea:"))),
+    el("ul", null,
+      li("Fica registrado, sem nome, que você está conectado, para mostrar quantas pessoas estão estudando agora.", "Se registra, sin nombre, que estás conectado, para mostrar cuántas personas están estudiando ahora."),
+      li("Se você entrar com Google, guardamos seu nome, seu e-mail e seu progresso no Firebase (Google), em servidores em São Paulo, Brasil, para você continuar em outro aparelho.", "Si entrás con Google, guardamos tu nombre, tu correo y tu progreso en Firebase (Google), en servidores de San Pablo, Brasil, para que sigas en otro dispositivo."),
+      li("Enquanto você estiver online, seu primeiro nome e o tema que você está vendo ficam visíveis só para os administradores do atlas. Os colegas veem apenas quantas pessoas estão online.", "Mientras estés en línea, tu primer nombre y el tema que estás viendo son visibles solo para los administradores del atlas. Los compañeros ven solo cuántas personas están en línea."),
+      li("Não usamos publicidade nem análise de uso, e não vendemos nem passamos seus dados a ninguém.", "No usamos publicidad ni analítica, y no vendemos ni cedemos tus datos a nadie."),
+      li("Os dados ficam guardados enquanto você usar o atlas. Você pode apagá-los quando quiser em \"Sua conta\".", "Los datos se guardan mientras uses el atlas. Podés borrarlos cuando quieras en \"Tu cuenta\".")),
+    el("p", null, T("Aceitar é opcional. Se não aceitar, o atlas funciona igual, só neste aparelho, sem enviar nada.", "Aceptar es optativo. Si no aceptás, el atlas funciona igual, solo en este dispositivo, sin enviar nada.")),
+    el("p", { class: "sm muted" }, T("Você pode pedir acesso, correção ou exclusão dos seus dados a qualquer momento (Ley 25.326, arts. 14 a 16; no Brasil, LGPD). Responsáveis: os administradores do atlas. ", "Podés pedir acceso, rectificación o supresión de tus datos en cualquier momento (Ley 25.326, arts. 14 a 16). Responsables: los administradores del atlas. ") + contato),
+    el("p", { class: "sm muted" }, T("A Agência de Acesso à Informação Pública (Argentina), órgão de controle da Ley 25.326, recebe denúncias e reclamações sobre o descumprimento das normas de proteção de dados pessoais.", "La Agencia de Acceso a la Información Pública, Órgano de Control de la Ley 25.326, tiene la atribución de atender las denuncias y reclamos que se interpongan con relación al incumplimiento de las normas sobre protección de datos personales.")),
+    ja ? el("p", { class: "sm" }, el("b", null, T("Sua escolha: ", "Tu elección: ")), ja.nuvem ? T("online aceito", "en línea aceptado") : T("só neste aparelho", "solo en este dispositivo"), " · " + fmt(ja.em)) : null,
+    el("div", { class: "row" },
+      el("button", { class: "btn solid", onclick: () => escolher(true) }, T("Aceito e quero estudar online", "Acepto y quiero estudiar en línea")),
+      el("button", { class: "btn", onclick: () => escolher(false) }, T("Usar só neste aparelho", "Usar solo en este dispositivo")),
+      ja ? el("button", { class: "btn ghost", onclick: () => { verPriv = false; render(); } }, T("Voltar", "Volver")) : null),
+    logado ? el("p", { class: "sm muted" }, T("Para apagar seus dados da nuvem, use \"Sua conta\", no fim da página inicial.", "Para borrar tus datos de la nube, usá \"Tu cuenta\", al final de la página de inicio.")) : null));
+}
+
 /* ===== nuvem da versão pública (Firebase, em nuvem.js) ===== */
 function temProgresso(x) { return !!x && (Object.values(x.cards || {}).some(c => c && (c.flag || c.streak)) || Object.values(x.rev || {}).some(Boolean) || Object.keys(x.quiz || {}).length > 0); }
 function ligarNuvem() {
@@ -921,10 +958,19 @@ function contaRodape() {
   return el("details", { class: "mini-sec" }, el("summary", null, T("Sua conta", "Tu cuenta"), el("small", null, c.nome || c.email)),
     el("div", { class: "in" }, el("p", null, CAP.nuvemErro ? T("Não consegui falar com a nuvem agora. O progresso continua salvo neste aparelho.", "No pude conectar con la nube ahora. El progreso sigue guardado en este dispositivo.") : T("Progresso salvo na nuvem, ligado a ", "Progreso guardado en la nube, vinculado a ") + c.email + "."),
       c.admin ? el("p", { class: "sm muted" }, T("Você é administrador: toque no contador de online, no topo, para ver quem está estudando.", "Tienes acceso de administrador: toca el contador de en línea, arriba, para ver quién está estudiando.")) : null,
-      el("div", { class: "row" }, el("button", { class: "btn", onclick: () => CAP.nuvem.sair() }, T("Sair", "Salir")))));
+      el("div", { class: "row" }, el("button", { class: "btn", onclick: () => CAP.nuvem.sair() }, T("Sair", "Salir")),
+        el("button", { class: "btn ghost", onclick: async e => { const b = e.currentTarget, st = b.parentNode.nextSibling;
+          if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = T("Toque de novo para apagar", "Tocá de nuevo para borrar"); return; }
+          b.disabled = true; const r = await CAP.nuvem.apagar(); CAP.conta = null; CAP.online = null;
+          S.aceite = { v: 1, em: new Date().toISOString(), nuvem: false }; save(); render(); renderOnline();
+          alertaPriv(r === "relogin" ? T("Seu progresso e sua presença foram apagados da nuvem. Para apagar também a conta, entre de novo com Google e repita.", "Tu progreso y tu presencia se borraron de la nube. Para borrar también la cuenta, entrá de nuevo con Google y repetí.") : T("Seus dados foram apagados da nuvem. O progresso continua só neste aparelho.", "Tus datos se borraron de la nube. El progreso sigue solo en este dispositivo.")); } },
+          T("Apagar meus dados da nuvem", "Borrar mis datos de la nube"))), el("span", { class: "sm muted", "aria-live": "polite" })));
+}
+let avisoTopo = null;
+function alertaPriv(txt) { avisoTopo = txt; render();
 }
 async function ligar() {
-  if (PUBLICO) { ligarNuvem(); return; }
+  if (PUBLICO) { if (S.aceite && S.aceite.nuvem) ativarNuvem(); return; }
   if (!window.claude || !window.claude.use) return;
   const [db, user, room, dic] = await Promise.all(["db", "user", "room", "dictation"].map(n => window.claude.use(n).catch(() => null)));
   CAP.db = db; CAP.user = user; CAP.room = room; CAP.dic = dic;
@@ -938,7 +984,7 @@ async function ligar() {
 }
 document.getElementById("homeBtn").addEventListener("click", () => { location.hash = "#inicio"; });
 document.querySelectorAll(".lang").forEach(b => b.addEventListener("click", () => { S.lang = b.dataset.l; save(); carregar(); render(); renderOnline(); }));
-addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
+addEventListener("hashchange", () => { avisoTopo = null; render(); scrollTo(0, 0); });
 view.replaceChildren(el("p", { class: "muted", style: "padding:40px 0" }, T("Carregando…", "Cargando…")));
 carregarArquivos().then(() => { carregar(); render(); ligar(); });
 </script>
