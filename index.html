@@ -273,9 +273,20 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
 .onl li { display: flex; align-items: center; gap: 8px } .onl li small { color: var(--muted); font-weight: 500 }
 .onl .dot, .online .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gr); flex: 0 0 auto }
 .conta { display: flex; flex-direction: column; gap: 10px; margin-top: 16px }
-.anoh { display: flex; flex-direction: column; gap: 10px }
+.anoh { display: flex; flex-direction: column; gap: 10px } .anoh .top { display: flex; justify-content: space-between; align-items: center; gap: 10px } .anoh .top .pill { min-width: 44px; min-height: 40px; font-weight: 800 }
+.grow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line) } .grow select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px; min-height: 40px }
 .linkb { background: none; border: 0; padding: 0; font: inherit; color: var(--c, var(--vi)); text-decoration: underline; cursor: pointer }
 .priv h2 { font-size: 1.5rem; font-weight: 800 } .priv ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px }
+/* agenda e perfil */
+[hidden] { display: none !important }
+a.exam { text-decoration: none } a.exam .ir { font-weight: 700; font-size: .85rem; opacity: .9; margin-top: 4px }
+.comp { display: flex; flex-direction: column; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-left: 5px solid var(--c, var(--vi)); border-radius: 6px 16px 16px 6px; padding: 12px 14px; box-shadow: var(--sh-s) }
+.comp .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline } .comp .in { font-weight: 800; font-size: .85rem; color: var(--c, var(--vi)); white-space: nowrap }
+.form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px } .form label { display: flex; flex-direction: column; gap: 4px; font-size: .86rem; font-weight: 600; color: var(--muted) }
+.form input, .form select, .comp input { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; min-height: 44px; min-width: 0 }
+.form .tudo { grid-column: 1 / -1 } .chk { flex-direction: row !important; align-items: flex-start; gap: 10px !important; color: var(--ink) !important; font-weight: 500 !important } .chk input { min-height: 0; width: 22px; height: 22px; flex: 0 0 auto; padding: 0 }
+.barras { display: flex; align-items: flex-end; gap: 4px; height: 120px; padding-top: 18px } .barras > div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px; height: 100%; min-width: 0 }
+.barras i { display: block; width: 100%; max-width: 26px; background: var(--vi); border-radius: 5px 5px 0 0; min-height: 2px } .barras small { font-size: .62rem; color: var(--muted) } .barras b { font-size: .68rem }
 /* barra inferior (celular) */
 .bn { display: none }
 @media (max-width: 760px) {
@@ -300,13 +311,13 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
   <div class="bar gut"><div class="inner">
     <button class="brand" id="homeBtn"><i></i><span>Atlas</span></button>
     <div class="sp"></div>
-    <a class="pill" href="#inicio" id="navI"></a><a class="pill" href="#cartoes" id="navC"></a>
+    <a class="pill" href="#inicio" id="navI"></a><a class="pill" href="#cartoes" id="navC"></a><a class="pill" href="#perfil" id="navP"></a>
     <div class="langs" role="group" aria-label="Idioma / Idioma"><button class="lang" data-l="pt">PT</button><button class="lang" data-l="es">ES</button></div>
   </div></div>
   <div class="gut"><div class="inner online" id="online" hidden></div></div>
   <main id="view" class="gut"></main>
   <footer class="gut" id="foot"></footer>
-  <nav class="bn" aria-label="Seções"><a href="#inicio" data-n="inicio" id="bnI"></a><a href="#m-fisiologia" data-n="m" id="bnM"></a><a href="#cartoes" data-n="cartoes" id="bnC"></a></nav>
+  <nav class="bn" aria-label="Seções"><a href="#inicio" data-n="inicio" id="bnI"></a><a href="#m-fisiologia" data-n="m" id="bnM"></a><a href="#cartoes" data-n="cartoes" id="bnC"></a><a href="#perfil" data-n="perfil" id="bnP"></a></nav>
 </div>
 
 <script src="materias/indice.js"></script>
@@ -331,7 +342,7 @@ function save() { S.ts = Date.now(); try { localStorage.setItem(KEY, JSON.string
   /* só sincroniza depois de ler o que já está salvo: um aparelho vazio não pode apagar o progresso da nuvem */
   if (CAP.db && CAP.id && CAP.pronto) { clearTimeout(syncT); syncT = setTimeout(async function sync() { if (syncBusy) { syncT = setTimeout(sync, 1500); return; } syncBusy = true;
     try { await CAP.db.doc("data/users/" + CAP.id + "/estado").set({ json: JSON.stringify(S), ts: S.ts }); } catch (e) {} syncBusy = false; }, 2500); }
-  if (PUBLICO && CAP.nuvem && CAP.conta && !CAP.conta.anon && CAP.nuvemPronta) { clearTimeout(syncT); syncT = setTimeout(() => { CAP.nuvem.gravar(JSON.stringify(S), S.ts).catch(() => { CAP.nuvemErro = true; }); }, 2500); } }
+  if (PUBLICO && CAP.nuvem && CAP.conta && !CAP.conta.anon && CAP.nuvemPronta) { clearTimeout(syncT); syncT = setTimeout(() => { CAP.nuvem.gravar(JSON.stringify(S), S.ts).catch(() => { CAP.nuvemErro = true; }); if (S.perfil && S.perfil.nuvem) CAP.nuvem.perfil(resumoPerfil()).catch(() => {}); }, 2500); } }
 
 const T = (pt, es) => S.lang === "es" ? es : pt;
 const BUILD = {}, M = {};
@@ -523,10 +534,17 @@ function carregar() {
   migrarCartoes();
 }
 /* ano: o atlas abre no período atual (o último ano que já começou); os outros anos ficam a um toque */
-function anoAtual() { const h = hoje(); let at = IDX.anos.length ? IDX.anos[0].ano : 1; IDX.anos.forEach(a => { if (a.inicio <= h) at = a.ano; }); return at; }
+/* se a pessoa informou no perfil o ano em que começou, o ano atual sai daí (o ano letivo vira em março); senão, das datas do índice */
+function anoAtual() { const h = hoje(), ini = S.perfil && S.perfil.inicio; if (ini) return Math.max(1, Math.min(7, +h.slice(0, 4) - ini + (h.slice(5, 7) >= "03" ? 1 : 0)));
+  let at = IDX.anos.length ? IDX.anos[0].ano : 1; IDX.anos.forEach(a => { if (a.inicio <= h) at = a.ano; }); return at; }
+/* grade pessoal: cada um esconde o que não cursa e pode mudar uma matéria de ano (7 = "Extra", depois do 6º) */
+let editGrade = false;
+const anoDe = c => ((S.grade || {})[c.id] || {}).ano || c.ano, oculta = c => !!((S.grade || {})[c.id] || {}).oculta;
+function setGrade(id, m) { S.grade = S.grade || {}; S.grade[id] = Object.assign({}, S.grade[id], m); S.plano = null; save(); }
+function anosVis() { const a = IDX.anos.map(x => x.ano); if (anoAtual() === 7 || CATALOGO.some(c => anoDe(c) === 7) || editGrade) a.push(7); return a; }
 let anoVer = null;
 const anoSel = () => anoVer || anoAtual();
-const rotAno = n => n + "º " + T("ano", "año");
+const rotAno = n => n === 7 ? T("ano extra", "año extra") : n + "º " + T("ano", "año");
 function carregarArquivos() {
   const at = anoAtual(), anos = IDX.anos.filter(a => a.ano === at).concat(IDX.anos.filter(a => a.ano !== at));
   return Promise.all(anos.flatMap(a => a.materias.flatMap(m => m.arquivos || [])).map(src => new Promise(ok => {
@@ -547,7 +565,7 @@ function cs(mid, i) { const k = mid + ":" + M[mid].ck[i]; return S.cards[k] || (
 /* data de estudo: na versão privada é a do tema; na pública é o dia em que cada aluno abriu o tema pela primeira vez */
 function dataEstudo(mid, t) { return PUBLICO ? (S.vistos || {})[mid + ":" + t.id] : t.estudado; }
 function proxRev(mid, t) { const d = dataEstudo(mid, t); if (!d) return null; const k = S.rev[mid + ":" + t.id] || 0; return k >= 3 ? null : { passo: k, data: addDays(d, [1, 3, 7][k]) }; }
-function provas() { return CATALOGO.flatMap(c => (c.provas || []).map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
+function provas() { return CATALOGO.filter(c => !oculta(c)).flatMap(c => (c.provas || []).map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
 function nFlags() { return Object.keys(M).reduce((a, mid) => a + M[mid].cartoes.filter((_, i) => cs(mid, i).flag).length, 0); }
 function falar(txt) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt.replace(/\(!\)/g, "")); u.lang = S.lang === "es" ? "es-AR" : "pt-BR"; u.rate = .95; speechSynthesis.speak(u); } catch (e) {} }
 
@@ -701,15 +719,14 @@ function vInicio() {
   const lista = pl.itens.length ? [el("div", { class: "plhead" }, el("div", { class: "track" }, barra), cont),
       el("ul", { class: "plan" }, verMais(itens, 2, T("Ver plano completo", "Ver plan completo"), T("Recolher plano", "Recoger plan")))]
     : el("p", { class: "muted", style: "margin-top:12px" }, T("Nada vence hoje. As revisões aparecem 1, 3 e 7 dias depois de cada tema estudado.", "Nada vence hoy. Los repasos aparecen 1, 3 y 7 días después de cada tema estudiado."));
-  const doAno = CATALOGO.filter(c => c.ano === anoSel()), comConteudo = doAno.filter(c => M[c.id]), semConteudo = doAno.filter(c => !M[c.id]);
+  const doAno = CATALOGO.filter(c => anoDe(c) === anoSel() && (editGrade || !oculta(c))), comConteudo = doAno.filter(c => M[c.id]), semConteudo = doAno.filter(c => !M[c.id]);
   const anoInfo = IDX.anos.find(a => a.ano === anoSel()) || {};
   const tile = c => { const m = M[c.id], p = (c.provas || []).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [];
     return el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, disabled: !m, onclick: () => { location.hash = "#m-" + c.id; } },
       el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, nomeM(c)),
       el("span", { class: "ts" }, m ? ts.length + T(" temas estudados · ", " temas estudiados · ") + m.cartoes.length + T(" cartões", " tarjetas") : T("Sem conteúdo ainda. Entra quando você estudar o primeiro tema.", "Sin contenido todavía. Entra cuando estudies el primer tema.")),
       m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("A começar", "Por empezar"))); };
-  const tl = pv.map(p => el("li", { "data-m": p.c.id }, el("span", { class: "d" }, fmt(p.dt)), el("span", { class: "dot" }),
-    el("span", null, el("b", null, nomeM(p.c)), " · " + T(...TIPO[p.tipo])), el("span", { class: "in" }, T("em ", "en ") + dias(falta(p.dt).d))));
+  const tl = comps().map(linhaComp);
   return el("div", { class: "inner" }, avisoTopo ? el("p", { class: "note", style: "margin-top:16px", role: "status" }, avisoTopo) : null, caixaImport(),
     el("section", { class: "hero" },
       el("div", null, el("div", { class: "htop" }, el("div", null, el("div", { class: "kicker" }, "Medicina · " + rotAno(anoAtual()) + " · UCES"),
@@ -717,21 +734,26 @@ function vInicio() {
         el("div", { class: "row", style: "margin-top:16px" }, el("a", { class: "btn solid", href: "#cartoes" }, T("Revisar cartões", "Repasar tarjetas")),
           prox && M[prox.c.id] ? el("a", { class: "btn", href: "#m-" + prox.c.id }, T("Abrir ", "Abrir ") + nomeM(prox.c)) : null)),
       el("div", { style: "display:flex;flex-direction:column;gap:14px;min-width:0" },
-        prox ? el("div", { class: "exam", "data-m": prox.c.id }, el("span", { class: "kicker" }, T("Próxima prova", "Próximo examen")),
-          el("div", { class: "count" }, T("faltam ", "faltan ") + faltaTxt(falta(prox.dt))), el("b", null, T(...TIPO[prox.tipo]) + T(" de ", " de ") + nomeM(prox.c)),
-          el("span", null, fmt(prox.dt) + ", " + new Date(prox.dt).toLocaleTimeString(S.lang === "es" ? "es-AR" : "pt-BR", { hour: "2-digit", minute: "2-digit" }))) : null,
+        cardProx(),
         el("div", { class: "stats" },
           el("div", { class: "stat" }, el("b", null, String(total)), el("span", null, T("cartões", "tarjetas"))),
           el("div", { class: "stat" }, el("b", null, String(nFlags())), el("span", null, T("marcados (!)", "marcadas (!)"))),
           el("div", { class: "stat" }, el("b", null, String(S.today.date === hoje() ? S.today.n : 0)), el("span", null, T("respondidos hoje", "respondidas hoy")))))),
     contaTopo(),
-    el("section", { class: "sec" }, el("div", { class: "anoh" }, el("h2", null, T("Matérias do ", "Materias de ") + rotAno(anoSel())),
-        IDX.anos.length > 1 ? el("div", { class: "chips", role: "group", "aria-label": T("Ano do curso", "Año de la carrera") }, IDX.anos.map(a => el("button", { class: "chip", "aria-pressed": String(a.ano === anoSel()),
-          onclick: () => { anoVer = a.ano === anoAtual() ? null : a.ano; render(); const h = document.querySelector(".anoh"); if (h) h.scrollIntoView({ block: "nearest" }); } }, a.ano + "º" + (a.ano === anoAtual() ? T(" · atual", " · actual") : "")))) : null),
-      doAno.length ? el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(comConteudo.length, innerWidth > 760 ? 4 : 2), T("Ver mais matérias", "Ver más materias")))
-        : el("p", { class: "muted" }, anoInfo.inicio > hoje() ? T("Este ano ainda não começou. As matérias entram aqui quando você estudar o primeiro tema.", "Este año todavía no empezó. Las materias entran aquí cuando estudies el primer tema.") : T("Nenhuma matéria deste ano no atlas ainda.", "Ninguna materia de este año en el atlas todavía."))),
-    el("section", { class: "sec" }, el("h2", null, T("Calendário de provas", "Calendario de exámenes")),
-      el("ul", { class: "tl" }, verMais(tl, 3, T("Ver todas as provas", "Ver todos los exámenes")))),
+    el("section", { class: "sec" }, el("div", { class: "anoh" }, el("div", { class: "top" }, el("h2", null, T("Matérias do ", "Materias de ") + rotAno(anoSel())),
+          el("button", { class: "pill", "aria-label": T("Escolher as matérias que você cursa", "Elegir las materias que cursás"), "aria-pressed": String(editGrade), onclick: () => { editGrade = !editGrade; render(); document.querySelector(".anoh").scrollIntoView({ block: "nearest" }); } }, editGrade ? T("Pronto", "Listo") : "⋯")),
+        el("div", { class: "chips", role: "group", "aria-label": T("Ano do curso", "Año de la carrera") }, anosVis().map(a => el("button", { class: "chip", "aria-pressed": String(a === anoSel()),
+          onclick: () => { anoVer = a === anoAtual() ? null : a; render(); const h = document.querySelector(".anoh"); if (h) h.scrollIntoView({ block: "nearest" }); } }, (a === 7 ? "Extra" : a + "º") + (a === anoAtual() ? T(" · atual", " · actual") : ""))))),
+      editGrade ? el("div", { class: "card" }, el("p", { class: "sm muted" }, T("Desmarque o que você não cursa. Se for cursar uma matéria em outro ano (por exemplo, repetir), troque o ano dela. \"Extra\" é para depois do 6º ano.", "Desmarcá lo que no cursás. Si vas a cursar una materia en otro año (por ejemplo, recursar), cambiale el año. \"Extra\" es para después de 6º año.")),
+          doAno.length ? doAno.map(c => { const g = (S.grade || {})[c.id] || {};
+            const cb = el("input", { type: "checkbox", id: "gr-" + c.id, checked: !g.oculta, onchange: () => { setGrade(c.id, { oculta: !cb.checked }); } });
+            const sel = el("select", { "aria-label": T("Ano de ", "Año de ") + nomeM(c), onchange: () => { setGrade(c.id, { ano: +sel.value }); render(); } }, [1, 2, 3, 4, 5, 6, 7].map(a => el("option", { value: String(a), selected: a === anoDe(c) }, a === 7 ? "Extra" : a + "º")));
+            return el("div", { class: "grow" }, el("label", { class: "chk", for: "gr-" + c.id }, cb, el("span", null, nomeM(c))), sel); }) : el("p", { class: "muted" }, T("Nenhuma matéria neste ano.", "Ninguna materia en este año.")))
+        : doAno.length ? el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(comConteudo.length, innerWidth > 760 ? 4 : 2), T("Ver mais matérias", "Ver más materias")))
+        : el("p", { class: "muted" }, anoInfo.inicio > hoje() ? T("Este ano ainda não começou. As matérias entram aqui quando você estudar o primeiro tema.", "Este año todavía no empezó. Las materias entran aquí cuando estudies el primer tema.") : T("Nenhuma matéria aqui. Toque em ⋯ para escolher as suas.", "Ninguna materia acá. Tocá ⋯ para elegir las tuyas."))),
+    el("section", { class: "sec" }, el("h2", null, T("Próximos compromissos", "Próximos compromisos")),
+      el("ul", { class: "tl" }, tl.slice(0, 3)),
+      el("div", { class: "row" }, el("a", { class: "btn", href: "#agenda" }, T("Abrir agenda", "Abrir agenda") + (tl.length > 3 ? " (" + tl.length + ")" : "")))),
     PUBLICO ? el("section", { class: "sec" }, contaRodape()) : el("section", { class: "sec" }, caixaExport(),
       el("details", { class: "mini-sec" }, el("summary", null, T("Estudar com uma amiga", "Estudiar con una amiga")),
         el("div", { class: "in" },
@@ -823,7 +845,7 @@ function fila(modo) { let ids = []; for (const mid in M) M[mid].cartoes.forEach(
 function iniciar(modo) { const q = fila(modo); deck = { modo, q, total: q.length, pos: 0, shown: false, erros: [] }; if (location.hash !== "#cartoes") location.hash = "#cartoes"; else render(); }
 function responder(ok) { const [mid, i] = deck.q[deck.pos], c = cs(mid, i);
   if (ok) { c.streak++; if (c.streak >= 2) c.flag = false; } else { c.streak = 0; c.flag = true; if (!deck.erros.some(e => e[0] === mid && e[1] === i)) deck.erros.push([mid, i]); deck.q.push([mid, i]); }
-  if (S.today.date !== hoje()) S.today = { date: hoje(), n: 0 }; S.today.n++; save(); deck.pos++; deck.shown = false; render();
+  if (S.today.date !== hoje()) S.today = { date: hoje(), n: 0 }; S.today.n++; const hh = (S.hist = S.hist || {})[hoje()] || (S.hist[hoje()] = [0, 0]); hh[0]++; if (ok) hh[1]++; save(); deck.pos++; deck.shown = false; render();
   const f = document.getElementById("btn-show") || document.getElementById("btn-again"); if (f) f.focus(); }
 function vCartoes() {
   if (!deck) { const q = fila("todos"); deck = { modo: "todos", q, total: q.length, pos: 0, shown: false, erros: [] }; }
@@ -855,11 +877,12 @@ function render() {
   const h = location.hash.slice(1), p = h.split("-"); let v, nav = "inicio";
   if (PUBLICO && (!S.aceite || verPriv)) v = vPriv();
   else if (p[0] === "m" && M[p[1]]) { v = vMateria(p[1], p[2]); nav = "m"; } else if (p[0] === "t" && tema(p[1], p[2])) { v = vTema(p[1], p[2], p[3]); nav = "m"; }
-  else if (h === "cartoes") { v = vCartoes(); nav = "cartoes"; } else v = vInicio();
+  else if (h === "cartoes") { v = vCartoes(); nav = "cartoes"; } else if (h === "agenda") v = vAgenda(); else if (h === "perfil") { v = vPerfil(); nav = "perfil"; } else v = vInicio();
   view.replaceChildren(v); document.documentElement.style.setProperty("--barh", barh() + "px");
   document.documentElement.lang = S.lang === "es" ? "es" : "pt-BR";
   document.getElementById("navI").textContent = document.getElementById("bnI").textContent = T("Início", "Inicio");
   document.getElementById("navC").textContent = document.getElementById("bnC").textContent = T("Cartões", "Tarjetas");
+  document.getElementById("navP").textContent = document.getElementById("bnP").textContent = T("Perfil", "Perfil");
   const bm = document.getElementById("bnM"); bm.textContent = T("Matéria", "Materia"); if (nav === "m") bm.setAttribute("href", "#m-" + p[1]);
   document.getElementById("foot").textContent = PUBLICO ? T("Resumos de estudo feitos por alunos, com base no Costanzo e em guias de estudo. Não substituem o livro nem as aulas: confira sempre com o material oficial. Sem entrar com Google, o progresso fica só neste aparelho.", "Resúmenes de estudio hechos por alumnos, basados en el Costanzo y en guías de estudio. No reemplazan el libro ni las clases: confirma siempre con el material oficial. Sin entrar con Google, el progreso queda solo en este dispositivo.") : T("Modelo simplificado para estudo, feito a partir das suas anotações. Confira sempre com o livro adotado ou com o professor.", "Modelo simplificado para estudiar, hecho a partir de tus apuntes. Confirma siempre con el libro adoptado o con el profesor.");
   if (PUBLICO) document.getElementById("foot").append(" ", el("button", { class: "linkb", onclick: () => { verPriv = true; render(); scrollTo(0, 0); } }, T("Privacidade e dados", "Privacidad y datos")));
@@ -886,6 +909,120 @@ async function renderOnline() {
         el("span", null, nm + (p.isMe ? T(" (você)", " (tú)") : "")), onde && !p.isMe ? el("small", null, T("em ", "en ") + ondeTxt(onde)) : null); return node; }),
     list.length < 2 ? el("span", { class: "sm muted" }, T("Só você por enquanto.", "Solo tú por ahora.")) : null].flat().filter(Boolean));
 }
+/* ===== agenda: provas do curso + compromissos da própria pessoa ===== */
+const TIPOS = { exame: ["Exame", "Examen"], parcial: ["Parcial", "Parcial"], final: ["Final", "Final"], trabalho: ["Trabalho", "Trabajo práctico"], apresentacao: ["Apresentação", "Presentación"], pratica: ["Prática ou plantão", "Práctica o guardia"], outro: ["Outro", "Otro"] };
+const tipoTxt = t => T(...(TIPOS[t] || TIPOS.outro));
+const horaTxt = dt => /T\d\d:\d\d/.test(dt) && !/T00:00/.test(dt) ? ", " + new Date(dt).toLocaleTimeString(S.lang === "es" ? "es-AR" : "pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
+function comps(todos) {
+  const of = CATALOGO.filter(c => !oculta(c)).flatMap(c => (c.provas || []).map(p => ({ k: c.id + "|" + p[1], mid: c.id, tipo: T(...TIPO[p[0]]), titulo: nomeM(c), dt: p[1] })));
+  const pes = (S.agenda || []).map(a => { const c = CATALOGO.find(x => x.id === a.mid); return { k: a.id, mid: a.mid, tipo: tipoTxt(a.tipo), titulo: a.titulo || (c ? nomeM(c) : ""), dt: a.dt, ref: a }; });
+  return of.concat(pes).filter(x => todos || new Date(x.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt));
+}
+function oQueFalta(mid) {
+  const m = M[mid]; if (!mid) return ""; if (!m) return T("Sem conteúdo no atlas ainda.", "Sin contenido en el atlas todavía.");
+  const pend = m.unidades.reduce((a, u) => a + (u.pendentes || []).length, 0), h = hoje();
+  const rev = temas(m).filter(t => { const r = proxRev(mid, t); return r && r.data <= h; }).length, fl = m.cartoes.filter((_, i) => cs(mid, i).flag).length;
+  const x = [pend ? pend + T(" temas a estudar", " temas por estudiar") : null, rev ? rev + T(" revisões vencidas", " repasos vencidos") : null, fl ? fl + T(" cartões com (!)", " tarjetas con (!)") : null].filter(Boolean);
+  return x.length ? T("Falta: ", "Falta: ") + x.join(" · ") : T("Em dia: nada pendente no atlas.", "Al día: nada pendiente en el atlas.");
+}
+function linhaComp(p) { const f = falta(p.dt); return el("li", { "data-m": p.mid || "fisiologia" }, el("span", { class: "d" }, fmt(p.dt)), el("span", { class: "dot" }),
+  el("span", null, el("b", null, p.titulo || p.tipo), p.titulo ? " · " + p.tipo : ""), el("span", { class: "in" }, f ? T("em ", "en ") + (f.d > 0 ? dias(f.d) : f.h + " h") : "")); }
+function cardProx() { const p = comps()[0];
+  if (!p) return el("a", { class: "exam", href: "#agenda" }, el("span", { class: "kicker" }, T("Agenda", "Agenda")), el("b", null, T("Nenhum compromisso marcado", "Ningún compromiso agendado")), el("span", { class: "ir" }, T("Incluir compromisso →", "Agregar compromiso →")));
+  return el("a", { class: "exam", href: "#agenda", "data-m": p.mid || "fisiologia" }, el("span", { class: "kicker" }, T("Próximo compromisso", "Próximo compromiso")),
+    el("div", { class: "count" }, T("faltam ", "faltan ") + faltaTxt(falta(p.dt))), el("b", null, p.tipo + (p.titulo ? T(" de ", " de ") + p.titulo : "")),
+    el("span", null, fmt(p.dt) + horaTxt(p.dt)), el("span", { class: "ir" }, T("Ver agenda e o que falta →", "Ver agenda y lo que falta →"))); }
+let formAberto = false;
+function vAgenda() {
+  const fut = comps(), pas = comps(true).filter(x => new Date(x.dt) <= Date.now()).reverse();
+  const anoMat = CATALOGO.filter(c => anoDe(c) === anoAtual() && !oculta(c));
+  const fTipo = el("select", { id: "ag-tipo" }, Object.keys(TIPOS).map(k => el("option", { value: k }, tipoTxt(k))));
+  const fMat = el("select", { id: "ag-mat" }, el("option", { value: "" }, T("Nenhuma / outra", "Ninguna / otra")), anoMat.map(c => el("option", { value: c.id }, nomeM(c))));
+  const fTit = el("input", { id: "ag-tit", maxlength: "60", placeholder: T("Ex.: TP de imunologia", "Ej.: TP de inmunología") });
+  const fData = el("input", { id: "ag-data", type: "date", min: "2020-01-01" }), fHora = el("input", { id: "ag-hora", type: "time" });
+  const st = el("span", { class: "sm muted", "aria-live": "polite" });
+  const form = el("section", { class: "card rail", hidden: !formAberto }, el("span", { class: "ct" }, T("Novo compromisso", "Nuevo compromiso")),
+    el("div", { class: "form" }, el("label", null, T("Tipo", "Tipo"), fTipo), el("label", null, T("Data", "Fecha"), fData), el("label", null, T("Hora (opcional)", "Hora (opcional)"), fHora),
+      el("label", null, T("Matéria (opcional)", "Materia (opcional)"), fMat), el("label", { class: "tudo" }, T("Descrição (opcional)", "Descripción (opcional)"), fTit)),
+    el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => {
+        if (!fData.value) { st.textContent = T("Escolha a data.", "Elegí la fecha."); fData.focus(); return; }
+        (S.agenda = S.agenda || []).push({ id: "a" + Date.now().toString(36), tipo: fTipo.value, mid: fMat.value || null, titulo: fTit.value.trim().slice(0, 60), dt: fData.value + "T" + (fHora.value || "00:00") });
+        formAberto = false; save(); render(); } }, T("Salvar", "Guardar")),
+      el("button", { class: "btn", onclick: () => { formAberto = false; render(); } }, T("Cancelar", "Cancelar")), st));
+  const cartao = (p, passado) => { const f = falta(p.dt), nk = p.ref ? null : p.k, notaAt = p.ref ? p.ref.nota : (S.notas || {})[nk];
+    const nota = passado ? el("label", { class: "sm muted", style: "display:flex;gap:8px;align-items:center" }, T("Nota (opcional):", "Nota (opcional):"),
+      el("input", { type: "number", min: "0", max: "10", step: "0.1", inputmode: "decimal", style: "width:90px", value: notaAt != null ? String(notaAt) : "",
+        onchange: e => { const v = e.target.value === "" ? null : Math.max(0, Math.min(10, +e.target.value)); if (p.ref) p.ref.nota = v; else { S.notas = S.notas || {}; if (v == null) delete S.notas[nk]; else S.notas[nk] = v; } save(); } })) : null;
+    return el("div", { class: "comp", "data-m": p.mid || "fisiologia" }, el("div", { class: "top" }, el("b", null, p.tipo + (p.titulo ? " · " + p.titulo : "")), el("span", { class: "in" }, f ? T("faltam ", "faltan ") + faltaTxt(f) : T("já passou", "ya pasó"))),
+      el("span", { class: "sm muted" }, fmt(p.dt) + " " + p.dt.slice(0, 4) + horaTxt(p.dt)), !passado && p.mid ? el("span", { class: "sm" }, oQueFalta(p.mid)) : null, nota,
+      el("div", { class: "row" }, !passado && p.mid && M[p.mid] ? el("a", { class: "pill", href: "#m-" + p.mid }, T("Estudar", "Estudiar")) : null,
+        p.ref ? el("button", { class: "pill", onclick: e => { const b = e.currentTarget; if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = T("Toque de novo para excluir", "Tocá de nuevo para eliminar"); return; } S.agenda = S.agenda.filter(a => a !== p.ref); save(); render(); } }, T("Excluir", "Eliminar")) : null)); };
+  return el("div", { class: "inner" }, el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
+      el("h1", null, T("Agenda", "Agenda")), el("p", { class: "muted" }, T("Provas do curso e os seus compromissos, com o que ainda falta estudar para cada um.", "Exámenes de la carrera y tus compromisos, con lo que todavía falta estudiar para cada uno."))),
+    el("div", { class: "row", style: "margin-top:14px" }, el("button", { class: "btn solid", onclick: () => { formAberto = !formAberto; render(); if (formAberto) document.getElementById("ag-tipo").focus(); } }, "+ " + T("Incluir novo compromisso", "Agregar nuevo compromiso"))),
+    el("div", { style: "display:flex;flex-direction:column;gap:12px;margin-top:14px" }, form,
+      fut.length ? fut.map(p => cartao(p, false)) : el("p", { class: "muted" }, T("Nenhum compromisso futuro.", "Ningún compromiso futuro."))),
+    pas.length ? el("section", { class: "sec" }, el("details", { class: "mini-sec" }, el("summary", null, T("Já passaram", "Ya pasaron"), el("small", null, "(" + pas.length + ")")),
+      el("div", { class: "in" }, el("p", { class: "sm muted" }, T("Registrar a nota é opcional. Ela aparece na sua evolução, no Perfil.", "Registrar la nota es optativo. Aparece en tu evolución, en Perfil.")), pas.map(p => cartao(p, true))))) : null);
+}
+
+/* ===== perfil e evolução: ficam no aparelho; vão para a nuvem só com aceite expresso, visíveis para a própria pessoa e para os administradores ===== */
+function evolucao() {
+  const H = S.hist || {}, ds = []; for (let i = 13; i >= 0; i--) ds.push(addDays(hoje(), -i));
+  const n = d => (H[d] || [0, 0])[0], max = Math.max(1, ...ds.map(n));
+  let seq = 0; for (let d = n(hoje()) ? hoje() : addDays(hoje(), -1); n(d); d = addDays(d, -1)) seq++;
+  const s7 = ds.slice(7).reduce((a, d) => [a[0] + n(d), a[1] + (H[d] || [0, 0])[1]], [0, 0]);
+  const todos = Object.values(M).flatMap(m => temas(m).map(t => [m, t])), mids = Object.keys(M);
+  const vistos = PUBLICO ? Object.keys(S.vistos || {}).length : todos.length, revs = Object.values(S.rev || {}).reduce((a, x) => a + (x || 0), 0);
+  const notas = comps(true).map(p => ({ p, v: p.ref ? p.ref.nota : (S.notas || {})[p.k] })).filter(x => x.v != null);
+  const media = notas.length ? notas.reduce((a, x) => a + x.v, 0) / notas.length : null;
+  return { ds, n, max, seq, s7, vistos, total: todos.length, revs, notas, media, flags: nFlags() };
+}
+function vPerfil() {
+  const P = S.perfil || {}, E = evolucao(), logado = CAP.conta && !CAP.conta.anon, st = el("span", { class: "sm muted", "aria-live": "polite" });
+  const anoH = new Date().getFullYear();
+  const fNome = el("input", { id: "pf-nome", maxlength: "40", autocomplete: "given-name", value: P.nome || (logado ? CAP.conta.nome : "") || "" });
+  const fTel = el("input", { id: "pf-tel", type: "tel", maxlength: "20", autocomplete: "tel", placeholder: "+54 9 11 ...", value: P.tel || "" });
+  const fIni = el("select", { id: "pf-ini" }, el("option", { value: "" }, "—"), Array.from({ length: 12 }, (_, i) => anoH - i).map(a => el("option", { value: String(a), selected: String(P.inicio) === String(a) }, String(a))));
+  const fInt = el("input", { id: "pf-int", maxlength: "40", placeholder: T("Ex.: pediatria, cirurgia", "Ej.: pediatría, cirugía"), value: P.interesse || "" });
+  const fMeta = el("input", { id: "pf-meta", type: "number", min: "0", max: "500", inputmode: "numeric", value: P.meta != null ? String(P.meta) : "" });
+  const fPais = el("select", { id: "pf-rev" }, [["", "—"], ["ar", T("Argentina (residência)", "Argentina (residencia)")], ["br", T("Brasil (Revalida)", "Brasil (Revalida)")], ["outro", T("Outro / não sei", "Otro / no sé")]].map(x => el("option", { value: x[0], selected: (P.destino || "") === x[0] }, x[1])));
+  const fOk = el("input", { type: "checkbox", id: "pf-ok", checked: !!P.nuvem });
+  const tile = (v, r) => el("div", { class: "stat" }, el("b", null, String(v)), el("span", null, r));
+  const salvar = async () => {
+    S.perfil = { nome: fNome.value.trim().slice(0, 40), tel: fTel.value.replace(/[^0-9+ ()-]/g, "").slice(0, 20), inicio: fIni.value ? +fIni.value : null, interesse: fInt.value.trim().slice(0, 40), meta: fMeta.value === "" ? null : Math.max(0, Math.min(500, +fMeta.value)), destino: fPais.value, nuvem: fOk.checked, em: new Date().toISOString() };
+    if (S.perfil.nome) S.nick = S.perfil.nome; save();
+    let msg = T("Perfil salvo neste aparelho.", "Perfil guardado en este dispositivo.");
+    if (CAP.nuvem && logado) { try { if (fOk.checked) { await CAP.nuvem.perfil(resumoPerfil()); msg = T("Perfil salvo neste aparelho e na nuvem.", "Perfil guardado en este dispositivo y en la nube."); } else await CAP.nuvem.perfil(null); } catch (e) { msg = T("Salvo neste aparelho. Não consegui enviar para a nuvem agora.", "Guardado en este dispositivo. No pude enviarlo a la nube ahora."); } }
+    else if (fOk.checked) msg += " " + T("Para guardar na nuvem, aceite a conexão online e entre com Google.", "Para guardarlo en la nube, aceptá la conexión en línea y entrá con Google.");
+    st.textContent = msg; };
+  return el("div", { class: "inner" }, el("header", { class: "mhead" }, el("h1", null, T("Perfil", "Perfil")), el("p", { class: "muted" }, T("Tudo aqui é opcional e fica neste aparelho. Só sai daqui se você aceitar compartilhar o perfil, lá embaixo.", "Todo acá es optativo y queda en este dispositivo. Solo sale de acá si aceptás compartir el perfil, más abajo."))),
+    el("section", { class: "sec" }, el("h2", null, T("Sua evolução", "Tu evolución")),
+      el("div", { class: "stats", style: "grid-template-columns:repeat(auto-fit,minmax(110px,1fr))" }, tile(E.seq, T(E.seq === 1 ? "dia seguido" : "dias seguidos", E.seq === 1 ? "día seguido" : "días seguidos")),
+        tile(E.s7[0], T("cartões em 7 dias", "tarjetas en 7 días")), tile(E.s7[0] ? Math.round(E.s7[1] / E.s7[0] * 100) + "%" : "—", T("de acertos", "de aciertos")),
+        tile(E.vistos + "/" + E.total, T("temas vistos", "temas vistos")), tile(E.revs, T("revisões feitas", "repasos hechos")), tile(E.flags, T("cartões com (!)", "tarjetas con (!)")), tile(E.media != null ? E.media.toFixed(1) : "—", T("média das notas", "promedio de notas"))),
+      el("div", { class: "card" }, el("span", { class: "ct" }, T("Cartões respondidos por dia (14 dias)", "Tarjetas respondidas por día (14 días)") + (P.meta ? " · " + T("meta ", "meta ") + P.meta : "")),
+        el("div", { class: "barras", role: "img", "aria-label": T("Cartões por dia nos últimos 14 dias: ", "Tarjetas por día en los últimos 14 días: ") + E.ds.map(d => d.slice(8) + "/" + d.slice(5, 7) + " " + E.n(d)).join(", ") },
+          E.ds.map(d => el("div", null, el("b", null, E.n(d) ? String(E.n(d)) : ""), el("i", { style: "height:" + Math.round(E.n(d) / E.max * 100) + "%" + (P.meta && E.n(d) >= P.meta ? ";background:var(--gr)" : "") }), el("small", null, d.slice(8)))))),
+      E.notas.length ? el("div", { class: "card" }, el("span", { class: "ct" }, T("Notas registradas", "Notas registradas")), el("ul", null, E.notas.map(x => el("li", null, el("b", null, String(x.v)), " · " + x.p.tipo + (x.p.titulo ? " · " + x.p.titulo : "") + " (" + fmt(x.p.dt) + ")"))))
+        : el("p", { class: "sm muted" }, T("Para ver a média, registre notas na Agenda, em \"Já passaram\".", "Para ver el promedio, registrá notas en la Agenda, en \"Ya pasaron\"."))),
+    el("section", { class: "sec" }, el("h2", null, T("Seus dados", "Tus datos")),
+      el("div", { class: "card" }, el("div", { class: "form" }, el("label", null, T("Nome", "Nombre"), fNome), el("label", null, T("Telefone (opcional)", "Teléfono (opcional)"), fTel),
+          el("label", null, T("Ano em que começou o curso", "Año en que empezaste la carrera"), fIni), el("label", null, T("Meta de cartões por dia", "Meta de tarjetas por día"), fMeta),
+          el("label", null, T("Área de interesse", "Área de interés"), fInt), el("label", null, T("Depois de formar", "Después de recibirte"), fPais),
+          PUBLICO ? el("label", { class: "tudo chk", for: "pf-ok" }, fOk, el("span", null, T("Aceito guardar este perfil na nuvem (Firebase, servidores em São Paulo), junto com um resumo da minha evolução (sequência de dias, cartões na semana e média das notas). Além de mim, só os administradores do atlas podem ver, para acompanhar o grupo. Posso desmarcar ou apagar quando quiser.", "Acepto guardar este perfil en la nube (Firebase, servidores en San Pablo), junto con un resumen de mi evolución (racha de días, tarjetas en la semana y promedio de notas). Además de mí, solo los administradores del atlas pueden verlo, para acompañar al grupo. Puedo desmarcarlo o borrarlo cuando quiera."))) : null),
+        el("div", { class: "row" }, el("button", { class: "btn solid", onclick: salvar }, T("Salvar perfil", "Guardar perfil")), st),
+        el("p", { class: "sm muted" }, T("Sem marcar o aceite, o perfil, a agenda e as notas ficam só neste aparelho. ", "Sin marcar la aceptación, el perfil, la agenda y las notas quedan solo en este dispositivo. "), PUBLICO ? el("button", { class: "linkb", onclick: () => { verPriv = true; render(); scrollTo(0, 0); } }, T("Privacidade e dados", "Privacidad y datos")) : null))),
+    CAP.conta && CAP.conta.admin ? el("section", { class: "sec" }, el("h2", null, T("Alunos (só administradores)", "Alumnos (solo administradores)")), painelAlunos()) : null);
+}
+function resumoPerfil() { const P = S.perfil || {}, E = evolucao(); return { nome: P.nome || "", tel: P.tel || "", inicio: P.inicio || null, interesse: P.interesse || "", destino: P.destino || "", seq: E.seq, sem: E.s7[0], media: E.media != null ? +E.media.toFixed(1) : null }; }
+function painelAlunos() {
+  const box = el("div", { class: "card" }, el("p", { class: "muted sm" }, T("Carregando…", "Cargando…")));
+  CAP.nuvem.perfis().then(l => { box.replaceChildren(l.length ? el("ul", null, l.map(x => el("li", null, el("b", null, String(x.nome || "—").slice(0, 40)), " · " + [x.tel, x.inicio ? T("início ", "inicio ") + x.inicio : "", x.interesse, T("sequência ", "racha ") + (x.seq || 0), (x.sem || 0) + T(" cartões/sem", " tarjetas/sem"), x.media != null ? T("média ", "promedio ") + x.media : ""].filter(Boolean).map(v => String(v).slice(0, 40)).join(" · "))))
+    : el("p", { class: "muted sm" }, T("Ninguém compartilhou o perfil ainda.", "Nadie compartió el perfil todavía."))); }).catch(() => { box.replaceChildren(el("p", { class: "muted sm" }, T("Não consegui carregar agora.", "No pude cargar ahora."))); });
+  return box;
+}
+
 /* ===== aceite de dados (Ley 25.326 da Argentina; LGPD no Brasil): nada vai para a nuvem antes do aceite ===== */
 let verPriv = false;
 function ativarNuvem() { if (!PUBLICO) return; if (CAP.nuvem) { CAP.nuvem.religar(); return; } if (CAP.nuvemCarregando) return; CAP.nuvemCarregando = true; ligarNuvem(); import("./nuvem.js").catch(() => { CAP.nuvemCarregando = false; }); }
@@ -907,6 +1044,7 @@ function vPriv() {
       li("Fica registrado, sem nome, que você está conectado, para mostrar quantas pessoas estão estudando agora.", "Se registra, sin nombre, que estás conectado, para mostrar cuántas personas están estudiando ahora."),
       li("Se você entrar com Google, guardamos seu nome, seu e-mail e seu progresso no Firebase (Google), em servidores em São Paulo, Brasil, para você continuar em outro aparelho.", "Si entrás con Google, guardamos tu nombre, tu correo y tu progreso en Firebase (Google), en servidores de San Pablo, Brasil, para que sigas en otro dispositivo."),
       li("Enquanto você estiver online, seu primeiro nome e o tema que você está vendo ficam visíveis só para os administradores do atlas. Os colegas veem apenas quantas pessoas estão online.", "Mientras estés en línea, tu primer nombre y el tema que estás viendo son visibles solo para los administradores del atlas. Los compañeros ven solo cuántas personas están en línea."),
+      li("Perfil, agenda e notas são opcionais. O perfil (nome, telefone, ano de início e um resumo da evolução) só vai para a nuvem se você marcar o aceite na tela Perfil; aí, além de você, só os administradores podem ver.", "Perfil, agenda y notas son optativos. El perfil (nombre, teléfono, año de inicio y un resumen de la evolución) solo va a la nube si marcás la aceptación en la pantalla Perfil; en ese caso, además de vos, solo los administradores pueden verlo."),
       li("Não usamos publicidade nem análise de uso, e não vendemos nem passamos seus dados a ninguém.", "No usamos publicidad ni analítica, y no vendemos ni cedemos tus datos a nadie."),
       li("Os dados ficam guardados enquanto você usar o atlas. Você pode apagá-los quando quiser em \"Sua conta\".", "Los datos se guardan mientras uses el atlas. Podés borrarlos cuando quieras en \"Tu cuenta\".")),
     el("p", null, T("Aceitar é opcional. Se não aceitar, o atlas funciona igual, só neste aparelho, sem enviar nada.", "Aceptar es optativo. Si no aceptás, el atlas funciona igual, solo en este dispositivo, sin enviar nada.")),

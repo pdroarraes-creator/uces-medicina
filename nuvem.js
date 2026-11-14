@@ -71,13 +71,17 @@ window.NUVEM = {
   async ler() { if (!user || user.isAnonymous) return null; const s = await getDoc(doc(db, "usuarios", user.uid)); return s.exists() ? s.data() : null; },
   async gravar(json, ts) { if (!user || user.isAnonymous) return false; await setDoc(doc(db, "usuarios", user.uid), { json, ts }); return true; },
   presenca(o) { onde = o || "inicio"; },
+  /* perfil compartilhado: só com aceite expresso; null apaga */
+  async perfil(d) { if (!user || user.isAnonymous) return false; const r = doc(db, "perfis", user.uid); if (!d) { await deleteDoc(r); return true; }
+    await setDoc(r, { nome: String(d.nome || "").slice(0, 40), tel: String(d.tel || "").slice(0, 20), inicio: d.inicio || null, interesse: String(d.interesse || "").slice(0, 40), destino: String(d.destino || "").slice(0, 10), seq: d.seq || 0, sem: d.sem || 0, media: d.media == null ? null : d.media, ts: serverTimestamp() }); return true; },
+  async perfis() { return (await getDocs(collection(db, "perfis"))).docs.map(x => ({ uid: x.id, ...x.data() })); },
   /* a pessoa retirou o aceite: para de enviar presença e sai da conta */
   async desligar() { parado = true; clearInterval(timer); sai(); aoOnline && aoOnline(null); try { await signOut(auth); } catch (e) {} },
   religar() { if (!parado) return; parado = false; if (!user) signInAnonymously(auth).catch(() => {}); else { timer = setInterval(pulso, PULSO); pulso(); } },
   /* apagar meus dados: progresso, presença e a conta do Firebase */
   async apagar() {
     if (!user) return true; const uid = user.uid;
-    await Promise.all(["usuarios", "online", "online_nomes"].map(c => deleteDoc(doc(db, c, uid)).catch(() => {})));
+    await Promise.all(["usuarios", "perfis", "online", "online_nomes"].map(c => deleteDoc(doc(db, c, uid)).catch(() => {})));
     parado = true; clearInterval(timer);
     try { await user.delete(); return true; } catch (e) { try { await signOut(auth); } catch (x) {} return e && e.code === "auth/requires-recent-login" ? "relogin" : true; }
   },
