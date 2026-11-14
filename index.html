@@ -107,6 +107,9 @@ input.txt { font: inherit; color: var(--ink); background: var(--sunk); border: 1
 /* matéria */
 .mhead { padding-block: 26px 4px; display: flex; flex-direction: column; gap: 10px }
 .mhead h1 { font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800; letter-spacing: -.04em }
+.mstat { margin: 0; font-size: .95rem; color: var(--muted) } .mstat b { color: var(--ink) }
+.btn.cta { justify-content: space-between; gap: 12px; width: 100%; max-width: 460px; text-align: left; margin-top: 2px } .btn.cta > span:first-child { display: flex; flex-direction: column; min-width: 0 } .btn.cta small { font: 700 .7rem var(--fd); letter-spacing: .08em; text-transform: uppercase; opacity: .85 } .btn.cta b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.sheet .sum .sum-in { margin-top: 0 }
 .unit { padding-block: 26px 6px; display: flex; flex-direction: column; gap: 14px }
 .unit-h { display: flex; flex-direction: column; gap: 4px } .unit-h h2 { font-size: 1.3rem; font-weight: 800 }
 .note { border-left: 4px solid var(--am); background: var(--am-s); border-radius: 4px 14px 14px 4px; padding: 10px 14px; font-size: .92rem }
@@ -772,7 +775,7 @@ function vInicio() {
   const anoInfo = IDX.anos.find(a => a.ano === anoSel()) || {};
   const tile = c => { const m = M[c.id], p = provasDe(c).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [], g = (S.grade || {})[c.id] || {};
     const sit = g.status === "aprovada" ? el("span", { class: "badge ok" }, T("Aprovada", "Aprobada") + (g.final != null ? " · " + g.final : "")) : g.status === "nao_sei" ? el("span", { class: "badge part" }, T("A decidir", "A decidir"))
-      : m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("Sumário", "Sumario"));
+      : m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("Sem conteúdo", "Sin contenido"));
     return el("div", { class: "tw" }, el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, onclick: () => { location.hash = "#m-" + c.id; } },
       el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, g.fav ? el("span", { class: "estrela", "aria-label": T("Favorita", "Favorita") }, "★ ") : null, nomeM(c)),
       g.prof ? el("span", { class: "ts" }, T("Prof. ", "Prof. ") + g.prof) : null,
@@ -828,7 +831,7 @@ function vMateria(mid, abaIni) {
       const rows = u.temas.map(t => { const r = proxRev(mid, t);
         return el("button", { class: "trow", onclick: () => { location.hash = "#t-" + mid + "-" + t.id; } },
           el("span", { class: "num" }, t.n), el("span", null, el("span", { class: "tt" }, t.curto || t.nome), t.sub ? el("span", { class: "ts" }, t.sub) : null,
-            el("span", { class: "badge" + (t.parcial ? " part" : "") }, t.parcial ? T("Em parte", "En parte") : !dataEstudo(mid, t) ? T("Novo", "Nuevo") : r ? T("Revisar ", "Repasar ") + fmt(r.data) : T("Consolidado", "Consolidado")))); });
+            el("span", { class: "badge" + (t.parcial || (r && r.data <= hoje()) ? " part" : !dataEstudo(mid, t) ? " todo" : r ? "" : " ok") }, t.parcial ? T("Em parte", "En parte") : !dataEstudo(mid, t) ? T("Novo", "Nuevo") : r ? (r.data <= hoje() ? T("Revisar hoje", "Repasar hoy") : T("Revisar ", "Repasar ") + fmt(r.data)) : T("Consolidado", "Consolidado")))); });
       return [el("div", { class: "unit-h" }, el("h2", null, u.nome), el("p", { class: "muted sm" }, u.fonte + " · " + feitos + T(" de ", " de ") + tot + T(" temas estudados", " temas estudiados")),
           el("div", { class: "track", style: "max-width:420px;margin-top:6px" }, el("i", { style: "width:" + Math.round(feitos / Math.max(1, tot) * 100) + "%" }))),
         u.nota ? el("p", { class: "note" }, u.nota) : null,
@@ -838,10 +841,9 @@ function vMateria(mid, abaIni) {
         u.mapa ? el("details", { class: "mini-sec" }, el("summary", null, T("Mapa mental da unidade", "Mapa mental de la unidad")), el("div", { class: "in" }, mapa(u.mapa))) : null]; } }; });
   return el("div", { class: "inner", "data-m": mid },
     el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
-      el("span", { class: "kicker" }, provasDe(c).filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]) + " " + fmt(p[1])).join(" · ")),
-      el("div", { class: "htop" }, el("h1", null, m.nome), el("button", { class: "pill dotsb", "aria-label": T("Opções da matéria", "Opciones de la materia"), onclick: () => menuMateria(c) }, dots())),
-      el("p", { class: "muted" }, m.sub)),
-    sumario(c, m),
+      el("div", { class: "htop" }, el("h1", null, m.nome), el("button", { class: "pill dotsb", "aria-label": T("Sobre a matéria", "Sobre la materia"), onclick: () => fichaMateria(c) }, dots())),
+      statusProva(c), continuar(mid, m)),
+    avisoMudanca(c),
     abas("materia", lista, ini, id => marcaAba("m-" + mid, id)));
 }
 function vTema(mid, tid, abaIni) {
@@ -1086,35 +1088,47 @@ function dialogoCal(itens) {
       todos ? el("button", { class: "btn ghost", onclick: () => { itens.forEach(i => { delete (S.cal || {})[i.uid]; }); save(); fecha(); render(); } }, T("Tirar a marca ✓", "Quitar la marca ✓")) : null];
     return folha(itens.length > 1 ? T("Levar ao calendário", "Llevar al calendario") + " (" + itens.length + ")" : T("Levar ao calendário", "Llevar al calendario"), null, corpo, rod); }); }
 
-/* ===== sumário no topo de cada matéria ===== */
+/* ===== ficha da matéria (dados complementares, fora do caminho do estudo) ===== */
 function dots() { return el("span", { class: "dots", "aria-hidden": "true", html: '<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>' }); }
-function sumario(c, m) {
-  const e = efet(c), mu = mudanca(c), sn = snap(c), g = (S.grade || {})[c.id] || {};
-  const hors = e.horarios.slice().sort((a, b) => ((a.dia + 6) % 7) - ((b.dia + 6) % 7) || a.ini.localeCompare(b.ini)), hit = hors.map(h => itemHorario(c, h, e)), pit = itensProva(c, e);
-  const vaz = el("span", { class: "muted" }, "—");
-  const lin = (r, v) => [el("dt", null, r), el("dd", null, v || vaz)];
-  const banner = mu && sn.adiou !== mu.h ? el("div", { class: "mudou", role: "status" }, el("b", null, T("Chegou atualização dos dados desta matéria", "Llegó una actualización de los datos de esta materia")),
+/* topo da matéria: próxima prova em uma linha e o próximo passo de estudo */
+function statusProva(c) { const p = provasDe(c).filter(x => new Date(x[1]) > Date.now()).sort((x, y) => new Date(x[1]) - new Date(y[1]))[0]; if (!p) return null; const f = falta(p[1]);
+  return el("p", { class: "mstat" }, el("b", null, T(...TIPO[p[0]])), " · " + fmt(p[1]) + " · " + (f.d > 0 ? T("faltam ", "faltan ") + dias(f.d) : T("faltam ", "faltan ") + f.h + " h")); }
+function continuar(mid, m) { const ts = temas(m), h = hoje(), rev = ts.find(t => { const r = proxRev(mid, t); return r && r.data <= h; });
+  const novo = rev ? null : ts.find(t => !t.parcial && !dataEstudo(mid, t)), t = rev || novo; if (!t) return null;
+  const rot = rev ? T("Revisar", "Repasar") : ts.some(x => dataEstudo(mid, x)) ? T("Continuar", "Continuar") : T("Começar", "Empezar");
+  return el("a", { class: "btn solid cta", href: "#t-" + mid + "-" + t.id }, el("span", null, el("small", null, rot), el("b", null, t.curto || t.nome)), el("span", { "aria-hidden": "true" }, "→")); }
+function avisoMudanca(c) { const mu = mudanca(c), sn = snap(c); return mu && sn.adiou !== mu.h ? el("section", { class: "card sum" }, bannerMudanca(c, mu, sn)) : null; }
+function fichaMateria(c) { abrirFolha(fecha => { const corpo = el("div", { class: "sum" }, sumario(c, M[c.id], fecha));
+  corpo.addEventListener("click", e => { if (e.target.closest(".btn.cal")) fecha(); });
+  return folha(nomeM(c), [T("Sobre a matéria", "Sobre la materia")], [corpo], [el("button", { class: "btn", onclick: fecha }, T("Fechar", "Cerrar")), el("button", { class: "btn solid", onclick: () => { fecha(); menuMateria(c); } }, T("Editar", "Editar"))]); }); }
+function bannerMudanca(c, mu, sn) { return el("div", { class: "mudou", role: "status" }, el("b", null, T("Chegou atualização dos dados desta matéria", "Llegó una actualización de los datos de esta materia")),
       el("ul", null, mu.linhas.map(x => el("li", null, x))), el("p", { class: "sm muted" }, T("Se você aceitar, os seus ajustes nesses itens são trocados pelos novos. Nada muda enquanto você não aceitar.", "Si aceptás, tus ajustes en esos ítems se reemplazan por los nuevos. Nada cambia mientras no aceptes.")),
       Object.keys(S.cal || {}).some(u => u.startsWith("h-" + c.id + "-")) && hs(sn.v.horarios) !== hs(mu.o.horarios) ? el("p", { class: "sm muted" }, T("O Atlas não apaga eventos do seu calendário: se um horário saiu da lista, apague-o lá. Os que só mudaram de hora ou sala são atualizados pelo arquivo novo.", "Atlas no borra eventos de tu calendario: si un horario salió de la lista, borralo allá. Los que solo cambiaron de hora o aula se actualizan con el archivo nuevo.")) : null,
-      el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => aceitarMudanca(c, mu) }, T("Atualizar", "Actualizar")), el("button", { class: "btn", onclick: () => adiarMudanca(c, mu) }, T("Agora não", "Ahora no"))))
-    : mu ? el("p", { class: "sm" }, T("Há uma atualização que você adiou. ", "Hay una actualización que pospusiste. "), el("button", { class: "linkb", onclick: () => { delete sn.adiou; save(); render(); } }, T("Ver de novo", "Ver de nuevo"))) : null;
+      el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => aceitarMudanca(c, mu) }, T("Atualizar", "Actualizar")), el("button", { class: "btn", onclick: () => adiarMudanca(c, mu) }, T("Agora não", "Ahora no")))); }
+/* ficha da matéria (dados complementares): abre pelo ⋮; na matéria sem conteúdo fica na própria página */
+function sumario(c, m, fecha) {
+  const e = efet(c), mu = mudanca(c), sn = snap(c), g = (S.grade || {})[c.id] || {};
+  const hors = e.horarios.slice().sort((a, b) => ((a.dia + 6) % 7) - ((b.dia + 6) % 7) || a.ini.localeCompare(b.ini)), hit = hors.map(h => itemHorario(c, h, e)), pit = itensProva(c, e);
+  const lin = (r, v) => v ? [el("dt", null, r), el("dd", null, v)] : null;
+  const banner = mu && sn.adiou !== mu.h ? (fecha ? null : bannerMudanca(c, mu, sn))
+    : mu ? el("p", { class: "sm" }, T("Há uma atualização que você adiou. ", "Hay una actualización que pospusiste. "), el("button", { class: "linkb", onclick: () => { delete sn.adiou; save(); if (fecha) fecha(); render(); } }, T("Ver de novo", "Ver de nuevo"))) : null;
   const per = e.periodo ? (PER[e.periodo.tipo] ? T(...PER[e.periodo.tipo]) + " · " : "") + fmtD(e.periodo.ini).slice(0, 5) + " " + T("a", "a") + " " + fmtD(e.periodo.fim) : null;
   const horEl = hors.length ? el("div", { class: "hl" }, hors.map(h => el("div", null, el("b", null, diaNome(h.dia)), " " + h.ini + "–" + h.fim + (h.sala ? " · " + h.sala : "") + (h.tipo !== "aula" ? " · " + T(...TAULA[h.tipo]) : "")))) : e.textoHorario ? e.textoHorario : null;
   const provEl = e.provas.length ? el("div", { class: "hl" }, e.provas.map(p => { return el("div", null, el("b", null, T(...TIPO[p[0]])), " " + fmt(p[1]) + horaTxt(p[1])); })) : null;
   const idx = m ? el("details", { class: "mini-sec" }, el("summary", null, T("Índice de conteúdos", "Índice de contenidos"), el("small", null, "(" + m.unidades.reduce((a, u) => a + u.temas.length + (u.pendentes || []).length, 0) + ")")),
-      el("div", { class: "in idx" }, m.unidades.map((u, ui) => el("div", { class: "idx-u" }, el("a", { class: "idx-h", href: "#m-" + c.id + "-" + ui }, u.nome),
-        el("ol", null, u.temas.map(t => el("li", null, el("a", { href: "#t-" + c.id + "-" + t.id }, t.curto || t.nome))), (u.pendentes || []).map(p => el("li", { class: "muted" }, p + " · " + T("a estudar", "por estudiar"))))))))
+      el("div", { class: "in idx" }, m.unidades.map((u, ui) => el("div", { class: "idx-u" }, el("a", { class: "idx-h", href: "#m-" + c.id + "-" + ui, onclick: () => fecha && fecha() }, u.nome),
+        el("ol", null, u.temas.map(t => el("li", null, el("a", { href: "#t-" + c.id + "-" + t.id, onclick: () => fecha && fecha() }, t.curto || t.nome))), (u.pendentes || []).map(p => el("li", { class: "muted" }, p + " · " + T("a estudar", "por estudiar"))))))))
     : el("p", { class: "sm muted" }, T("Sem conteúdo no atlas ainda. Entra quando o primeiro tema desta matéria for estudado.", "Sin contenido en el atlas todavía. Entra cuando se estudie el primer tema de esta materia."));
   const ok = hit.filter(i => !i.semPeriodo).length;
-  return el("section", { class: "card sum" }, el("details", { open: true },
-    el("summary", { class: "ct" }, T("Sumário da matéria", "Sumario de la materia")),
-    el("div", { class: "sum-in" }, banner,
+  const semDados = !hors.length && !e.prof && !e.periodo;
+  const corpo = el("div", { class: "sum-in" }, banner,
       el("dl", null, lin(T("Professor(es)", "Profesor(es)"), e.prof), e.comissao || e.turma ? lin(T("Comissão", "Comisión"), e.comissao || e.turma) : null, lin(T("Período", "Período"), per), lin(T("Horários", "Horarios"), horEl),
-        lin(T("Provas", "Exámenes"), provEl), e.regra ? lin(T("Aprovação", "Aprobación"), e.regra) : null, e.material ? lin(T("Material", "Material"), e.material) : null, e.obs ? lin(T("Observações", "Observaciones"), e.obs) : null),
+        lin(T("Provas", "Exámenes"), provEl), e.regra ? lin(T("Aprovação", "Aprobación"), e.regra) : null, e.material ? lin(T("Material", "Material"), e.material) : null, m && m.sub ? lin(T("Fonte", "Fuente"), m.sub) : null, e.obs ? lin(T("Observações", "Observaciones"), e.obs) : null),
       el("div", { class: "row" }, hit.length ? botaoCal(hit, T("Horários no calendário", "Horarios en el calendario")) : null, pit.length ? botaoCal(pit, T("Provas no calendário", "Exámenes en el calendario")) : null,
-        el("button", { class: "btn", onclick: () => menuMateria(c) }, T("Editar", "Editar"))),
-      !hors.length && !e.prof && !e.periodo ? el("p", { class: "sm muted" }, T("Dica: conte na conversa de estudo o professor, o período e os horários. Eles entram aqui na próxima atualização.", "Tip: contá en la conversación de estudio el profesor, el período y los horarios. Entran acá en la próxima actualización.")) : null,
-      idx)));
+        fecha ? null : el("button", { class: "btn", onclick: () => menuMateria(c) }, T("Editar", "Editar"))),
+      semDados ? el("p", { class: "sm muted" }, T("Ainda sem professor, período e horários. Toque em Editar para colocar os seus.", "Todavía sin profesor, período ni horarios. Tocá Editar para cargar los tuyos.")) : null,
+      idx);
+  return fecha ? corpo : el("section", { class: "card sum" }, el("span", { class: "ct" }, T("Sobre a matéria", "Sobre la materia")), corpo);
 }
 const fmtD = s => s ? s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4) : "";
 function vMateriaVazia(c) { return el("div", { class: "inner", "data-m": c.id }, el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
