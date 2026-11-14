@@ -277,6 +277,14 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
 .grow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line) } .grow select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px; min-height: 40px }
 .linkb { background: none; border: 0; padding: 0; font: inherit; color: var(--c, var(--vi)); text-decoration: underline; cursor: pointer }
 .priv h2 { font-size: 1.5rem; font-weight: 800 } .priv ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px }
+/* opções da matéria */
+.tw { position: relative; display: grid } .tw > .tile { width: 100% }
+.tmenu { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 800 1.1rem var(--fd); cursor: pointer; z-index: 1 }
+.badge.ok { background: var(--gr-s); color: var(--gr) }
+.fundo { position: fixed; inset: 0; z-index: 50; background: rgba(10, 10, 25, .45); display: flex; align-items: flex-end; justify-content: center }
+.sheet { --c: var(--vi); --cs: var(--vi-s); font-family: var(--fb); background: var(--surface); color: var(--ink); width: min(560px, 100%); max-height: 88vh; overflow: auto; border-radius: 22px 22px 0 0; padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 14px; box-shadow: var(--sh) }
+.sheet h2 { font-size: 1.25rem; font-weight: 800 } .sheet fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px } .sheet .chk input { accent-color: var(--vi) }
+@media (min-width: 761px) { .fundo { align-items: center } .sheet { border-radius: 22px } }
 /* agenda e perfil */
 [hidden] { display: none !important }
 a.exam { text-decoration: none } a.exam .ir { font-weight: 700; font-size: .85rem; opacity: .9; margin-top: 4px }
@@ -539,6 +547,7 @@ function anoAtual() { const h = hoje(), ini = S.perfil && S.perfil.inicio; if (i
   let at = IDX.anos.length ? IDX.anos[0].ano : 1; IDX.anos.forEach(a => { if (a.inicio <= h) at = a.ano; }); return at; }
 /* grade pessoal: cada um esconde o que não cursa e pode mudar uma matéria de ano (7 = "Extra", depois do 6º) */
 let editGrade = false;
+const fora = c => oculta(c) || ((S.grade || {})[c.id] || {}).status === "aprovada";
 const anoDe = c => ((S.grade || {})[c.id] || {}).ano || c.ano, oculta = c => !!((S.grade || {})[c.id] || {}).oculta;
 function setGrade(id, m) { S.grade = S.grade || {}; S.grade[id] = Object.assign({}, S.grade[id], m); S.plano = null; save(); }
 function anosVis() { const a = IDX.anos.map(x => x.ano); if (anoAtual() === 7 || CATALOGO.some(c => anoDe(c) === 7) || editGrade) a.push(7); return a; }
@@ -565,7 +574,7 @@ function cs(mid, i) { const k = mid + ":" + M[mid].ck[i]; return S.cards[k] || (
 /* data de estudo: na versão privada é a do tema; na pública é o dia em que cada aluno abriu o tema pela primeira vez */
 function dataEstudo(mid, t) { return PUBLICO ? (S.vistos || {})[mid + ":" + t.id] : t.estudado; }
 function proxRev(mid, t) { const d = dataEstudo(mid, t); if (!d) return null; const k = S.rev[mid + ":" + t.id] || 0; return k >= 3 ? null : { passo: k, data: addDays(d, [1, 3, 7][k]) }; }
-function provas() { return CATALOGO.filter(c => !oculta(c)).flatMap(c => (c.provas || []).map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
+function provas() { return CATALOGO.filter(c => !fora(c)).flatMap(c => (c.provas || []).map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
 function nFlags() { return Object.keys(M).reduce((a, mid) => a + M[mid].cartoes.filter((_, i) => cs(mid, i).flag).length, 0); }
 function falar(txt) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt.replace(/\(!\)/g, "")); u.lang = S.lang === "es" ? "es-AR" : "pt-BR"; u.rate = .95; speechSynthesis.speak(u); } catch (e) {} }
 
@@ -721,11 +730,14 @@ function vInicio() {
     : el("p", { class: "muted", style: "margin-top:12px" }, T("Nada vence hoje. As revisões aparecem 1, 3 e 7 dias depois de cada tema estudado.", "Nada vence hoy. Los repasos aparecen 1, 3 y 7 días después de cada tema estudiado."));
   const doAno = CATALOGO.filter(c => anoDe(c) === anoSel() && (editGrade || !oculta(c))), comConteudo = doAno.filter(c => M[c.id]), semConteudo = doAno.filter(c => !M[c.id]);
   const anoInfo = IDX.anos.find(a => a.ano === anoSel()) || {};
-  const tile = c => { const m = M[c.id], p = (c.provas || []).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [];
-    return el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, disabled: !m, onclick: () => { location.hash = "#m-" + c.id; } },
+  const tile = c => { const m = M[c.id], p = (c.provas || []).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [], g = (S.grade || {})[c.id] || {};
+    const sit = g.status === "aprovada" ? el("span", { class: "badge ok" }, T("Aprovada", "Aprobada") + (g.final != null ? " · " + g.final : "")) : g.status === "nao_sei" ? el("span", { class: "badge part" }, T("A decidir", "A decidir"))
+      : m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("A começar", "Por empezar"));
+    return el("div", { class: "tw" }, el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, disabled: !m, onclick: () => { location.hash = "#m-" + c.id; } },
       el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, nomeM(c)),
-      el("span", { class: "ts" }, m ? ts.length + T(" temas estudados · ", " temas estudiados · ") + m.cartoes.length + T(" cartões", " tarjetas") : T("Sem conteúdo ainda. Entra quando você estudar o primeiro tema.", "Sin contenido todavía. Entra cuando estudies el primer tema.")),
-      m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("A começar", "Por empezar"))); };
+      g.prof ? el("span", { class: "ts" }, T("Prof. ", "Prof. ") + g.prof) : null,
+      el("span", { class: "ts" }, m ? ts.length + T(" temas estudados · ", " temas estudiados · ") + m.cartoes.length + T(" cartões", " tarjetas") : T("Sem conteúdo ainda. Entra quando você estudar o primeiro tema.", "Sin contenido todavía. Entra cuando estudies el primer tema.")), sit),
+      el("button", { class: "tmenu", "aria-label": T("Opções de ", "Opciones de ") + nomeM(c), onclick: () => menuMateria(c) }, "⋯")); };
   const tl = comps().map(linhaComp);
   return el("div", { class: "inner" }, avisoTopo ? el("p", { class: "note", style: "margin-top:16px", role: "status" }, avisoTopo) : null, caixaImport(),
     el("section", { class: "hero" },
@@ -741,16 +753,16 @@ function vInicio() {
           el("div", { class: "stat" }, el("b", null, String(S.today.date === hoje() ? S.today.n : 0)), el("span", null, T("respondidos hoje", "respondidas hoy")))))),
     contaTopo(),
     el("section", { class: "sec" }, el("div", { class: "anoh" }, el("div", { class: "top" }, el("h2", null, T("Matérias do ", "Materias de ") + rotAno(anoSel())),
-          el("button", { class: "pill", "aria-label": T("Escolher as matérias que você cursa", "Elegir las materias que cursás"), "aria-pressed": String(editGrade), onclick: () => { editGrade = !editGrade; render(); document.querySelector(".anoh").scrollIntoView({ block: "nearest" }); } }, editGrade ? T("Pronto", "Listo") : "⋯")),
+          CATALOGO.some(c => anoDe(c) === anoSel() && oculta(c)) || editGrade ? el("button", { class: "pill", "aria-pressed": String(editGrade), onclick: () => { editGrade = !editGrade; render(); document.querySelector(".anoh").scrollIntoView({ block: "nearest" }); } }, editGrade ? T("Pronto", "Listo") : T("Ocultas (", "Ocultas (") + CATALOGO.filter(c => anoDe(c) === anoSel() && oculta(c)).length + ")") : null),
         el("div", { class: "chips", role: "group", "aria-label": T("Ano do curso", "Año de la carrera") }, anosVis().map(a => el("button", { class: "chip", "aria-pressed": String(a === anoSel()),
           onclick: () => { anoVer = a === anoAtual() ? null : a; render(); const h = document.querySelector(".anoh"); if (h) h.scrollIntoView({ block: "nearest" }); } }, (a === 7 ? "Extra" : a + "º") + (a === anoAtual() ? T(" · atual", " · actual") : ""))))),
-      editGrade ? el("div", { class: "card" }, el("p", { class: "sm muted" }, T("Desmarque o que você não cursa. Se for cursar uma matéria em outro ano (por exemplo, repetir), troque o ano dela. \"Extra\" é para depois do 6º ano.", "Desmarcá lo que no cursás. Si vas a cursar una materia en otro año (por ejemplo, recursar), cambiale el año. \"Extra\" es para después de 6º año.")),
+      editGrade ? el("div", { class: "card" }, el("p", { class: "sm muted" }, T("Marque para voltar a mostrar. Para mudar situação, ano ou professor, use o ⋯ de cada matéria.", "Marcá para volver a mostrar. Para cambiar situación, año o profesor, usá el ⋯ de cada materia.")),
           doAno.length ? doAno.map(c => { const g = (S.grade || {})[c.id] || {};
             const cb = el("input", { type: "checkbox", id: "gr-" + c.id, checked: !g.oculta, onchange: () => { setGrade(c.id, { oculta: !cb.checked }); } });
             const sel = el("select", { "aria-label": T("Ano de ", "Año de ") + nomeM(c), onchange: () => { setGrade(c.id, { ano: +sel.value }); render(); } }, [1, 2, 3, 4, 5, 6, 7].map(a => el("option", { value: String(a), selected: a === anoDe(c) }, a === 7 ? "Extra" : a + "º")));
             return el("div", { class: "grow" }, el("label", { class: "chk", for: "gr-" + c.id }, cb, el("span", null, nomeM(c))), sel); }) : el("p", { class: "muted" }, T("Nenhuma matéria neste ano.", "Ninguna materia en este año.")))
         : doAno.length ? el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(comConteudo.length, innerWidth > 760 ? 4 : 2), T("Ver mais matérias", "Ver más materias")))
-        : el("p", { class: "muted" }, anoInfo.inicio > hoje() ? T("Este ano ainda não começou. As matérias entram aqui quando você estudar o primeiro tema.", "Este año todavía no empezó. Las materias entran aquí cuando estudies el primer tema.") : T("Nenhuma matéria aqui. Toque em ⋯ para escolher as suas.", "Ninguna materia acá. Tocá ⋯ para elegir las tuyas."))),
+        : el("p", { class: "muted" }, anoInfo.inicio > hoje() ? T("Este ano ainda não começou. As matérias entram aqui quando você estudar o primeiro tema.", "Este año todavía no empezó. Las materias entran aquí cuando estudies el primer tema.") : T("Nenhuma matéria aqui. Use o ⋯ de uma matéria para trazê-la para este ano.", "Ninguna materia acá. Usá el ⋯ de una materia para traerla a este año."))),
     el("section", { class: "sec" }, el("h2", null, T("Próximos compromissos", "Próximos compromisos")),
       el("ul", { class: "tl" }, tl.slice(0, 3)),
       el("div", { class: "row" }, el("a", { class: "btn", href: "#agenda" }, T("Abrir agenda", "Abrir agenda") + (tl.length > 3 ? " (" + tl.length + ")" : "")))),
@@ -787,7 +799,8 @@ function vMateria(mid, abaIni) {
   return el("div", { class: "inner", "data-m": mid },
     el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
       el("span", { class: "kicker" }, (c.provas || []).filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]) + " " + fmt(p[1])).join(" · ")),
-      el("h1", null, m.nome), el("p", { class: "muted" }, m.sub)),
+      el("div", { class: "htop" }, el("h1", null, m.nome), el("button", { class: "pill", style: "min-width:44px;font-weight:800", "aria-label": T("Opções da matéria", "Opciones de la materia"), onclick: () => menuMateria(c) }, "⋯")),
+      infoMat(c), el("p", { class: "muted" }, m.sub)),
     abas("materia", lista, ini, id => marcaAba("m-" + mid, id)));
 }
 function vTema(mid, tid, abaIni) {
@@ -909,12 +922,43 @@ async function renderOnline() {
         el("span", null, nm + (p.isMe ? T(" (você)", " (tú)") : "")), onde && !p.isMe ? el("small", null, T("em ", "en ") + ondeTxt(onde)) : null); return node; }),
     list.length < 2 ? el("span", { class: "sm muted" }, T("Só você por enquanto.", "Solo tú por ahora.")) : null].flat().filter(Boolean));
 }
+/* ===== opções de cada matéria (⋯): situação, ano, professor, comissão, horário e nota final ===== */
+const SIT = { cursando: ["Estou cursando", "La estoy cursando"], outro_ano: ["Vou cursar em outro ano", "La voy a cursar otro año"], nao_sei: ["Ainda não sei (fica em Extra)", "Todavía no sé (queda en Extra)"], aprovada: ["Já fui aprovada(o)", "Ya la aprobé"], oculta: ["Não mostrar", "No mostrar"] };
+function infoMat(c) { const g = (S.grade || {})[c.id] || {}, x = [g.prof ? T("Prof. ", "Prof. ") + g.prof : null, g.comissao ? T("Comissão ", "Comisión ") + g.comissao : null, g.horario || null].filter(Boolean);
+  return x.length ? el("p", { class: "sm", style: "font-weight:600" }, x.join(" · ")) : null; }
+function menuMateria(c) {
+  const g = (S.grade || {})[c.id] || {}, sitAt = g.oculta ? "oculta" : g.status || (anoDe(c) !== c.ano ? "outro_ano" : "cursando");
+  const fecha = () => { fundo.remove(); document.removeEventListener("keydown", esc); };
+  const esc = e => { if (e.key === "Escape") fecha(); };
+  const rad = Object.keys(SIT).map(k => el("label", { class: "chk" }, el("input", { type: "radio", name: "sit", value: k, checked: k === sitAt, onchange: () => { anoBox.hidden = k !== "outro_ano"; notaBox.hidden = k !== "aprovada"; } }), el("span", null, T(...SIT[k]))));
+  const anoSel = el("select", { "aria-label": T("Em que ano", "En qué año") }, [1, 2, 3, 4, 5, 6].map(a => el("option", { value: String(a), selected: a === (anoDe(c) === 7 ? c.ano : anoDe(c)) }, a + "º " + T("ano", "año"))));
+  const anoBox = el("label", { hidden: sitAt !== "outro_ano" }, T("Em que ano", "En qué año"), anoSel);
+  const fNota = el("input", { type: "number", min: "0", max: "10", step: "0.1", inputmode: "decimal", value: g.final != null ? String(g.final) : "" });
+  const notaBox = el("label", { hidden: sitAt !== "aprovada" }, T("Nota final (opcional)", "Nota final (opcional)"), fNota);
+  const fProf = el("input", { maxlength: "60", placeholder: T("Ex.: Dra. Gómez", "Ej.: Dra. Gómez"), value: g.prof || "" });
+  const fCom = el("input", { maxlength: "20", value: g.comissao || "" }), fHor = el("input", { maxlength: "40", placeholder: T("Ex.: ter e sex, 8h", "Ej.: mar y vie, 8 h"), value: g.horario || "" });
+  const salvar = () => { const k = (document.querySelector('.sheet input[name=sit]:checked') || {}).value || "cursando", n = {};
+    n.prof = fProf.value.trim().slice(0, 60); n.comissao = fCom.value.trim().slice(0, 20); n.horario = fHor.value.trim().slice(0, 40);
+    n.oculta = k === "oculta"; n.status = k === "oculta" ? g.status || null : k;
+    const aqui = anoDe(c) === 7 ? (anoAtual() === 7 ? c.ano : anoAtual()) : anoDe(c);
+    n.ano = k === "nao_sei" ? 7 : k === "outro_ano" ? +anoSel.value : aqui;
+    n.final = k === "aprovada" && fNota.value !== "" ? Math.max(0, Math.min(10, +fNota.value)) : (k === "aprovada" ? null : g.final ?? null);
+    setGrade(c.id, n); fecha(); render(); };
+  const fundo = el("div", { class: "fundo", onclick: e => { if (e.target === fundo) fecha(); } },
+    el("div", { class: "sheet", role: "dialog", "aria-modal": "true", "aria-label": nomeM(c) }, el("h2", null, nomeM(c)),
+      el("fieldset", null, el("legend", { class: "ct" }, T("Situação", "Situación")), rad),
+      el("div", { class: "form" }, anoBox, notaBox, el("label", null, T("Professor(es)", "Profesor(es)"), fProf), el("label", null, T("Comissão", "Comisión"), fCom), el("label", { class: "tudo" }, T("Dias e horário", "Días y horario"), fHor)),
+      el("p", { class: "sm muted" }, T("Fica só com você, neste aparelho (e na sua conta, se entrou com Google).", "Queda solo con vos, en este dispositivo (y en tu cuenta, si entraste con Google).")),
+      el("div", { class: "row" }, el("button", { class: "btn solid", onclick: salvar }, T("Salvar", "Guardar")), el("button", { class: "btn", onclick: fecha }, T("Cancelar", "Cancelar")))));
+  document.body.append(fundo); document.addEventListener("keydown", esc); fundo.querySelector("input:checked, input").focus();
+}
+
 /* ===== agenda: provas do curso + compromissos da própria pessoa ===== */
 const TIPOS = { exame: ["Exame", "Examen"], parcial: ["Parcial", "Parcial"], final: ["Final", "Final"], trabalho: ["Trabalho", "Trabajo práctico"], apresentacao: ["Apresentação", "Presentación"], pratica: ["Prática ou plantão", "Práctica o guardia"], outro: ["Outro", "Otro"] };
 const tipoTxt = t => T(...(TIPOS[t] || TIPOS.outro));
 const horaTxt = dt => /T\d\d:\d\d/.test(dt) && !/T00:00/.test(dt) ? ", " + new Date(dt).toLocaleTimeString(S.lang === "es" ? "es-AR" : "pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
 function comps(todos) {
-  const of = CATALOGO.filter(c => !oculta(c)).flatMap(c => (c.provas || []).map(p => ({ k: c.id + "|" + p[1], mid: c.id, tipo: T(...TIPO[p[0]]), titulo: nomeM(c), dt: p[1] })));
+  const of = CATALOGO.filter(c => !fora(c)).flatMap(c => (c.provas || []).map(p => ({ k: c.id + "|" + p[1], mid: c.id, tipo: T(...TIPO[p[0]]), titulo: nomeM(c), dt: p[1] })));
   const pes = (S.agenda || []).map(a => { const c = CATALOGO.find(x => x.id === a.mid); return { k: a.id, mid: a.mid, tipo: tipoTxt(a.tipo), titulo: a.titulo || (c ? nomeM(c) : ""), dt: a.dt, ref: a }; });
   return of.concat(pes).filter(x => todos || new Date(x.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt));
 }
@@ -967,6 +1011,14 @@ function vAgenda() {
 }
 
 /* ===== perfil e evolução: ficam no aparelho; vão para a nuvem só com aceite expresso, visíveis para a própria pessoa e para os administradores ===== */
+/* notas: as da agenda, as lançadas no Perfil e a nota final da matéria (⋯). Média simples por enquanto: a regra da UCES entra depois. */
+const TIPOS_NOTA = { p1: ["1º parcial", "1º parcial"], p2: ["2º parcial", "2º parcial"], p3: ["3º parcial", "3º parcial"], p4: ["4º parcial", "4º parcial"], rec: ["Recuperatório", "Recuperatorio"], final: ["Final", "Final"], tp: ["Trabalho", "Trabajo práctico"], outro: ["Outra", "Otra"] };
+function todasNotas() {
+  const a = comps(true).map(p => ({ mid: p.mid, tipo: p.tipo + (p.ref && p.ref.titulo ? " · " + p.ref.titulo : ""), v: p.ref ? p.ref.nota : (S.notas || {})[p.k], dt: p.dt, origem: "agenda" })).filter(x => x.v != null);
+  const b = Object.entries(S.notasM || {}).flatMap(([mid, l]) => l.map(x => ({ mid, tipo: T(...(TIPOS_NOTA[x.tipo] || TIPOS_NOTA.outro)), v: x.v, dt: x.dt || "", origem: "perfil", ref: x })));
+  const c = Object.entries(S.grade || {}).filter(([, g]) => g.status === "aprovada" && g.final != null).map(([mid, g]) => ({ mid, tipo: T("Nota final", "Nota final"), v: g.final, dt: "", origem: "materia" }));
+  return a.concat(b, c);
+}
 function evolucao() {
   const H = S.hist || {}, ds = []; for (let i = 13; i >= 0; i--) ds.push(addDays(hoje(), -i));
   const n = d => (H[d] || [0, 0])[0], max = Math.max(1, ...ds.map(n));
@@ -974,7 +1026,7 @@ function evolucao() {
   const s7 = ds.slice(7).reduce((a, d) => [a[0] + n(d), a[1] + (H[d] || [0, 0])[1]], [0, 0]);
   const todos = Object.values(M).flatMap(m => temas(m).map(t => [m, t])), mids = Object.keys(M);
   const vistos = PUBLICO ? Object.keys(S.vistos || {}).length : todos.length, revs = Object.values(S.rev || {}).reduce((a, x) => a + (x || 0), 0);
-  const notas = comps(true).map(p => ({ p, v: p.ref ? p.ref.nota : (S.notas || {})[p.k] })).filter(x => x.v != null);
+  const notas = todasNotas();
   const media = notas.length ? notas.reduce((a, x) => a + x.v, 0) / notas.length : null;
   return { ds, n, max, seq, s7, vistos, total: todos.length, revs, notas, media, flags: nFlags() };
 }
@@ -1004,8 +1056,8 @@ function vPerfil() {
       el("div", { class: "card" }, el("span", { class: "ct" }, T("Cartões respondidos por dia (14 dias)", "Tarjetas respondidas por día (14 días)") + (P.meta ? " · " + T("meta ", "meta ") + P.meta : "")),
         el("div", { class: "barras", role: "img", "aria-label": T("Cartões por dia nos últimos 14 dias: ", "Tarjetas por día en los últimos 14 días: ") + E.ds.map(d => d.slice(8) + "/" + d.slice(5, 7) + " " + E.n(d)).join(", ") },
           E.ds.map(d => el("div", null, el("b", null, E.n(d) ? String(E.n(d)) : ""), el("i", { style: "height:" + Math.round(E.n(d) / E.max * 100) + "%" + (P.meta && E.n(d) >= P.meta ? ";background:var(--gr)" : "") }), el("small", null, d.slice(8)))))),
-      E.notas.length ? el("div", { class: "card" }, el("span", { class: "ct" }, T("Notas registradas", "Notas registradas")), el("ul", null, E.notas.map(x => el("li", null, el("b", null, String(x.v)), " · " + x.p.tipo + (x.p.titulo ? " · " + x.p.titulo : "") + " (" + fmt(x.p.dt) + ")"))))
-        : el("p", { class: "sm muted" }, T("Para ver a média, registre notas na Agenda, em \"Já passaram\".", "Para ver el promedio, registrá notas en la Agenda, en \"Ya pasaron\"."))),
+      ),
+    el("section", { class: "sec" }, el("h2", null, T("Notas", "Notas")), secNotas()),
     el("section", { class: "sec" }, el("h2", null, T("Seus dados", "Tus datos")),
       el("div", { class: "card" }, el("div", { class: "form" }, el("label", null, T("Nome", "Nombre"), fNome), el("label", null, T("Telefone (opcional)", "Teléfono (opcional)"), fTel),
           el("label", null, T("Ano em que começou o curso", "Año en que empezaste la carrera"), fIni), el("label", null, T("Meta de cartões por dia", "Meta de tarjetas por día"), fMeta),
@@ -1014,6 +1066,28 @@ function vPerfil() {
         el("div", { class: "row" }, el("button", { class: "btn solid", onclick: salvar }, T("Salvar perfil", "Guardar perfil")), st),
         el("p", { class: "sm muted" }, T("Sem marcar o aceite, o perfil, a agenda e as notas ficam só neste aparelho. ", "Sin marcar la aceptación, el perfil, la agenda y las notas quedan solo en este dispositivo. "), PUBLICO ? el("button", { class: "linkb", onclick: () => { verPriv = true; render(); scrollTo(0, 0); } }, T("Privacidade e dados", "Privacidad y datos")) : null))),
     CAP.conta && CAP.conta.admin ? el("section", { class: "sec" }, el("h2", null, T("Alunos (só administradores)", "Alumnos (solo administradores)")), painelAlunos()) : null);
+}
+let formNota = false;
+function secNotas() {
+  const N = todasNotas(), por = {}; N.forEach(x => (por[x.mid || "_"] = por[x.mid || "_"] || []).push(x));
+  const nome = mid => { const c = CATALOGO.find(x => x.id === mid); return c ? nomeM(c) : T("Sem matéria", "Sin materia"); };
+  const mats = CATALOGO.filter(c => !oculta(c) && (anoDe(c) === anoAtual() || por[c.id])).sort((a, b) => anoDe(a) - anoDe(b));
+  const fMat = el("select", { id: "nt-mat" }, mats.map(c => el("option", { value: c.id }, nomeM(c) + " (" + (anoDe(c) === 7 ? "Extra" : anoDe(c) + "º") + ")")));
+  const fTipo = el("select", { id: "nt-tipo" }, Object.keys(TIPOS_NOTA).map(k => el("option", { value: k }, T(...TIPOS_NOTA[k]))));
+  const fV = el("input", { id: "nt-v", type: "number", min: "0", max: "10", step: "0.1", inputmode: "decimal" }), fD = el("input", { id: "nt-d", type: "date" });
+  const st = el("span", { class: "sm muted", "aria-live": "polite" });
+  const form = el("div", { class: "card", hidden: !formNota }, el("div", { class: "form" }, el("label", null, T("Matéria", "Materia"), fMat), el("label", null, T("Tipo", "Tipo"), fTipo),
+      el("label", null, T("Nota (0 a 10)", "Nota (0 a 10)"), fV), el("label", null, T("Data (opcional)", "Fecha (opcional)"), fD)),
+    el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => { if (fV.value === "") { st.textContent = T("Digite a nota.", "Escribí la nota."); fV.focus(); return; }
+        const l = ((S.notasM = S.notasM || {})[fMat.value] = S.notasM[fMat.value] || []); l.push({ id: "n" + Date.now().toString(36), tipo: fTipo.value, v: Math.max(0, Math.min(10, +fV.value)), dt: fD.value || "" });
+        formNota = false; save(); render(); } }, T("Salvar nota", "Guardar nota")), el("button", { class: "btn", onclick: () => { formNota = false; render(); } }, T("Cancelar", "Cancelar")), st));
+  const grupos = Object.keys(por).sort().map(mid => { const l = por[mid].slice().sort((a, b) => (a.dt || "").localeCompare(b.dt || "")), med = l.reduce((a, x) => a + x.v, 0) / l.length;
+    return el("div", { class: "card", "data-m": mid }, el("div", { class: "top", style: "display:flex;justify-content:space-between;gap:10px;align-items:baseline" }, el("b", null, nome(mid)), el("span", { class: "sm" }, T("média simples ", "promedio simple ") + med.toFixed(1))),
+      el("ul", null, l.map(x => el("li", null, el("b", null, String(x.v)), " · " + x.tipo + (x.dt ? " · " + fmt(x.dt) : ""), x.origem === "perfil" ? el("button", { class: "linkb", style: "margin-left:8px", onclick: e => { const b = e.currentTarget; if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = T("confirmar", "confirmar"); return; } S.notasM[mid] = S.notasM[mid].filter(y => y !== x.ref); save(); render(); } }, T("excluir", "eliminar")) : x.origem === "agenda" ? el("small", { class: "muted" }, T(" (agenda)", " (agenda)")) : el("small", { class: "muted" }, T(" (matéria)", " (materia)"))))));
+  });
+  return [el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => { formNota = !formNota; render(); const f = document.getElementById("nt-v"); if (formNota && f) f.focus(); } }, "+ " + T("Lançar nota", "Cargar nota"))), form,
+    grupos.length ? grupos : el("p", { class: "sm muted" }, T("Nenhuma nota ainda. Você pode lançar aqui, na Agenda (provas que já passaram) ou no ⋯ da matéria, quando for aprovada.", "Ninguna nota todavía. Podés cargarlas acá, en la Agenda (exámenes que ya pasaron) o en el ⋯ de la materia, cuando la apruebes.")),
+    el("p", { class: "sm muted" }, T("A média aqui é simples, só para acompanhar. A regra oficial de cálculo entra depois.", "El promedio acá es simple, solo para seguimiento. La regla oficial de cálculo se agrega después."))];
 }
 function resumoPerfil() { const P = S.perfil || {}, E = evolucao(); return { nome: P.nome || "", tel: P.tel || "", inicio: P.inicio || null, interesse: P.interesse || "", destino: P.destino || "", seq: E.seq, sem: E.s7[0], media: E.media != null ? +E.media.toFixed(1) : null }; }
 function painelAlunos() {
