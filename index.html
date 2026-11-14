@@ -113,6 +113,12 @@ input.txt { font: inherit; color: var(--ink); background: var(--sunk); border: 1
 .bv { display: flex; flex-direction: column; gap: 18px; padding-top: 28px; max-width: 560px } .bv header { display: flex; flex-direction: column; gap: 8px } .bv h1 { font-size: clamp(2rem, 8vw, 2.8rem); font-weight: 800; letter-spacing: -.045em; line-height: 1.04 } .bv h1 em { font-style: normal; background: linear-gradient(120deg, var(--vi), var(--rs)); -webkit-background-clip: text; background-clip: text; color: transparent }
 .bv-ops { display: flex; flex-direction: column; gap: 8px } .bv-ops .btn.cta { max-width: none; min-height: 60px } .bv-ops p { margin: 0 0 8px } .bv-ac { color: var(--muted); margin: 0 }
 .conta-fim { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px } .conta-fim p { margin: 0 } .conta-fim .btn { min-height: 40px; padding: 8px 16px; font-size: .9rem; box-shadow: none }
+.nano { padding: 14px 16px; gap: 6px } .ntop { display: flex; justify-content: space-between; align-items: baseline; gap: 10px } .ntop b { font: 800 1.05rem var(--fd) }
+.ntab { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; table-layout: fixed } .ntab th, .ntab td { padding: 10px 4px; text-align: left; vertical-align: middle; border-top: 1px solid var(--line) } .ntab thead th { border-top: 0; padding-block: 4px 6px; font: 700 .68rem var(--fd); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+.ntab .num { text-align: right; width: 3.6em; white-space: nowrap } .ntab thead th.num { letter-spacing: .03em } .ntab thead th:first-child { width: 40% } .ntab td.fin b { display: inline-block; min-width: 2.2em; text-align: center; padding: 3px 7px; border-radius: 9px; background: var(--cs); color: var(--c); font-weight: 800 }
+.ntab tbody th { font-weight: 400 } .nmat { all: unset; cursor: pointer; font: 700 .92rem/1.25 var(--fb); color: var(--ink); overflow-wrap: break-word; hyphens: auto; min-height: 28px; display: block } .nmat:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; border-radius: 6px } .nmat::after { content: "▾"; color: var(--muted); margin-left: 6px; font-size: .8em } .nmat[aria-expanded=true]::after { content: "▴" }
+.ntab .par span { display: inline-block; min-width: 1.9em; text-align: center; padding: 2px 5px; margin: 1px 3px 1px 0; border-radius: 7px; background: var(--sunk); font-weight: 600; font-size: .9rem } .ntab .par .vz { background: none; color: var(--muted) }
+.ntab tr.det td { border-top: 0; padding: 0 4px 10px } .ntab tr.det ul { margin: 0; padding-left: 1.1em; font-size: .9rem; display: flex; flex-direction: column; gap: 4px }
 .hoje, .retomar { display: flex; flex-direction: column; gap: 10px } .hoje { margin-top: 14px; gap: 14px } .retomar .btn.cta { max-width: none; margin-top: 0 }
 .unit { padding-block: 26px 6px; display: flex; flex-direction: column; gap: 14px }
 .unit-h { display: flex; flex-direction: column; gap: 4px } .unit-h h2 { font-size: 1.3rem; font-weight: 800 }
@@ -1220,8 +1226,8 @@ function semana() { const cs_ = CATALOGO.filter(c => anoDe(c) === anoAtual() && 
 const TIPOS = { exame: ["Exame", "Examen"], parcial: ["Parcial", "Parcial"], final: ["Final", "Final"], trabalho: ["Trabalho", "Trabajo práctico"], apresentacao: ["Apresentação", "Presentación"], pratica: ["Prática ou plantão", "Práctica o guardia"], outro: ["Outro", "Otro"] };
 const tipoTxt = t => T(...(TIPOS[t] || TIPOS.outro));
 const horaTxt = dt => /T\d\d:\d\d/.test(dt) && !/T00:00/.test(dt) ? ", " + new Date(dt).toLocaleTimeString(S.lang === "es" ? "es-AR" : "pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
-function comps(todos) {
-  const of = CATALOGO.filter(c => !fora(c)).flatMap(c => { const e = efet(c), it = itensProva(c, e); return e.provas.map((p, i) => ({ k: c.id + "|" + p[1], mid: c.id, tipo: T(...TIPO[p[0]]), titulo: nomeM(c), dt: p[1], cal: it[i] })); });
+function comps(todos, comAprov) {
+  const of = CATALOGO.filter(c => comAprov ? !oculta(c) : !fora(c)).flatMap(c => { const e = efet(c), it = itensProva(c, e); return e.provas.map((p, i) => ({ k: c.id + "|" + p[1], mid: c.id, tipo: T(...TIPO[p[0]]), titulo: nomeM(c), dt: p[1], cal: it[i] })); });
   const pes = (S.agenda || []).map(a => { const c = CATALOGO.find(x => x.id === a.mid); return { k: a.id, mid: a.mid, tipo: tipoTxt(a.tipo), titulo: a.titulo || (c ? nomeM(c) : ""), dt: a.dt, ref: a, cal: itemPessoal(a) }; });
   return of.concat(pes).filter(x => todos || new Date(x.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt));
 }
@@ -1277,9 +1283,9 @@ function vAgenda() {
 /* notas: as da agenda, as lançadas no Perfil e a nota final da matéria (⋯). Média simples por enquanto: a regra da UCES entra depois. */
 const TIPOS_NOTA = { p1: ["1º parcial", "1º parcial"], p2: ["2º parcial", "2º parcial"], p3: ["3º parcial", "3º parcial"], p4: ["4º parcial", "4º parcial"], rec: ["Recuperatório", "Recuperatorio"], final: ["Final", "Final"], tp: ["Trabalho", "Trabajo práctico"], outro: ["Outra", "Otra"] };
 function todasNotas() {
-  const a = comps(true).map(p => ({ mid: p.mid, tipo: p.tipo + (p.ref && p.ref.titulo ? " · " + p.ref.titulo : ""), v: p.ref ? p.ref.nota : (S.notas || {})[p.k], dt: p.dt, origem: "agenda" })).filter(x => x.v != null);
-  const b = Object.entries(S.notasM || {}).flatMap(([mid, l]) => l.map(x => ({ mid, tipo: T(...(TIPOS_NOTA[x.tipo] || TIPOS_NOTA.outro)), v: x.v, dt: x.dt || "", origem: "perfil", ref: x })));
-  const c = Object.entries(S.grade || {}).filter(([, g]) => g.status === "aprovada" && g.final != null).map(([mid, g]) => ({ mid, tipo: T("Nota final", "Nota final"), v: g.final, dt: "", origem: "materia" }));
+  const a = comps(true, true).map(p => ({ mid: p.mid, fin: /^Final/.test(p.tipo), tipo: p.tipo + (p.ref && p.ref.titulo ? " · " + p.ref.titulo : ""), v: p.ref ? p.ref.nota : (S.notas || {})[p.k], dt: p.dt, origem: "agenda" })).filter(x => x.v != null);
+  const b = Object.entries(S.notasM || {}).flatMap(([mid, l]) => l.map(x => ({ mid, fin: x.tipo === "final", tipo: T(...(TIPOS_NOTA[x.tipo] || TIPOS_NOTA.outro)), v: x.v, dt: x.dt || "", origem: "perfil", ref: x })));
+  const c = Object.entries(S.grade || {}).filter(([, g]) => g.status === "aprovada" && g.final != null).map(([mid, g]) => ({ mid, fin: true, tipo: T("Nota final", "Nota final"), v: g.final, dt: "", origem: "materia" }));
   return a.concat(b, c);
 }
 function evolucao() {
@@ -1345,13 +1351,23 @@ function secNotas() {
     el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => { if (fV.value === "") { st.textContent = T("Digite a nota.", "Escribí la nota."); fV.focus(); return; }
         const l = ((S.notasM = S.notasM || {})[fMat.value] = S.notasM[fMat.value] || []); l.push({ id: "n" + Date.now().toString(36), tipo: fTipo.value, v: Math.max(0, Math.min(10, +fV.value)), dt: fD.value || "" });
         formNota = false; save(); render(); } }, T("Salvar nota", "Guardar nota")), el("button", { class: "btn", onclick: () => { formNota = false; render(); } }, T("Cancelar", "Cancelar")), st));
-  const grupos = Object.keys(por).sort().map(mid => { const l = por[mid].slice().sort((a, b) => (a.dt || "").localeCompare(b.dt || "")), med = l.reduce((a, x) => a + x.v, 0) / l.length;
-    return el("div", { class: "card", "data-m": mid }, el("div", { class: "top", style: "display:flex;justify-content:space-between;gap:10px;align-items:baseline" }, el("b", null, nome(mid)), el("span", { class: "sm" }, T("média simples ", "promedio simple ") + med.toFixed(1))),
-      el("ul", null, l.map(x => el("li", null, el("b", null, String(x.v)), " · " + x.tipo + (x.dt ? " · " + fmt(x.dt) : ""), x.origem === "perfil" ? el("button", { class: "linkb", style: "margin-left:8px", onclick: e => { const b = e.currentTarget; if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = T("confirmar", "confirmar"); return; } S.notasM[mid] = S.notasM[mid].filter(y => y !== x.ref); save(); render(); } }, T("excluir", "eliminar")) : x.origem === "agenda" ? el("small", { class: "muted" }, T(" (agenda)", " (agenda)")) : el("small", { class: "muted" }, T(" (matéria)", " (materia)"))))));
-  });
+  const n1 = v => (Math.round(v * 10) / 10).toString().replace(".", ","), med = l => l.length ? l.reduce((s, x) => s + x.v, 0) / l.length : null;
+  const linha = mid => { const l = por[mid].slice().sort((x, y) => (x.dt || "").localeCompare(y.dt || "")), par = l.filter(x => !x.fin), fins = l.filter(x => x.fin), fin = fins.length ? fins[fins.length - 1].v : null, m = med(par);
+    const det = el("tr", { class: "det", hidden: true }, el("td", { colspan: "4" }, el("ul", null, l.map(x => el("li", null, el("b", null, n1(x.v)), " · " + x.tipo + (x.dt ? " · " + fmt(x.dt) : ""),
+      x.origem === "perfil" ? el("button", { class: "linkb", style: "margin-left:8px", onclick: e => { const bt = e.currentTarget; if (!bt.dataset.ok) { bt.dataset.ok = "1"; bt.textContent = T("confirmar", "confirmar"); return; } S.notasM[mid] = S.notasM[mid].filter(y => y !== x.ref); save(); render(); } }, T("excluir", "eliminar"))
+      : el("small", { class: "muted" }, x.origem === "agenda" ? T(" (da agenda)", " (de la agenda)") : T(" (da matéria)", " (de la materia)")))))));
+    const bt = el("button", { class: "nmat", "aria-expanded": "false", onclick: () => { det.hidden = !det.hidden; bt.setAttribute("aria-expanded", String(!det.hidden)); } }, nome(mid));
+    return { ref: fin != null ? fin : m, trs: [el("tr", null, el("th", { scope: "row" }, bt), el("td", { class: "par" }, par.length ? par.map(x => el("span", { title: x.tipo }, n1(x.v))) : el("span", { class: "vz" }, "—")),
+      el("td", { class: "num" }, m != null ? n1(m) : "—"), el("td", { class: "num fin" }, fin != null ? el("b", null, n1(fin)) : "—")), det] }; };
+  const anoMid = mid => { const c = CATALOGO.find(x => x.id === mid); return c ? anoDe(c) : 99; };
+  const anosN = [...new Set(Object.keys(por).map(anoMid))].sort((x, y) => x - y);
+  const grupos = anosN.map(a => { const ls = Object.keys(por).filter(mid => anoMid(mid) === a).sort((x, y) => nome(x).localeCompare(nome(y))).map(linha), refs = ls.map(x => x.ref).filter(v => v != null), mg = med(refs.map(v => ({ v })));
+    return el("div", { class: "card nano" }, el("div", { class: "ntop" }, el("b", null, a === 99 ? T("Sem matéria", "Sin materia") : a === 7 ? "Extra" : rotAno(a)), mg != null ? el("span", { class: "sm muted" }, T("média do ano ", "promedio del año ") + n1(mg)) : null),
+      el("table", { class: "ntab" }, el("thead", null, el("tr", null, el("th", { scope: "col" }, T("Matéria", "Materia")), el("th", { scope: "col" }, T("Parciais", "Parciales")), el("th", { scope: "col", class: "num" }, T("Média", "Prom.")), el("th", { scope: "col", class: "num" }, T("Final", "Final")))),
+        el("tbody", null, ls.map(x => x.trs)))); });
   return [el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => { formNota = !formNota; render(); const f = document.getElementById("nt-v"); if (formNota && f) f.focus(); } }, "+ " + T("Lançar nota", "Cargar nota"))), form,
     grupos.length ? grupos : el("p", { class: "sm muted" }, T("Nenhuma nota ainda. Você pode lançar aqui, na Agenda (provas que já passaram) ou no ⋯ da matéria, quando for aprovada.", "Ninguna nota todavía. Podés cargarlas acá, en la Agenda (exámenes que ya pasaron) o en el ⋯ de la materia, cuando la apruebes.")),
-    el("p", { class: "sm muted" }, T("A média aqui é simples, só para acompanhar. A regra oficial de cálculo entra depois.", "El promedio acá es simple, solo para seguimiento. La regla oficial de cálculo se agrega después."))];
+    el("p", { class: "sm muted" }, T("Toque na matéria para ver ou excluir cada nota. As médias são simples, só para acompanhar: a do ano usa a final de cada matéria ou, sem final, a média dos parciais. A regra oficial entra depois.", "Tocá la materia para ver o eliminar cada nota. Los promedios son simples, solo para seguimiento: el del año usa el final de cada materia o, sin final, el promedio de los parciales. La regla oficial se agrega después."))];
 }
 function resumoPerfil() { const P = S.perfil || {}, E = evolucao(); return { nome: P.nome || "", tel: P.tel || "", inicio: P.inicio || null, interesse: P.interesse || "", destino: P.destino || "", seq: E.seq, sem: E.s7[0], media: E.media != null ? +E.media.toFixed(1) : null }; }
 function painelAlunos() {
