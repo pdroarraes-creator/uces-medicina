@@ -112,6 +112,7 @@ input.txt { font: inherit; color: var(--ink); background: var(--sunk); border: 1
 .sheet .sum .sum-in { margin-top: 0 }
 .bv { display: flex; flex-direction: column; gap: 18px; padding-top: 28px; max-width: 560px } .bv header { display: flex; flex-direction: column; gap: 8px } .bv h1 { font-size: clamp(2rem, 8vw, 2.8rem); font-weight: 800; letter-spacing: -.045em; line-height: 1.04 } .bv h1 em { font-style: normal; background: linear-gradient(120deg, var(--vi), var(--rs)); -webkit-background-clip: text; background-clip: text; color: transparent }
 .bv-ops { display: flex; flex-direction: column; gap: 8px } .bv-ops .btn.cta { max-width: none; min-height: 60px } .bv-ops p { margin: 0 0 8px } .bv-ac { color: var(--muted); margin: 0 }
+.conta-fim { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px } .conta-fim p { margin: 0 } .conta-fim .btn { min-height: 40px; padding: 8px 16px; font-size: .9rem; box-shadow: none }
 .hoje, .retomar { display: flex; flex-direction: column; gap: 10px } .hoje { margin-top: 14px; gap: 14px } .retomar .btn.cta { max-width: none; margin-top: 0 }
 .unit { padding-block: 26px 6px; display: flex; flex-direction: column; gap: 14px }
 .unit-h { display: flex; flex-direction: column; gap: 4px } .unit-h h2 { font-size: 1.3rem; font-weight: 800 }
@@ -1311,7 +1312,6 @@ function vPerfil() {
     else if (fOk.checked) msg += " " + T("Para guardar na nuvem, aceite a conexão online e entre com Google.", "Para guardarlo en la nube, aceptá la conexión en línea y entrá con Google.");
     st.textContent = msg; };
   return el("div", { class: "inner" }, el("header", { class: "mhead" }, el("h1", null, T("Perfil", "Perfil")), el("p", { class: "muted" }, T("Tudo aqui é opcional e fica neste aparelho. Só sai daqui se você aceitar compartilhar o perfil, lá embaixo.", "Todo acá es optativo y queda en este dispositivo. Solo sale de acá si aceptás compartir el perfil, más abajo."))),
-    contaPerfil(),
     el("section", { class: "sec" }, el("h2", null, T("Sua evolução", "Tu evolución")),
       el("div", { class: "stats", style: "grid-template-columns:repeat(auto-fit,minmax(110px,1fr))" }, tile(E.seq, T(E.seq === 1 ? "dia seguido" : "dias seguidos", E.seq === 1 ? "día seguido" : "días seguidos")),
         tile(E.s7[0], T("cartões em 7 dias", "tarjetas en 7 días")), tile(E.s7[0] ? Math.round(E.s7[1] / E.s7[0] * 100) + "%" : "—", T("de acertos", "de aciertos")),
@@ -1328,7 +1328,8 @@ function vPerfil() {
           PUBLICO ? el("label", { class: "tudo chk", for: "pf-ok" }, fOk, el("span", null, T("Aceito guardar este perfil na nuvem (Firebase, servidores em São Paulo), junto com um resumo da minha evolução (sequência de dias, cartões na semana e média das notas). Além de mim, só os administradores do atlas podem ver, para acompanhar o grupo. Posso desmarcar ou apagar quando quiser.", "Acepto guardar este perfil en la nube (Firebase, servidores en San Pablo), junto con un resumen de mi evolución (racha de días, tarjetas en la semana y promedio de notas). Además de mí, solo los administradores del atlas pueden verlo, para acompañar al grupo. Puedo desmarcarlo o borrarlo cuando quiera."))) : null),
         el("div", { class: "row" }, el("button", { class: "btn solid", onclick: salvar }, T("Salvar perfil", "Guardar perfil")), st),
         el("p", { class: "sm muted" }, T("Sem marcar o aceite, o perfil, a agenda e as notas ficam só neste aparelho. ", "Sin marcar la aceptación, el perfil, la agenda y las notas quedan solo en este dispositivo. "), PUBLICO ? el("button", { class: "linkb", onclick: () => { verPriv = true; render(); scrollTo(0, 0); } }, T("Privacidade e dados", "Privacidad y datos")) : null))),
-    CAP.conta && CAP.conta.admin ? el("section", { class: "sec" }, el("h2", null, T("Alunos (só administradores)", "Alumnos (solo administradores)")), painelAlunos()) : null);
+    CAP.conta && CAP.conta.admin ? el("section", { class: "sec" }, el("h2", null, T("Alunos (só administradores)", "Alumnos (solo administradores)")), painelAlunos()) : null,
+    contaPerfil());
 }
 let formNota = false;
 function secNotas() {
@@ -1409,7 +1410,7 @@ function vPriv() {
       el("button", { class: "btn solid", onclick: () => escolher(true) }, T("Aceito e quero estudar online", "Acepto y quiero estudiar en línea")),
       el("button", { class: "btn", onclick: () => escolher(false) }, T("Usar só neste aparelho", "Usar solo en este dispositivo")),
       ja ? el("button", { class: "btn ghost", onclick: () => { verPriv = false; render(); } }, T("Voltar", "Volver")) : null),
-    logado ? el("p", { class: "sm muted" }, T("Para apagar seus dados da nuvem, use o cartão Conta, no Perfil.", "Para borrar tus datos de la nube, usá la tarjeta Cuenta, en Perfil.")) : null));
+    logado ? el("p", { class: "sm muted" }, T("Para apagar seus dados da nuvem, vá ao fim do Perfil.", "Para borrar tus datos de la nube, andá al final de Perfil.")) : null));
 }
 
 /* ===== nuvem da versão pública (Firebase, em nuvem.js) ===== */
@@ -1454,20 +1455,17 @@ function entrarGoogle(st) { const erro = e => { if (st) st.textContent = e && e.
   querEntrar = true; ativarNuvem(); render(); scrollTo(0, 0); }
 function contaPerfil() {
   if (!PUBLICO) return null;
-  if (!CAP.conta || CAP.conta.anon) { const st = el("span", { class: "sm muted", "aria-live": "polite" });
-    return el("div", { class: "card rail" }, el("span", { class: "ct" }, T("Conta", "Cuenta")), el("p", null, T("Você está usando o atlas sem conta: o progresso fica só neste aparelho. Entre com Google para guardar na nuvem e continuar em outro aparelho.", "Estás usando el atlas sin cuenta: el progreso queda solo en este dispositivo. Entrá con Google para guardarlo en la nube y seguir en otro dispositivo.")),
-      el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => entrarGoogle(st) }, T("Entrar com Google", "Entrar con Google")), st)); }
+  const st = el("span", { class: "sm muted", "aria-live": "polite" });
+  if (!CAP.conta || CAP.conta.anon) return el("section", { class: "conta-fim" }, el("p", { class: "sm muted" }, T("Sem conta: o progresso fica só neste aparelho.", "Sin cuenta: el progreso queda solo en este dispositivo.")),
+    el("div", { class: "row" }, el("button", { class: "btn", onclick: () => entrarGoogle(st) }, T("Entrar com Google", "Entrar con Google")), st));
   const c = CAP.conta;
-  return el("div", { class: "card rail" }, el("span", { class: "ct" }, T("Conta", "Cuenta")),
-    el("div", { class: "in", style: "display:flex;flex-direction:column;gap:12px" }, el("p", null, CAP.nuvemErro ? T("Não consegui falar com a nuvem agora. O progresso continua salvo neste aparelho.", "No pude conectar con la nube ahora. El progreso sigue guardado en este dispositivo.") : T("Progresso salvo na nuvem, ligado a ", "Progreso guardado en la nube, vinculado a ") + c.email + "."),
-      c.admin ? el("p", { class: "sm muted" }, T("Você é administrador: toque no contador de online, no topo, para ver quem está estudando.", "Tienes acceso de administrador: toca el contador de en línea, arriba, para ver quién está estudiando.")) : null,
-      el("div", { class: "row" }, el("button", { class: "btn", onclick: () => CAP.nuvem.sair() }, T("Sair", "Salir")),
-        el("button", { class: "btn ghost", onclick: async e => { const b = e.currentTarget, st = b.parentNode.nextSibling;
-          if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = T("Toque de novo para apagar", "Tocá de nuevo para borrar"); return; }
-          b.disabled = true; const r = await CAP.nuvem.apagar(); CAP.conta = null; CAP.online = null;
-          S.aceite = { v: 1, em: new Date().toISOString(), nuvem: false }; save(); render(); renderOnline();
-          alertaPriv(r === "relogin" ? T("Seu progresso e sua presença foram apagados da nuvem. Para apagar também a conta, entre de novo com Google e repita.", "Tu progreso y tu presencia se borraron de la nube. Para borrar también la cuenta, entrá de nuevo con Google y repetí.") : T("Seus dados foram apagados da nuvem. O progresso continua só neste aparelho.", "Tus datos se borraron de la nube. El progreso sigue solo en este dispositivo.")); } },
-          T("Apagar meus dados da nuvem", "Borrar mis datos de la nube"))), el("span", { class: "sm muted", "aria-live": "polite" })));
+  const apagar = async e => { const b = e.currentTarget;
+    if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = T("Toque de novo para apagar", "Tocá de nuevo para borrar"); return; }
+    b.disabled = true; const r = await CAP.nuvem.apagar(); CAP.conta = null; CAP.online = null;
+    S.aceite = { v: 1, em: new Date().toISOString(), nuvem: false }; save(); render(); renderOnline();
+    alertaPriv(r === "relogin" ? T("Seu progresso e sua presença foram apagados da nuvem. Para apagar também a conta, entre de novo com Google e repita.", "Tu progreso y tu presencia se borraron de la nube. Para borrar también la cuenta, entrá de nuevo con Google y repetí.") : T("Seus dados foram apagados da nuvem. O progresso continua só neste aparelho.", "Tus datos se borraron de la nube. El progreso sigue solo en este dispositivo.")); };
+  return el("section", { class: "conta-fim" }, el("p", { class: "sm muted" }, CAP.nuvemErro ? T("Sem conexão com a nuvem agora. O progresso segue salvo neste aparelho.", "Sin conexión con la nube ahora. El progreso sigue guardado en este dispositivo.") : c.email),
+    el("div", { class: "row" }, el("button", { class: "btn", onclick: () => CAP.nuvem.sair() }, T("Sair", "Salir")), el("button", { class: "linkb", onclick: apagar }, T("Apagar meus dados da nuvem", "Borrar mis datos de la nube"))), st);
 }
 let avisoTopo = null;
 function alertaPriv(txt) { avisoTopo = txt; render();
