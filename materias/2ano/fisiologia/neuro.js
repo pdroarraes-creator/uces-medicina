@@ -1,6 +1,7 @@
 
-
-window.neuroFisiologia = ((T, U) => {
+window.registrarUnidade("fisiologia", "neuro", 3, (T, U, H) => {
+  const { AVISO, QUAL, simples, EIXO_EST, SUPRA_EST, RG, RK, RC, RB, LOBO, cerebro, cadeia, FONTE } = H;
+  const NX = ((T, U) => {
  const AVISO = T("Modelo simplificado.", "Modelo simplificado.");
  const figuras = {};
 
@@ -164,4 +165,55 @@ window.neuroFisiologia = ((T, U) => {
  mapa: { c: T("Neuro|guia", "Neuro|guía"), r: [{ t: T("Organização", "Organización"), f: [T("SNC e SNP", "SNC y SNP"), T("Medula e arco reflexo", "Médula y arco reflejo")] }, { t: T("Encéfalo", "Encéfalo"), f: [T("Tronco e cerebelo", "Tronco y cerebelo"), T("Diencéfalo", "Diencéfalo"), T("Hemisférios", "Hemisferios")] }, { t: T("Córtex", "Corteza"), f: [T("Lobos", "Lóbulos"), T("Movimento voluntário", "Movimiento voluntario"), T("Linguagem", "Lenguaje")] }, { t: T("SNA", "SNA"), f: [T("Simpático", "Simpático"), T("Parassimpático", "Parasimpático")] }] } }
  ]
  };
+})(T, U);
+  const figuras = Object.assign({
+    arcoReflexo() {
+      const af = "M322 62 L262 62 L162 68 L143 106", ef = "M146 152 L153 174 L210 198 L284 200";
+      return U.estados(T("O arco reflexo na medula: entra por trás, sai pela frente", "El arco reflejo en la médula: entra por atrás, sale por adelante"), `<svg class="sv" viewBox="0 0 360 252" role="img" aria-label="${T("Corte da medula: o neurônio sensitivo entra pela raiz dorsal, faz sinapse e o neurônio motor sai pela raiz ventral até o músculo", "Corte de la médula: la neurona sensitiva entra por la raíz dorsal, hace sinapsis y la neurona motora sale por la raíz ventral hasta el músculo")}">
+        <ellipse class="f-sur" cx="120" cy="128" rx="96" ry="82"/>
+        <path class="f-vi" d="M120 116 C102 98 94 78 84 62 C76 74 80 100 96 126 C80 150 70 172 78 192 C96 188 110 162 120 142 C130 162 144 188 162 192 C170 172 160 150 144 126 C160 100 164 74 156 62 C146 78 138 98 120 116 Z"/>
+        <text x="120" y="30" text-anchor="middle" class="mut">${T("DORSAL (atrás)", "DORSAL (atrás)")}</text><text x="120" y="232" text-anchor="middle" class="mut">${T("VENTRAL (frente)", "VENTRAL (adelante)")}</text>
+        <g data-on="tudo p1"><circle class="f-bl" cx="334" cy="62" r="12"/><text x="334" y="40" text-anchor="end" style="font-size:10.5px">${T("1 receptor", "1 receptor")}</text></g>
+        <g data-on="tudo p2"><path class="ln k-bl" d="${af}" marker-end="url(#ah-bl)"/><ellipse class="f-bl" cx="246" cy="63" rx="17" ry="11"/><text x="246" y="92" text-anchor="middle" style="font-size:10.5px">${T("gânglio da raiz dorsal", "ganglio de la raíz dorsal")}</text><text x="204" y="50" text-anchor="middle" style="font-size:10.5px;font-weight:800">${T("2 entra: sensitivo", "2 entra: sensitivo")}</text></g>
+        <g data-on="tudo p3"><path class="ln k-ink" d="M143 106 L146 152" style="stroke-dasharray:3 3"/><circle cx="143" cy="106" r="5" fill="var(--ink)"/><circle cx="146" cy="152" r="5" fill="var(--ink)"/><text x="60" y="132" text-anchor="middle" style="font-size:10.5px;font-weight:800">${T("3 sinapse", "3 sinapsis")}</text></g>
+        <g data-on="tudo p4"><path class="ln k-rs" d="${ef}" marker-end="url(#ah-ink)"/><text x="246" y="222" text-anchor="middle" style="font-size:10.5px;font-weight:800">${T("4 sai: motor (raiz ventral)", "4 sale: motor (raíz ventral)")}</text></g>
+        <g data-on="tudo p5"><rect class="f-rs" x="290" y="184" width="64" height="32" rx="10"/><text x="322" y="204" text-anchor="middle" style="font-size:10.5px">${T("5 músculo", "5 músculo")}</text></g>
+        <circle class="sinal" r="6" fill="var(--c)" style="offset-path:path('${af} L146 152 ${ef.slice(9)}')" data-show="tudo"/>
+      </svg>`, [
+        { id: "tudo", r: T("O caminho todo", "Todo el camino"), d: T("<b>Dorsal entra, ventral sai.</b> Siga a bolinha: receptor, neurônio sensitivo, sinapse na medula, neurônio motor, músculo. Tudo sem esperar o córtex.", "<b>Dorsal entra, ventral sale.</b> Sigue la bolita: receptor, neurona sensitiva, sinapsis en la médula, neurona motora, músculo. Todo sin esperar a la corteza.") },
+        { id: "p1", r: "1", d: T("<b>1. Recepção.</b> O receptor detecta o estímulo.", "<b>1. Recepción.</b> El receptor detecta el estímulo.") },
+        { id: "p2", r: "2", d: T("<b>2. Condução aferente.</b> O neurônio sensitivo leva o potencial de ação e entra pela RAIZ DORSAL. O corpo dele fica no GÂNGLIO DA RAIZ DORSAL, fora da medula.", "<b>2. Conducción aferente.</b> La neurona sensitiva lleva el potencial de acción y entra por la RAÍZ DORSAL. Su cuerpo está en el GANGLIO DE LA RAÍZ DORSAL, fuera de la médula.") },
+        { id: "p3", r: "3", d: T("<b>3. Integração.</b> Sinapse com um neurônio de integração ou direto com o motoneurônio.", "<b>3. Integración.</b> Sinapsis con una neurona de integración o directo con la motoneurona.") },
+        { id: "p4", r: "4", d: T("<b>4. Condução eferente.</b> O neurônio motor sai pela RAIZ VENTRAL. O corpo do motoneurônio fica na medula.", "<b>4. Conducción eferente.</b> La neurona motora sale por la RAÍZ VENTRAL. El cuerpo de la motoneurona está en la médula.") },
+        { id: "p5", r: "5", d: T("<b>5. Resposta.</b> O músculo efetor contrai (ou a glândula secreta).", "<b>5. Respuesta.</b> El músculo efector se contrae (o la glándula secreta).") }
+      ], { cap: T("Corte esquemático da medula; a forma em borboleta é a substância cinzenta. ", "Corte esquemático de la médula; la forma de mariposa es la sustancia gris. ") + AVISO });
+    },
+    snaFig() {
+      const linha = (y, xg, cor, on, org, lg, lo, show) => `<g ${show ? `data-show="${show}"` : `data-on="${on}"`}><rect class="f-sur" x="6" y="${y - 15}" width="46" height="30" rx="8"/><text x="29" y="${y + 4}" text-anchor="middle" style="font-size:10.5px">SNC</text>
+        <path class="ln k-${cor}" d="M52 ${y} H${xg - 9}"/><circle cx="${xg}" cy="${y}" r="9" fill="var(--surface)" stroke="var(--${cor})" stroke-width="3"/>
+        ${org ? `<path class="ln k-${cor}" d="M${xg + 9} ${y} H283" marker-end="url(#ah-ink)" style="stroke-dasharray:6 3"/><rect class="f-sur" x="290" y="${y - 15}" width="64" height="30" rx="8"/><text x="322" y="${y + 4}" text-anchor="middle" style="font-size:10.5px">${org}</text>` : ""}
+        <text x="${Math.min(Math.max(xg, 56), 270)}" y="${y - 16}" text-anchor="middle" style="font-size:10px;font-weight:800">${lg}</text>${lo ? `<text x="354" y="${y + 32}" text-anchor="end" style="font-size:10px;font-weight:800">${lo}</text>` : ""}</g>`;
+      const ach = T("ACh em nicotínico", "ACh en nicotínico");
+      return U.estados(T("Autônomo: dois neurônios, um gânglio no meio", "Autónomo: dos neuronas, un ganglio en el medio"), `<svg class="sv" viewBox="0 0 360 232" role="img" aria-label="${T("Simpático com fibra pré curta e pós longa; parassimpático com pré longa e pós curta; neurotransmissor em cada sinapse", "Simpático con fibra pre corta y pos larga; parasimpático con pre larga y pos corta; neurotransmisor en cada sinapsis")}">
+        <text x="6" y="16" class="cap" data-on="tudo simp suor supra">${T("SIMPÁTICO · luta ou fuga", "SIMPÁTICO · lucha o huida")}</text><text x="6" y="31" class="mut" style="font-size:10px" data-on="tudo simp suor supra">${T("toracolombar: T1 a L2 ou L3 · pré curta, pós longa", "toracolumbar: T1 a L2 o L3 · pre corta, pos larga")}</text>
+        ${linha(72, 122, "rs", "", T("órgão", "órgano"), ach, T("pós: NORADRENALINA em adrenérgico", "pos: NORADRENALINA en adrenérgico"), "tudo simp para")}
+        ${linha(72, 122, "rs", "", T("suor", "sudor"), ach, T("pós: ACh em MUSCARÍNICO (exceção)", "pos: ACh en MUSCARÍNICO (excepción)"), "suor")}
+        <g data-show="supra">${linha(72, 200, "rs", "tudo", "", ach, "")}<text x="200" y="96" text-anchor="middle" style="font-size:10px">${T("medula suprarrenal", "médula suprarrenal")}</text><path class="ln k-rs" d="M209 72 H283" marker-end="url(#ah-ink)" style="stroke-dasharray:2 4"/><text x="354" y="112" text-anchor="end" style="font-size:10px;font-weight:800">${T("adrenalina e noradrenalina NO SANGUE", "adrenalina y noradrenalina EN LA SANGRE")}</text><rect class="f-rs" x="290" y="57" width="64" height="30" rx="8"/><text x="322" y="76" text-anchor="middle" style="font-size:10.5px">${T("sangue", "sangre")}</text></g>
+        <text x="6" y="134" class="cap" data-on="tudo para">${T("PARASSIMPÁTICO · repouso e digestão", "PARASIMPÁTICO · reposo y digestión")}</text><text x="6" y="149" class="mut" style="font-size:10px" data-on="tudo para">${T("craniossacral: III, VII, IX, X e S2 a S4 · pré longa, pós curta", "craneosacro: III, VII, IX, X y S2 a S4 · pre larga, pos corta")}</text>
+        ${linha(190, 236, "bl", "tudo para", T("órgão", "órgano"), ach, T("pós: ACh em MUSCARÍNICO", "pos: ACh en MUSCARÍNICO"))}
+      </svg>`, [
+        { id: "tudo", r: T("Os dois", "Los dos"), d: T("<b>O pré é igual nos dois: ACh em receptor nicotínico, no gânglio.</b> A diferença está no pós. Linha cheia = pré-ganglionar; tracejada = pós-ganglionar; círculo = gânglio (onde fica o corpo do pós).", "<b>El pre es igual en los dos: ACh en receptor nicotínico, en el ganglio.</b> La diferencia está en el pos. Línea llena = preganglionar; punteada = posganglionar; círculo = ganglio (donde está el cuerpo del pos).") },
+        { id: "simp", r: T("Simpático", "Simpático"), d: T("<b>Simpático:</b> origem toracolombar; gânglios perto da coluna (paravertebrais ou pré-vertebrais), então pré CURTA e pós LONGA. O pós libera noradrenalina em receptor adrenérgico.", "<b>Simpático:</b> origen toracolumbar; ganglios cerca de la columna (paravertebrales o prevertebrales), así que pre CORTA y pos LARGA. El pos libera noradrenalina en receptor adrenérgico.") },
+        { id: "para", r: T("Parassimpático", "Parasimpático"), d: T("<b>Parassimpático:</b> origem craniossacral; o vago (X) leva grande parte para tórax e abdome. Gânglios perto ou dentro do órgão: pré LONGA e pós CURTA. O pós libera ACh em receptor muscarínico.", "<b>Parasimpático:</b> origen craneosacro; el vago (X) lleva gran parte a tórax y abdomen. Ganglios cerca o dentro del órgano: pre LARGA y pos CORTA. El pos libera ACh en receptor muscarínico.") },
+        { id: "suor", r: T("Exceção: suor", "Excepción: sudor"), d: T("<b>Glândulas sudoríparas:</b> são simpáticas, mas o pós libera ACh em receptor MUSCARÍNICO, não noradrenalina.", "<b>Glándulas sudoríparas:</b> son simpáticas, pero el pos libera ACh en receptor MUSCARÍNICO, no noradrenalina.") },
+        { id: "supra", r: T("Exceção: suprarrenal", "Excepción: suprarrenal"), d: T("<b>Medula suprarrenal = gânglio simpático modificado.</b> Recebe ACh pré-ganglionar em nicotínico e, em vez de um pós, libera adrenalina e noradrenalina direto no sangue.", "<b>Médula suprarrenal = ganglio simpático modificado.</b> Recibe ACh preganglionar en nicotínico y, en lugar de un pos, libera adrenalina y noradrenalina directo a la sangre.") }
+      ], { cap: AVISO });
+    },
+    cerebroLobos() { return cerebro("lobos"); },
+    cerebroTronco() { return cerebro("tronco"); },
+    cerebroDi() { return cerebro("di"); }
+  }, NX.figuras || {});
+  const FIG_EXTRA = { organizacao: ["arcoReflexo"], tronco: ["cerebroTronco"], diencefalo: ["cerebroDi"], cortex: ["cerebroLobos"], sna: ["snaFig"] };
+  NX.unidades.flatMap(u => u.temas).forEach(t => { const x = FIG_EXTRA[t.id]; if (x) t.figuras = x.concat((t.figuras || []).filter(f => !x.includes(f))); });
+  return { figuras, cartoes: NX.cartoes, unidades: NX.unidades.map(u => Object.assign({}, u, { nome: "Neuro" })) };
 });

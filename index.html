@@ -274,6 +274,7 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
 .onl li { display: flex; align-items: center; gap: 8px } .onl li small { color: var(--muted); font-weight: 500 }
 .onl .dot, .online .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gr); flex: 0 0 auto }
 .conta { display: flex; flex-direction: column; gap: 10px; margin-top: 16px }
+.anoh { display: flex; flex-direction: column; gap: 10px }
 /* barra inferior (celular) */
 .bn { display: none }
 @media (max-width: 760px) {
@@ -307,19 +308,16 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
   <nav class="bn" aria-label="Seções"><a href="#inicio" data-n="inicio" id="bnI"></a><a href="#m-fisiologia" data-n="m" id="bnM"></a><a href="#cartoes" data-n="cartoes" id="bnC"></a></nav>
 </div>
 
+<script src="materias/indice.js"></script>
 <script>
 /* ===== catálogo do 2º ano: uma entrada por matéria. O conteúdo de cada uma vem de um arquivo em materias/ ===== */
 /* PUBLICO: o build da versão para colegas troca para true. Some: joinha, comentários, quem está online, ditado e tudo o que é pessoal. */
 const PUBLICO = true;
 const PUB_URL = "https://pdroarraes-creator.github.io/uces-medicina/";
 const LINK = location.href.split("#")[0];
-const CATALOGO = [
-  { id: "fisiologia", nome: ["Fisiologia", "Fisiología"], provas: [["p", "2026-11-13T08:00:00-03:00"], ["fc", "2026-12-18T08:00:00-03:00"]] },
-  { id: "microbiologia", nome: ["Microbiologia", "Microbiología"], provas: [["p", "2026-11-18T14:30:00-03:00"], ["f", "2026-12-21T16:00:00-03:00"]] },
-  { id: "bioquimica", nome: ["Bioquímica", "Bioquímica"], provas: [["f", "2026-12-09T19:00:00-03:00"]] },
-  { id: "ipc", nome: ["IPC", "IPC"], provas: [["f", "2026-12-11T15:00:00-03:00"]] },
-  { id: "profissionalismo", nome: ["Profissionalismo Médico", "Profesionalismo Médico"], provas: [["fc", "2026-12-18T14:30:00-03:00"]] }
-];
+/* catálogo do curso: vem de materias/indice.js (anos, matérias, provas e arquivos de cada matéria) */
+const IDX = window.INDICE || { anos: [] };
+const CATALOGO = IDX.anos.flatMap(a => a.materias.map(m => Object.assign({ ano: a.ano }, m)));
 const TIPO = { p: ["Parcial", "Parcial"], f: ["Final", "Final"], fc: ["Final (data a confirmar)", "Final (fecha a confirmar)"] };
 
 /* ===== estado: salvo neste aparelho e, quando a conta permite, também na conta ===== */
@@ -337,6 +335,10 @@ function save() { S.ts = Date.now(); try { localStorage.setItem(KEY, JSON.string
 const T = (pt, es) => S.lang === "es" ? es : pt;
 const BUILD = {}, M = {};
 window.registrarMateria = (id, build) => { BUILD[id] = build; };
+/* matéria dividida em arquivos: uma base comum + uma unidade por arquivo (ordem pelo número) */
+const BASES = {}, UNIDS = {};
+window.registrarBase = (id, build) => { BASES[id] = build; };
+window.registrarUnidade = (id, uid, ordem, build) => { (UNIDS[id] = UNIDS[id] || []).push({ uid, ordem, build }); };
 
 function el(tag, attrs, ...kids) {
   const n = document.createElement(tag);
@@ -502,12 +504,33 @@ function carregar3d() { return TRES || (TRES = new Promise((ok, no) => { if (win
   s.onload = () => window.THREE ? ok(window.THREE) : no(new Error("three")); s.onerror = () => no(new Error("three")); document.head.append(s); setTimeout(() => no(new Error("tempo")), 12000);
 }).catch(e => { TRES = null; throw e; })); }
 </script>
-<script src="materias/fisiologia-repro.js"></script>
-<script src="materias/fisiologia-neuro.js"></script>
-<script src="materias/fisiologia.js"></script>
 <script>
-function carregar() { for (const id in BUILD) { M[id] = BUILD[id](T, U); M[id].unidades.forEach(u => { if (u.pendentes) u.pendentes = u.pendentes.filter(Boolean); }); } }
-carregar();
+function montarMateria(id) {
+  const b = BASES[id](T, U), partes = [];
+  (UNIDS[id] || []).slice().sort((x, y) => x.ordem - y.ordem).forEach(u => { try { partes.push(u.build(T, U, b.H || {})); } catch (e) { console.error("unidade " + id + "/" + u.uid, e); } });
+  return { id, nome: b.nome, sub: b.sub, figuras: Object.assign({}, ...partes.map(p => p.figuras || {})),
+    cartoes: [].concat(...partes.map(p => p.cartoes || [])), unidades: [].concat(...partes.map(p => p.unidades || [p.unidade])) };
+}
+/* chave estável de cada cartão: matéria:tema#ordem dentro do tema (não muda quando entram temas ou unidades novas) */
+function chaves(m) { const n = {}; return m.cartoes.map(c => { n[c[0]] = (n[c[0]] || 0) + 1; return c[0] + "#" + (n[c[0]] - 1); }); }
+function migrarCartoes() { for (const k of Object.keys(S.cards)) { const x = /^([a-z0-9_]+):(\d+)$/.exec(k); if (!x || !M[x[1]]) continue;
+    const nk = M[x[1]].ck[+x[2]]; if (nk && !S.cards[x[1] + ":" + nk]) S.cards[x[1] + ":" + nk] = S.cards[k]; delete S.cards[k]; } }
+function carregar() {
+  for (const id in BUILD) { try { M[id] = BUILD[id](T, U); } catch (e) { console.error("matéria " + id, e); } }
+  for (const id in BASES) { try { M[id] = montarMateria(id); } catch (e) { console.error("matéria " + id, e); } }
+  for (const id in M) { M[id].unidades.forEach(u => { if (u.pendentes) u.pendentes = u.pendentes.filter(Boolean); }); M[id].ck = chaves(M[id]); }
+  migrarCartoes();
+}
+/* ano: o atlas abre no período atual (o último ano que já começou); os outros anos ficam a um toque */
+function anoAtual() { const h = hoje(); let at = IDX.anos.length ? IDX.anos[0].ano : 1; IDX.anos.forEach(a => { if (a.inicio <= h) at = a.ano; }); return at; }
+let anoVer = null;
+const anoSel = () => anoVer || anoAtual();
+const rotAno = n => n + "º " + T("ano", "año");
+function carregarArquivos() {
+  const at = anoAtual(), anos = IDX.anos.filter(a => a.ano === at).concat(IDX.anos.filter(a => a.ano !== at));
+  return Promise.all(anos.flatMap(a => a.materias.flatMap(m => m.arquivos || [])).map(src => new Promise(ok => {
+    const s = document.createElement("script"); s.src = src; s.async = false; s.onload = s.onerror = () => ok(); document.head.appendChild(s); })));
+}
 const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const hoje = () => iso(new Date());
 const addDays = (s, n) => { const d = new Date(s + "T12:00:00"); d.setDate(d.getDate() + n); return iso(d); };
@@ -519,7 +542,7 @@ const faltaTxt = f => f.d > 0 ? dias(f.d) + " " + T("e", "y") + " " + f.h + " h"
 const nomeM = c => T(c.nome[0], c.nome[1]);
 const temas = m => m.unidades.flatMap(u => u.temas);
 const tema = (mid, tid) => M[mid] && temas(M[mid]).find(t => t.id === tid);
-function cs(mid, i) { const k = mid + ":" + i; return S.cards[k] || (S.cards[k] = { flag: !PUBLICO && !!M[mid].cartoes[i][1], streak: 0 }); }
+function cs(mid, i) { const k = mid + ":" + M[mid].ck[i]; return S.cards[k] || (S.cards[k] = { flag: !PUBLICO && !!M[mid].cartoes[i][1], streak: 0 }); }
 /* data de estudo: na versão privada é a do tema; na pública é o dia em que cada aluno abriu o tema pela primeira vez */
 function dataEstudo(mid, t) { return PUBLICO ? (S.vistos || {})[mid + ":" + t.id] : t.estudado; }
 function proxRev(mid, t) { const d = dataEstudo(mid, t); if (!d) return null; const k = S.rev[mid + ":" + t.id] || 0; return k >= 3 ? null : { passo: k, data: addDays(d, [1, 3, 7][k]) }; }
@@ -611,7 +634,7 @@ function caixaImport() {
     el("p", null, nC + T(" cartões, ", " tarjetas, ") + nR + T(" revisões feitas e ", " repasos hechos y ") + nQ + T(" respostas de quiz.", " respuestas de quiz.")),
     temAqui ? el("p", { class: "sm muted" }, T("Este aparelho já tem progresso. Importar substitui o que está aqui.", "Este dispositivo ya tiene progreso. Importar reemplaza lo que está aquí.")) : null,
     el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => { ["cards", "rev", "quiz", "draft", "vistos"].forEach(k => { if (IMPORT[k]) S[k] = IMPORT[k]; });
-        if (IMPORT.nick) S.nick = IMPORT.nick; if (IMPORT.lang) S.lang = IMPORT.lang; S.plano = null; IMPORT = null; save(); render(); } }, T("Importar para este aparelho", "Importar a este dispositivo")),
+        if (IMPORT.nick) S.nick = IMPORT.nick; if (IMPORT.lang) S.lang = IMPORT.lang; S.plano = null; IMPORT = null; migrarCartoes(); save(); render(); } }, T("Importar para este aparelho", "Importar a este dispositivo")),
       el("button", { class: "btn", onclick: () => { IMPORT = null; render(); } }, T("Agora não", "Ahora no"))));
 }
 function caixaExport() {
@@ -677,7 +700,8 @@ function vInicio() {
   const lista = pl.itens.length ? [el("div", { class: "plhead" }, el("div", { class: "track" }, barra), cont),
       el("ul", { class: "plan" }, verMais(itens, 2, T("Ver plano completo", "Ver plan completo"), T("Recolher plano", "Recoger plan")))]
     : el("p", { class: "muted", style: "margin-top:12px" }, T("Nada vence hoje. As revisões aparecem 1, 3 e 7 dias depois de cada tema estudado.", "Nada vence hoy. Los repasos aparecen 1, 3 y 7 días después de cada tema estudiado."));
-  const comConteudo = CATALOGO.filter(c => M[c.id]), semConteudo = CATALOGO.filter(c => !M[c.id]);
+  const doAno = CATALOGO.filter(c => c.ano === anoSel()), comConteudo = doAno.filter(c => M[c.id]), semConteudo = doAno.filter(c => !M[c.id]);
+  const anoInfo = IDX.anos.find(a => a.ano === anoSel()) || {};
   const tile = c => { const m = M[c.id], p = c.provas.find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [];
     return el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, disabled: !m, onclick: () => { location.hash = "#m-" + c.id; } },
       el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, nomeM(c)),
@@ -687,7 +711,7 @@ function vInicio() {
     el("span", null, el("b", null, nomeM(p.c)), " · " + T(...TIPO[p.tipo])), el("span", { class: "in" }, T("em ", "en ") + dias(falta(p.dt).d))));
   return el("div", { class: "inner" }, caixaImport(),
     el("section", { class: "hero" },
-      el("div", null, el("div", { class: "htop" }, el("div", null, el("div", { class: "kicker" }, T("Medicina · 2º ano · UCES", "Medicina · 2º año · UCES")),
+      el("div", null, el("div", { class: "htop" }, el("div", null, el("div", { class: "kicker" }, "Medicina · " + rotAno(anoAtual()) + " · UCES"),
         el("h1", { html: T("Seu plano de <em>hoje</em>", "Tu plan de <em>hoy</em>") })), emblema()), lista,
         el("div", { class: "row", style: "margin-top:16px" }, el("a", { class: "btn solid", href: "#cartoes" }, T("Revisar cartões", "Repasar tarjetas")),
           prox && M[prox.c.id] ? el("a", { class: "btn", href: "#m-" + prox.c.id }, T("Abrir ", "Abrir ") + nomeM(prox.c)) : null)),
@@ -700,8 +724,11 @@ function vInicio() {
           el("div", { class: "stat" }, el("b", null, String(nFlags())), el("span", null, T("marcados (!)", "marcadas (!)"))),
           el("div", { class: "stat" }, el("b", null, String(S.today.date === hoje() ? S.today.n : 0)), el("span", null, T("respondidos hoje", "respondidas hoy")))))),
     contaTopo(),
-    el("section", { class: "sec" }, el("h2", null, T("Matérias do 2º ano", "Materias de 2º año")),
-      el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(1, comConteudo.length), T("Ver matérias sem conteúdo", "Ver materias sin contenido")))),
+    el("section", { class: "sec" }, el("div", { class: "anoh" }, el("h2", null, T("Matérias do ", "Materias de ") + rotAno(anoSel())),
+        IDX.anos.length > 1 ? el("div", { class: "chips", role: "group", "aria-label": T("Ano do curso", "Año de la carrera") }, IDX.anos.map(a => el("button", { class: "chip", "aria-pressed": String(a.ano === anoSel()),
+          onclick: () => { anoVer = a.ano === anoAtual() ? null : a.ano; render(); const h = document.querySelector(".anoh"); if (h) h.scrollIntoView({ block: "nearest" }); } }, a.ano + "º" + (a.ano === anoAtual() ? T(" · atual", " · actual") : "")))) : null),
+      doAno.length ? el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(1, comConteudo.length), T("Ver matérias sem conteúdo", "Ver materias sin contenido")))
+        : el("p", { class: "muted" }, anoInfo.inicio > hoje() ? T("Este ano ainda não começou. As matérias entram aqui quando você estudar o primeiro tema.", "Este año todavía no empezó. Las materias entran aquí cuando estudies el primer tema.") : T("Nenhuma matéria deste ano no atlas ainda.", "Ninguna materia de este año en el atlas todavía."))),
     el("section", { class: "sec" }, el("h2", null, T("Calendário de provas", "Calendario de exámenes")),
       el("ul", { class: "tl" }, verMais(tl, 3, T("Ver todas as provas", "Ver todos los exámenes")))),
     PUBLICO ? el("section", { class: "sec" }, contaRodape()) : el("section", { class: "sec" }, caixaExport(),
@@ -864,7 +891,7 @@ function ligarNuvem() {
       if (u && !u.anon) { try { const d = await N.ler();
           /* a nuvem vence quando este aparelho está vazio, ou quando ela é mais nova */
           if (d && typeof d.json === "string") { const r = JSON.parse(d.json);
-            if (r && r.cards && (!temProgresso(S) || (temProgresso(r) && (d.ts || 0) > (S.ts || 0)))) { const lang = S.lang; S = Object.assign(S, r); S.lang = lang; S.plano = null; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} } }
+            if (r && r.cards && (!temProgresso(S) || (temProgresso(r) && (d.ts || 0) > (S.ts || 0)))) { const lang = S.lang; S = Object.assign(S, r); S.lang = lang; S.plano = null; migrarCartoes(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} } }
           CAP.nuvemPronta = true; CAP.nuvemErro = false; save(); } catch (e) { CAP.nuvemErro = true; } }
       presenca(); render(); renderOnline(); });
     N.onOnline(o => { CAP.online = o; renderOnline(); }); };
@@ -912,7 +939,8 @@ async function ligar() {
 document.getElementById("homeBtn").addEventListener("click", () => { location.hash = "#inicio"; });
 document.querySelectorAll(".lang").forEach(b => b.addEventListener("click", () => { S.lang = b.dataset.l; save(); carregar(); render(); renderOnline(); }));
 addEventListener("hashchange", () => { render(); scrollTo(0, 0); });
-render(); ligar();
+view.replaceChildren(el("p", { class: "muted", style: "padding:40px 0" }, T("Carregando…", "Cargando…")));
+carregarArquivos().then(() => { carregar(); render(); ligar(); });
 </script>
 
 </body>
