@@ -110,6 +110,7 @@ input.txt { font: inherit; color: var(--ink); background: var(--sunk); border: 1
 .mstat { margin: 0; font-size: .95rem; color: var(--muted) } .mstat b { color: var(--ink) }
 .btn.cta { justify-content: space-between; gap: 12px; width: 100%; max-width: 460px; text-align: left; margin-top: 2px } .btn.cta > span:first-child { display: flex; flex-direction: column; min-width: 0 } .btn.cta small { font: 700 .7rem var(--fd); letter-spacing: .08em; text-transform: uppercase; opacity: .85 } .btn.cta b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
 .sheet .sum .sum-in { margin-top: 0 }
+.hoje, .retomar { display: flex; flex-direction: column; gap: 10px } .hoje { margin-top: 14px; gap: 14px } .retomar .btn.cta { max-width: none; margin-top: 0 }
 .unit { padding-block: 26px 6px; display: flex; flex-direction: column; gap: 14px }
 .unit-h { display: flex; flex-direction: column; gap: 4px } .unit-h h2 { font-size: 1.3rem; font-weight: 800 }
 .note { border-left: 4px solid var(--am); background: var(--am-s); border-radius: 4px 14px 14px 4px; padding: 10px 14px; font-size: .92rem }
@@ -785,11 +786,10 @@ function vInicio() {
   return el("div", { class: "inner" }, avisoTopo ? el("p", { class: "note", style: "margin-top:16px", role: "status" }, avisoTopo) : null, avisosMudanca(), caixaImport(),
     el("section", { class: "hero" },
       el("div", null, el("div", { class: "htop" }, el("div", null, el("div", { class: "kicker" }, "Medicina · " + rotAno(anoAtual()) + " · UCES"),
-        el("h1", { html: T("Seu plano de <em>hoje</em>", "Tu plan de <em>hoy</em>") })), emblema()), lista,
-        el("div", { class: "row", style: "margin-top:16px" }, el("a", { class: "btn solid", href: "#cartoes" }, T("Revisar cartões", "Repasar tarjetas")),
-          prox && M[prox.c.id] ? el("a", { class: "btn", href: "#m-" + prox.c.id }, T("Abrir ", "Abrir ") + nomeM(prox.c)) : null)),
+        el("h1", { html: T("Seu <em>hoje</em>", "Tu <em>hoy</em>") })), emblema()),
+        el("div", { class: "hoje" }, cardProx(), retomar())),
       el("div", { style: "display:flex;flex-direction:column;gap:14px;min-width:0" },
-        cardProx(),
+        el("div", null, el("h2", { class: "ct" }, T("Plano de hoje", "Plan de hoy")), lista),
         el("div", { class: "stats" },
           el("div", { class: "stat" }, el("b", null, String(total)), el("span", null, T("cartões", "tarjetas"))),
           el("div", { class: "stat" }, el("b", null, String(nFlags())), el("span", null, T("marcados (!)", "marcadas (!)"))),
@@ -1093,10 +1093,16 @@ function dots() { return el("span", { class: "dots", "aria-hidden": "true", html
 /* topo da matéria: próxima prova em uma linha e o próximo passo de estudo */
 function statusProva(c) { const p = provasDe(c).filter(x => new Date(x[1]) > Date.now()).sort((x, y) => new Date(x[1]) - new Date(y[1]))[0]; if (!p) return null; const f = falta(p[1]);
   return el("p", { class: "mstat" }, el("b", null, T(...TIPO[p[0]])), " · " + fmt(p[1]) + " · " + (f.d > 0 ? T("faltam ", "faltan ") + dias(f.d) : T("faltam ", "faltan ") + f.h + " h")); }
-function continuar(mid, m) { const ts = temas(m), h = hoje(), rev = ts.find(t => { const r = proxRev(mid, t); return r && r.data <= h; });
+function continuar(mid, m, nome, leve) { const ts = temas(m), h = hoje(), rev = ts.find(t => { const r = proxRev(mid, t); return r && r.data <= h; });
   const novo = rev ? null : ts.find(t => !t.parcial && !dataEstudo(mid, t)), t = rev || novo; if (!t) return null;
   const rot = rev ? T("Revisar", "Repasar") : ts.some(x => dataEstudo(mid, x)) ? T("Continuar", "Continuar") : T("Começar", "Empezar");
-  return el("a", { class: "btn solid cta", href: "#t-" + mid + "-" + t.id }, el("span", null, el("small", null, rot), el("b", null, t.curto || t.nome)), el("span", { "aria-hidden": "true" }, "→")); }
+  return el("a", { class: "btn cta" + (leve ? "" : " solid"), href: "#t-" + mid + "-" + t.id }, el("span", null, el("small", null, (nome ? nome + " · " : "") + rot), el("b", null, t.curto || t.nome)), el("span", { "aria-hidden": "true" }, "→")); }
+/* tela inicial: voltar ao estudo, uma linha por matéria com conteúdo (revisão vencida primeiro, depois a prova mais próxima) */
+function retomar() { const h = hoje(), pv = c => { const p = provasDe(c).find(x => new Date(x[1]) > Date.now()); return p ? +new Date(p[1]) : Infinity; };
+  const ms = CATALOGO.filter(c => M[c.id] && !fora(c)).map(c => ({ c, rev: temas(M[c.id]).some(t => { const r = proxRev(c.id, t); return r && r.data <= h; }) })).sort((a, b) => b.rev - a.rev || pv(a.c) - pv(b.c));
+  const nf = nFlags();
+  return el("div", { class: "retomar" }, ms.map((x, i) => continuar(x.c.id, M[x.c.id], nomeM(x.c), i > 0) || el("a", { class: "btn cta" + (i ? "" : " solid"), href: "#m-" + x.c.id }, el("span", null, el("small", null, nomeM(x.c)), el("b", null, T("Abrir matéria", "Abrir materia"))), el("span", { "aria-hidden": "true" }, "→"))),
+    el("a", { class: "btn cta", href: "#cartoes" }, el("span", null, el("small", null, T("Cartões", "Tarjetas")), el("b", null, T("Revisar cartões", "Repasar tarjetas") + (nf ? " · " + nf + " (!)" : ""))), el("span", { "aria-hidden": "true" }, "→"))); }
 function avisoMudanca(c) { const mu = mudanca(c), sn = snap(c); return mu && sn.adiou !== mu.h ? el("section", { class: "card sum" }, bannerMudanca(c, mu, sn)) : null; }
 function fichaMateria(c) { abrirFolha(fecha => { const corpo = el("div", { class: "sum" }, sumario(c, M[c.id], fecha));
   corpo.addEventListener("click", e => { if (e.target.closest(".btn.cal")) fecha(); });
