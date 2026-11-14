@@ -281,10 +281,48 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
 .tw { position: relative; display: grid } .tw > .tile { width: 100% }
 .tmenu { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 800 1.1rem var(--fd); cursor: pointer; z-index: 1 }
 .badge.ok { background: var(--gr-s); color: var(--gr) } .estrela { color: var(--am) } .tile .tt { padding-right: 44px } .sheet .fav { font-weight: 700 !important }
-.fundo { position: fixed; inset: 0; z-index: 50; background: rgba(10, 10, 25, .45); display: flex; align-items: flex-end; justify-content: center }
-.sheet { --c: var(--vi); --cs: var(--vi-s); font-family: var(--fb); background: var(--surface); color: var(--ink); width: min(560px, 100%); max-height: 88vh; overflow: auto; border-radius: 22px 22px 0 0; padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 14px; box-shadow: var(--sh) }
-.sheet h2 { font-size: 1.25rem; font-weight: 800 } .sheet fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px } .sheet .chk input { accent-color: var(--vi) }
-@media (min-width: 761px) { .fundo { align-items: center } .sheet { border-radius: 22px } }
+.fundo { position: fixed; inset: 0; z-index: 50; background: rgba(10, 10, 25, .5); display: flex; align-items: flex-end; justify-content: center }
+.sheet { --c: var(--vi); --cs: var(--vi-s); font-family: var(--fb); background: var(--bg); color: var(--ink); width: min(600px, 100%); max-height: 92vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; box-shadow: var(--sh); overflow: hidden }
+.sh-head { padding: 8px 20px 14px; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px }
+.sh-grab { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 4px }
+.sh-head h2 { font: 800 1.3rem/1.2 var(--fd); margin: 0 }
+.sh-sub { display: flex; gap: 6px; flex-wrap: wrap } .shchip { font: 600 .76rem/1 var(--fb); padding: 6px 10px; border-radius: 999px; background: var(--cs); color: var(--c) }
+.sh-body { overflow: auto; padding: 18px 20px 12px; display: flex; flex-direction: column; gap: 22px; flex: 1 1 auto; overscroll-behavior: contain }
+.sh-foot { display: flex; gap: 10px; flex-wrap: wrap; padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 1px solid var(--line) }
+.sh-foot .btn { flex: 1 1 140px; justify-content: center; min-height: 48px } .sh-foot .btn.ghost { flex-basis: 100%; min-height: 40px }
+.sh-body > * { flex-shrink: 0 } .sec { display: flex; flex-direction: column; gap: 8px } .sec > .lb { font: 700 .72rem var(--fb); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); padding: 0 4px }
+.grp { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column } .grp > * + * { border-top: 1px solid var(--line) }
+.opt { display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 8px 16px; cursor: pointer; font: 500 1rem/1.3 var(--fb); color: var(--ink) }
+.opt .t { flex: 1; min-width: 0 } .opt .t small { display: block; font: 500 .8rem var(--fb); color: var(--muted); margin-top: 2px }
+.opt input[type=radio] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--muted); display: grid; place-content: center; flex: 0 0 auto; margin: 0; order: -1; background: transparent; cursor: pointer }
+.opt input[type=radio]::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--c); transform: scale(0); transition: transform .12s }
+.opt input[type=radio]:checked { border-color: var(--c) } .opt input[type=radio]:checked::after { transform: scale(1) } .opt:has(input[type=radio]:checked) { background: var(--cs) }
+.sw { appearance: none; -webkit-appearance: none; width: 50px; height: 30px; border-radius: 30px; background: var(--line); position: relative; flex: 0 0 auto; cursor: pointer; margin: 0; transition: background .15s }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .15s }
+.sw:checked { background: var(--c) } .sw:checked::after { transform: translateX(20px) }
+.fld { display: flex; flex-direction: column; gap: 3px; padding: 10px 16px; min-height: 58px; justify-content: center; cursor: text } .fld > span { font: 600 .76rem var(--fb); color: var(--muted) } .fld:focus-within { background: var(--cs) }
+.fld input, .fld select, .fld textarea { font: 500 1rem/1.35 var(--fb); color: var(--ink); background: transparent; border: 0; padding: 0; margin: 0; width: 100%; min-width: 0; outline: none; min-height: 26px; resize: none; box-shadow: none }
+.fld2 { display: grid; grid-template-columns: 1fr 1fr } .fld2 > .fld + .fld { border-left: 1px solid var(--line) }
+.sheet select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238a8fa8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 2px center; padding-right: 22px !important; cursor: pointer }
+.rowc { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px } .rowc .c2 { grid-column: 1 / -1 } .rowc.dois { grid-template-columns: 1fr }
+.cx-l { display: flex; flex-direction: column; gap: 4px; font: 600 .76rem var(--fb); color: var(--muted); min-width: 0 }
+.cx { font: 500 1rem var(--fb); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; min-height: 46px; width: 100%; min-width: 0; box-shadow: none }
+.cx:focus { outline: 2px solid var(--c); outline-offset: -1px; border-color: transparent }
+.rm { grid-column: 1 / -1; justify-self: end; font-size: .84rem; color: var(--rd) }
+.add { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; width: 100%; border: 0; background: transparent; color: var(--c); font: 700 .95rem var(--fb); cursor: pointer }
+.nota { padding: 0 4px; margin: 0 } .erro { color: var(--rd); font-weight: 600; margin: 0 4px } .erro:empty { display: none }
+.dots { display: inline-flex } .tmenu { display: grid; place-items: center; padding: 0 } .dotsb { min-width: 44px; min-height: 44px; display: grid; place-items: center; padding: 0 }
+.sum > details > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center } .sum > details > summary::-webkit-details-marker { display: none }
+.sum > details > summary::after { content: "▾"; color: var(--muted) } .sum > details[open] > summary::after { content: "▴" }
+.sum-in { display: flex; flex-direction: column; gap: 14px; margin-top: 12px }
+.sum dl { display: grid; grid-template-columns: 5.6em 1fr; gap: 9px 12px; margin: 0 } .sum dt { font: 600 .8rem var(--fb); color: var(--muted); padding-top: 2px } .sum dd { margin: 0; font-weight: 600; min-width: 0; overflow-wrap: anywhere }
+.hl { display: flex; flex-direction: column; gap: 3px; font-weight: 500 } .hl b { font-weight: 700 } .sum .row .btn { min-height: 40px; padding: 8px 14px; font-size: .88rem } .sum dd { font-size: .95rem }
+.idx-u + .idx-u { margin-top: 12px } .idx-h { font-weight: 700; color: var(--ink); text-decoration: none } .idx ol { margin: 6px 0 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 3px } .idx a { color: var(--c, var(--vi)) }
+.mudou { border: 1px solid var(--am); background: var(--am-s); color: var(--ink); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px } .mudou ul { margin: 0; padding-left: 1.2em }
+.btn.cal.mud { border-color: var(--am); color: var(--am); background: var(--am-s) }
+.cal-conf { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 14px; background: var(--cs) } .cal-conf[hidden] { display: none }
+.sem { display: flex; flex-direction: column; gap: 4px } .sem-d { display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-bottom: 1px solid var(--line) } .sem-l { display: flex; gap: 12px } .sem-l span:first-child { min-width: 6.4em; font-weight: 700 }
+@media (min-width: 761px) { .fundo { align-items: center } .sheet { border-radius: 24px } }
 /* agenda e perfil */
 [hidden] { display: none !important }
 a.exam { text-decoration: none } a.exam .ir { font-weight: 700; font-size: .85rem; opacity: .9; margin-top: 4px }
@@ -329,6 +367,7 @@ a.exam { text-decoration: none } a.exam .ir { font-weight: 700; font-size: .85re
 </div>
 
 <script src="materias/indice.js"></script>
+<script src="materias/dados.js"></script>
 <script>
 /* ===== catálogo do 2º ano: uma entrada por matéria. O conteúdo de cada uma vem de um arquivo em materias/ ===== */
 /* PUBLICO: o build da versão para colegas troca para true. Some: joinha, comentários, quem está online, ditado e tudo o que é pessoal. */
@@ -575,7 +614,7 @@ function cs(mid, i) { const k = mid + ":" + M[mid].ck[i]; return S.cards[k] || (
 /* data de estudo: na versão privada é a do tema; na pública é o dia em que cada aluno abriu o tema pela primeira vez */
 function dataEstudo(mid, t) { return PUBLICO ? (S.vistos || {})[mid + ":" + t.id] : t.estudado; }
 function proxRev(mid, t) { const d = dataEstudo(mid, t); if (!d) return null; const k = S.rev[mid + ":" + t.id] || 0; return k >= 3 ? null : { passo: k, data: addDays(d, [1, 3, 7][k]) }; }
-function provas() { return CATALOGO.filter(c => !fora(c)).flatMap(c => (c.provas || []).map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
+function provas() { return CATALOGO.filter(c => !fora(c)).flatMap(c => provasDe(c).map(p => ({ c, tipo: p[0], dt: p[1] }))).filter(p => new Date(p.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt)); }
 function nFlags() { return Object.keys(M).reduce((a, mid) => a + M[mid].cartoes.filter((_, i) => cs(mid, i).flag).length, 0); }
 function falar(txt) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt.replace(/\(!\)/g, "")); u.lang = S.lang === "es" ? "es-AR" : "pt-BR"; u.rate = .95; speechSynthesis.speak(u); } catch (e) {} }
 
@@ -731,16 +770,16 @@ function vInicio() {
     : el("p", { class: "muted", style: "margin-top:12px" }, T("Nada vence hoje. As revisões aparecem 1, 3 e 7 dias depois de cada tema estudado.", "Nada vence hoy. Los repasos aparecen 1, 3 y 7 días después de cada tema estudiado."));
   const doAno = CATALOGO.filter(c => anoDe(c) === anoSel() && (editGrade || !oculta(c))), favs = doAno.filter(fav), comConteudo = doAno.filter(c => !fav(c) && M[c.id]), semConteudo = doAno.filter(c => !fav(c) && !M[c.id]);
   const anoInfo = IDX.anos.find(a => a.ano === anoSel()) || {};
-  const tile = c => { const m = M[c.id], p = (c.provas || []).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [], g = (S.grade || {})[c.id] || {};
+  const tile = c => { const m = M[c.id], p = provasDe(c).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [], g = (S.grade || {})[c.id] || {};
     const sit = g.status === "aprovada" ? el("span", { class: "badge ok" }, T("Aprovada", "Aprobada") + (g.final != null ? " · " + g.final : "")) : g.status === "nao_sei" ? el("span", { class: "badge part" }, T("A decidir", "A decidir"))
-      : m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("A começar", "Por empezar"));
-    return el("div", { class: "tw" }, el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, disabled: !m, onclick: () => { location.hash = "#m-" + c.id; } },
+      : m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("Sumário", "Sumario"));
+    return el("div", { class: "tw" }, el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, onclick: () => { location.hash = "#m-" + c.id; } },
       el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, g.fav ? el("span", { class: "estrela", "aria-label": T("Favorita", "Favorita") }, "★ ") : null, nomeM(c)),
       g.prof ? el("span", { class: "ts" }, T("Prof. ", "Prof. ") + g.prof) : null,
       el("span", { class: "ts" }, m ? ts.length + T(" temas estudados · ", " temas estudiados · ") + m.cartoes.length + T(" cartões", " tarjetas") : T("Sem conteúdo ainda. Entra quando você estudar o primeiro tema.", "Sin contenido todavía. Entra cuando estudies el primer tema.")), sit),
-      el("button", { class: "tmenu", "aria-label": T("Opções de ", "Opciones de ") + nomeM(c), onclick: () => menuMateria(c) }, "⋮")); };
+      el("button", { class: "tmenu", "aria-label": T("Opções de ", "Opciones de ") + nomeM(c), onclick: () => menuMateria(c) }, dots())); };
   const tl = comps().map(linhaComp);
-  return el("div", { class: "inner" }, avisoTopo ? el("p", { class: "note", style: "margin-top:16px", role: "status" }, avisoTopo) : null, caixaImport(),
+  return el("div", { class: "inner" }, avisoTopo ? el("p", { class: "note", style: "margin-top:16px", role: "status" }, avisoTopo) : null, avisosMudanca(), caixaImport(),
     el("section", { class: "hero" },
       el("div", null, el("div", { class: "htop" }, el("div", null, el("div", { class: "kicker" }, "Medicina · " + rotAno(anoAtual()) + " · UCES"),
         el("h1", { html: T("Seu plano de <em>hoje</em>", "Tu plan de <em>hoy</em>") })), emblema()), lista,
@@ -782,7 +821,7 @@ function vInicio() {
 /* aba inicial da matéria: a que está no endereço; senão a unidade estudada por último */
 function unidadeAtual(m, mid) { let best = 0, d = ""; m.unidades.forEach((u, i) => u.temas.forEach(t => { const e = dataEstudo(mid, t) || ""; if (e >= d) { d = e; best = i; } })); return best; }
 function vMateria(mid, abaIni) {
-  const m = M[mid], c = CATALOGO.find(x => x.id === mid); if (!m) return vInicio();
+  const m = M[mid], c = CATALOGO.find(x => x.id === mid); if (!c) return vInicio(); if (!m) return vMateriaVazia(c);
   const ini = abaIni != null && m.unidades[+abaIni] ? String(+abaIni) : String(unidadeAtual(m, mid));
   const lista = m.unidades.map((u, ui) => { const feitos = u.temas.length, pend = (u.pendentes || []).length, tot = feitos + pend;
     return { id: String(ui), rot: u.curto || u.nome, montar: () => {
@@ -799,9 +838,10 @@ function vMateria(mid, abaIni) {
         u.mapa ? el("details", { class: "mini-sec" }, el("summary", null, T("Mapa mental da unidade", "Mapa mental de la unidad")), el("div", { class: "in" }, mapa(u.mapa))) : null]; } }; });
   return el("div", { class: "inner", "data-m": mid },
     el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
-      el("span", { class: "kicker" }, (c.provas || []).filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]) + " " + fmt(p[1])).join(" · ")),
-      el("div", { class: "htop" }, el("h1", null, m.nome), el("button", { class: "pill", style: "min-width:44px;font-weight:800", "aria-label": T("Opções da matéria", "Opciones de la materia"), onclick: () => menuMateria(c) }, "⋮")),
-      infoMat(c), el("p", { class: "muted" }, m.sub)),
+      el("span", { class: "kicker" }, provasDe(c).filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]) + " " + fmt(p[1])).join(" · ")),
+      el("div", { class: "htop" }, el("h1", null, m.nome), el("button", { class: "pill dotsb", "aria-label": T("Opções da matéria", "Opciones de la materia"), onclick: () => menuMateria(c) }, dots())),
+      el("p", { class: "muted" }, m.sub)),
+    sumario(c, m),
     abas("materia", lista, ini, id => marcaAba("m-" + mid, id)));
 }
 function vTema(mid, tid, abaIni) {
@@ -890,7 +930,7 @@ function vCartoes() {
 function render() {
   const h = location.hash.slice(1), p = h.split("-"); let v, nav = "inicio";
   if (PUBLICO && (!S.aceite || verPriv)) v = vPriv();
-  else if (p[0] === "m" && M[p[1]]) { v = vMateria(p[1], p[2]); nav = "m"; } else if (p[0] === "t" && tema(p[1], p[2])) { v = vTema(p[1], p[2], p[3]); nav = "m"; }
+  else if (p[0] === "m" && (M[p[1]] || CATALOGO.some(x => x.id === p[1]))) { v = vMateria(p[1], p[2]); nav = "m"; } else if (p[0] === "t" && tema(p[1], p[2])) { v = vTema(p[1], p[2], p[3]); nav = "m"; }
   else if (h === "cartoes") { v = vCartoes(); nav = "cartoes"; } else if (h === "agenda") v = vAgenda(); else if (h === "perfil") { v = vPerfil(); nav = "perfil"; } else v = vInicio();
   view.replaceChildren(v); document.documentElement.style.setProperty("--barh", barh() + "px");
   document.documentElement.lang = S.lang === "es" ? "es" : "pt-BR";
@@ -923,46 +963,242 @@ async function renderOnline() {
         el("span", null, nm + (p.isMe ? T(" (você)", " (tú)") : "")), onde && !p.isMe ? el("small", null, T("em ", "en ") + ondeTxt(onde)) : null); return node; }),
     list.length < 2 ? el("span", { class: "sm muted" }, T("Só você por enquanto.", "Solo tú por ahora.")) : null].flat().filter(Boolean));
 }
-/* ===== opções de cada matéria (⋯): situação, ano, professor, comissão, horário e nota final ===== */
-const SIT = { cursando: ["Estou cursando", "La estoy cursando"], outro_ano: ["Vou cursar em outro ano", "La voy a cursar otro año"], nao_sei: ["Ainda não sei (fica em Extra)", "Todavía no sé (queda en Extra)"], aprovada: ["Já fui aprovada(o)", "Ya la aprobé"], oculta: ["Não mostrar", "No mostrar"] };
-function infoMat(c) { const g = (S.grade || {})[c.id] || {}, x = [g.prof ? T("Prof. ", "Prof. ") + g.prof : null, g.comissao ? T("Comissão ", "Comisión ") + g.comissao : null, g.horario || null].filter(Boolean);
-  return x.length ? el("p", { class: "sm", style: "font-weight:600" }, x.join(" · ")) : null; }
+/* ===== dados da matéria: o oficial (materias/dados.js, mantido pelos arquitetos) + o que cada pessoa ajusta ===== */
+/* Regra de ouro: o que chega do oficial NÃO muda sozinho para ninguém. Cada aparelho guarda uma cópia (S.dados[id]) e, quando o oficial muda,
+   a pessoa é avisada e escolhe "Atualizar" ou "Agora não". O que a pessoa edita no ⋮ fica em S.grade[id] e vale por cima da cópia. */
+const DAD = () => (window.DADOS && window.DADOS.materias) || {};
+const DIAS = { pt: ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"], es: ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"] };
+const diaNome = n => DIAS[S.lang === "es" ? "es" : "pt"][n];
+const TAULA = { aula: ["Aula", "Clase"], pratica: ["Prática", "Práctica"], seminario: ["Seminário", "Seminario"], outro: ["Outro", "Otro"] };
+const PER = { semestral: ["Semestral", "Semestral"], anual: ["Anual", "Anual"], outro: ["Outro período", "Otro período"] };
+function hs(o) { const s = JSON.stringify(o); let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
+const normH = h => ({ id: h.id, dia: +h.dia, ini: h.ini || "", fim: h.fim || "", sala: h.sala || "", tipo: h.tipo || "aula" });
+const normHs = l => (l || []).map(normH);
+function oficial(c) { const d = DAD()[c.id] || {};
+  return { prof: d.prof || "", turma: d.turma || "", regra: d.regra || "", obs: d.obs || "", material: d.material || "", periodo: d.periodo ? { tipo: d.periodo.tipo || "semestral", ini: d.periodo.ini || "", fim: d.periodo.fim || "" } : null,
+    horarios: normHs(d.horarios), provas: (c.provas || []).map(p => [p[0], p[1]]), v: d.v || "" }; }
+const hOf = o => hs(Object.assign({}, o, { v: 0 }));
+let dadosSujo = false;
+function salvaLogo() { if (dadosSujo) return; dadosSujo = true; setTimeout(() => { dadosSujo = false; save(); }, 60); }
+function snap(c) { S.dados = S.dados || {}; let s = S.dados[c.id];
+  if (!s) { const o = oficial(c); s = S.dados[c.id] = { h: hOf(o), v: o }; salvaLogo(); }
+  return s; }
+const temPessoal = c => { const g = (S.grade || {})[c.id] || {}; return !!(g.prof || g.obs || g.periodo || Array.isArray(g.horarios) || Array.isArray(g.provas)); };
+const semDados = x => !(x.prof || x.horarios.length || x.periodo || x.regra || x.obs || x.material);
+/* o que vale para esta pessoa: cópia oficial + ajustes pessoais */
+function efet(c) { const s = snap(c).v, g = (S.grade || {})[c.id] || {};
+  return { prof: g.prof || s.prof, comissao: g.comissao || "", turma: s.turma, regra: s.regra, obs: g.obs || s.obs, material: s.material,
+    periodo: g.periodo || s.periodo, horarios: Array.isArray(g.horarios) ? normHs(g.horarios) : s.horarios,
+    provas: Array.isArray(g.provas) ? g.provas : s.provas, textoHorario: g.horario || "", v: s.v }; }
+const provasDe = c => efet(c).provas;
+/* há atualização oficial esperando aceite? */
+function mudanca(c) { const s = snap(c), o = oficial(c), h = hOf(o); if (h === s.h) return null;
+  if (semDados(s.v) && !temPessoal(c)) { S.dados[c.id] = { h, v: o }; salvaLogo(); return null; }
+  return { h, o, linhas: difLinhas(s.v, o) }; }
+const horTxt = l => l.map(h => diaNome(h.dia).slice(0, 3) + " " + h.ini + "–" + h.fim + (h.sala ? " (" + h.sala + ")" : "")).join(", ");
+function difLinhas(a, b) { const L = [];
+  [["prof", T("Professor", "Profesor")], ["turma", T("Turma", "Turno")], ["regra", T("Regra de aprovação", "Regla de aprobación")], ["obs", T("Observações", "Observaciones")], ["material", T("Material", "Material")]]
+    .forEach(([k, r]) => { if ((a[k] || "") !== (b[k] || "")) L.push(r + ": " + (a[k] || "—") + " → " + (b[k] || "—")); });
+  if (hs(a.horarios) !== hs(b.horarios)) L.push(T("Horários: ", "Horarios: ") + (horTxt(b.horarios) || T("nenhum", "ninguno")));
+  if (hs(a.periodo) !== hs(b.periodo)) L.push(T("Período: ", "Período: ") + (b.periodo ? fmtD(b.periodo.ini) + " a " + fmtD(b.periodo.fim) : "—"));
+  if (hs(a.provas) !== hs(b.provas)) L.push(T("Datas de prova: ", "Fechas de examen: ") + (b.provas.map(p => T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1])).join(", ") || "—"));
+  return L; }
+function aceitarMudanca(c, mu) { const s = snap(c).v, o = mu.o, g = (S.grade || {})[c.id];
+  if (g) { if (hs(s.horarios) !== hs(o.horarios)) g.horarios = null; if (hs(s.periodo) !== hs(o.periodo)) g.periodo = null; if (hs(s.provas) !== hs(o.provas)) g.provas = null;
+    if ((s.prof || "") !== (o.prof || "")) g.prof = ""; if ((s.obs || "") !== (o.obs || "")) g.obs = ""; }
+  S.dados[c.id] = { h: mu.h, v: o }; save(); render(); }
+function adiarMudanca(c, mu) { snap(c).adiou = mu.h; save(); render(); }
+function avisosMudanca() {
+  const l = CATALOGO.filter(c => !oculta(c) && anoDe(c) === anoAtual()).filter(c => { const m = mudanca(c); return m && snap(c).adiou !== m.h; });
+  if (!l.length) return null;
+  return el("div", { class: "mudou", role: "status", style: "margin-top:16px" }, el("b", null, T("Chegou atualização nos dados de ", "Llegó una actualización en los datos de ") + l.length + (l.length > 1 ? T(" matérias", " materias") : T(" matéria", " materia"))),
+    el("div", { class: "row" }, l.map(c => el("a", { class: "pill", href: "#m-" + c.id }, nomeM(c))))); }
+
+/* ===== calendário: .ics (iPhone, Android, Outlook, Google) e link do Google Agenda. Nada sai do aparelho. ===== */
+const TCAL = "@atlas-medicina";
+const p2 = n => String(n).padStart(2, "0");
+const lc = d => d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + "T" + p2(d.getHours()) + ":" + p2(d.getMinutes());
+const maisMin = (s, n) => { const d = new Date(s); d.setMinutes(d.getMinutes() + n); return lc(d); };
+function primeiraData(ini, dia) { const d = new Date(ini + "T12:00:00"); d.setDate(d.getDate() + ((dia - d.getDay() + 7) % 7)); return iso(d); }
+function fecItem(o) { o.h = hs([o.titulo, o.local || "", o.i, o.f || "", o.rep || "", o.todo ? 1 : 0, o.desc || ""]); return o; }
+function itemHorario(c, h, e) { const p = e.periodo, ok = !!(p && p.ini && p.fim && h.ini && h.fim);
+  const it = { uid: "h-" + c.id + "-" + h.id + TCAL, titulo: nomeM(c) + (h.tipo && h.tipo !== "aula" ? " · " + T(...TAULA[h.tipo]) : ""), local: h.sala || "",
+    desc: T("Aula", "Clase") + " · " + nomeM(c) + (e.prof ? " · " + e.prof : ""), tipo: "aula", semPeriodo: !ok };
+  if (ok) { const d0 = primeiraData(p.ini, +h.dia); it.i = d0 + "T" + h.ini; it.f = d0 + "T" + h.fim; it.rep = p.fim.replace(/-/g, ""); }
+  return fecItem(it); }
+function itensProva(c, e) { const n = {}; return e.provas.map(p => { n[p[0]] = (n[p[0]] || 0) + 1; const todo = /T00:00/.test(p[1]), i = p[1].slice(0, 16);
+  return fecItem({ uid: "pv-" + c.id + "-" + p[0] + n[p[0]] + TCAL, titulo: T(...TIPO[p[0]]).split(" (")[0] + " · " + nomeM(c), i, f: todo ? i : maisMin(i, 120), todo, alarmes: true, tipo: "prova", desc: nomeM(c) }); }); }
+function itemPessoal(a) { const c = CATALOGO.find(x => x.id === a.mid), todo = /T00:00/.test(a.dt), i = a.dt.slice(0, 16);
+  return fecItem({ uid: "ag-" + a.id + TCAL, titulo: tipoTxt(a.tipo) + (a.titulo ? " · " + a.titulo : c ? " · " + nomeM(c) : ""), i, f: todo ? i : maisMin(i, 60), todo, alarmes: true, tipo: "pessoal", desc: c ? nomeM(c) : "" }); }
+const calSt = it => { const r = (S.cal || {})[it.uid]; return !r ? "novo" : r.h === it.h ? "ok" : "mudou"; };
+const dtc = s => s.replace(/-/g, "").replace(":", "") + "00";
+function dobra(l) { const out = []; let cur = "", n = 0;
+  for (const ch of l) { const b = unescape(encodeURIComponent(ch)).length; if (n + b > (out.length ? 74 : 75)) { out.push(cur); cur = " " + ch; n = 1 + b; } else { cur += ch; n += b; } }
+  out.push(cur); return out.join("\r\n"); }
+const icsEsc = s => String(s || "").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+function ics(itens) { const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z/, "Z"), seq = Math.floor(Date.now() / 60000);
+  const L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Atlas de Medicina//PT-BR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+  itens.forEach(it => { L.push("BEGIN:VEVENT", "UID:" + it.uid, "DTSTAMP:" + stamp, "SEQUENCE:" + seq);
+    if (it.todo) L.push("DTSTART;VALUE=DATE:" + it.i.slice(0, 10).replace(/-/g, ""), "DTEND;VALUE=DATE:" + addDays(it.i.slice(0, 10), 1).replace(/-/g, ""));
+    else L.push("DTSTART:" + dtc(it.i), "DTEND:" + dtc(it.f));
+    if (it.rep) L.push("RRULE:FREQ=WEEKLY;UNTIL=" + it.rep + "T235959");
+    L.push("SUMMARY:" + icsEsc(it.titulo)); if (it.local) L.push("LOCATION:" + icsEsc(it.local)); if (it.desc) L.push("DESCRIPTION:" + icsEsc(it.desc));
+    if (it.alarmes) ["-P1D", "-PT1H"].forEach(t => L.push("BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + icsEsc(it.titulo), "TRIGGER:" + t, "END:VALARM"));
+    L.push("END:VEVENT"); });
+  L.push("END:VCALENDAR"); return L.map(dobra).join("\r\n") + "\r\n"; }
+function urlGoogle(it) { const q = encodeURIComponent;
+  const d = it.todo ? it.i.slice(0, 10).replace(/-/g, "") + "/" + addDays(it.i.slice(0, 10), 1).replace(/-/g, "") : dtc(it.i) + "/" + dtc(it.f);
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + q(it.titulo) + "&dates=" + d + "&details=" + q(it.desc || "") + (it.local ? "&location=" + q(it.local) : "")
+    + (it.rep ? "&recur=" + q("RRULE:FREQ=WEEKLY;UNTIL=" + it.rep + "T235959Z") : ""); }
+function baixarIcs(itens) { const url = URL.createObjectURL(new Blob([ics(itens)], { type: "text/calendar;charset=utf-8" }));
+  const a = el("a", { href: url, download: itens.length > 1 ? "atlas-medicina.ics" : "atlas-" + itens[0].uid.split("@")[0].slice(0, 40) + ".ics" }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000); }
+/* botão único: adicionar / ✓ no calendário / mudou, atualizar */
+function botaoCal(itens, rot) { itens = itens.filter(Boolean); const val = itens.filter(i => !i.semPeriodo);
+  if (!val.length) return itens.length ? el("span", { class: "sm muted" }, T("Falta o período da matéria (no ⋮) para levar ao calendário.", "Falta el período de la materia (en ⋮) para llevar al calendario.")) : null;
+  const st = val.map(calSt), mud = st.filter(s => s === "mudou").length, nov = st.filter(s => s === "novo").length, ok = !mud && !nov;
+  const txt = ok ? "✓ " + T("No calendário", "En el calendario") : mud ? T("Mudou: atualizar no calendário", "Cambió: actualizar en el calendario")
+    : (rot || T("Adicionar ao calendário", "Agregar al calendario")) + (val.length > 1 && nov < val.length ? " (" + nov + ")" : "");
+  return el("button", { class: "btn cal" + (ok ? " ok" : mud ? " mud" : ""), "data-cal": ok ? "ok" : mud ? "mudou" : "novo", onclick: () => dialogoCal(val) }, txt); }
+/* folha (bottom sheet) reutilizável */
+function abrirFolha(montar) { const fecha = () => { fundo.remove(); document.removeEventListener("keydown", tecla); }, tecla = e => { if (e.key === "Escape") fecha(); };
+  const fundo = el("div", { class: "fundo", onclick: e => { if (e.target === fundo) fecha(); } }, montar(fecha)); document.body.append(fundo); document.addEventListener("keydown", tecla);
+  const sh = fundo.firstChild; sh.setAttribute("tabindex", "-1"); sh.focus({ preventScroll: true }); return fecha; }
+const folha = (titulo, chips, corpo, rodape) => el("div", { class: "sheet", role: "dialog", "aria-modal": "true", "aria-label": titulo },
+  el("div", { class: "sh-head" }, el("div", { class: "sh-grab" }), el("h2", null, titulo), chips && chips.length ? el("div", { class: "sh-sub" }, chips.map(x => el("span", { class: "shchip" }, x))) : null),
+  el("div", { class: "sh-body" }, corpo), el("div", { class: "sh-foot" }, rodape));
+function dialogoCal(itens) {
+  const mud = itens.some(i => calSt(i) === "mudou"), todos = itens.every(i => calSt(i) === "ok");
+  abrirFolha(fecha => {
+    const marcar = () => { S.cal = S.cal || {}; itens.forEach(i => { S.cal[i.uid] = { h: i.h, ts: hoje() }; }); save(); fecha(); render(); };
+    const conf = el("div", { class: "cal-conf", hidden: true, role: "group" }, el("b", null, T("Salvou no calendário?", "¿Lo guardaste en el calendario?")),
+      el("div", { class: "row" }, el("button", { class: "btn solid", onclick: marcar }, T("Sim, salvei", "Sí, lo guardé")), el("button", { class: "btn", onclick: fecha }, T("Não, depois", "No, después"))));
+    const depois = () => { conf.hidden = false; conf.scrollIntoView({ block: "nearest" }); };
+    const lista = el("div", { class: "grp" }, itens.slice(0, 6).map(i => { const s = calSt(i);
+      return el("div", { class: "fld" }, el("span", null, i.uid.startsWith("h-") ? T("Toda ", "Todas ") + diaNome(new Date(i.i.slice(0, 10) + "T12:00:00").getDay()) + ", " + i.i.slice(11) + "–" + i.f.slice(11) : fmt(i.i) + (i.todo ? "" : ", " + i.i.slice(11))),
+        el("b", null, i.titulo + (s === "ok" ? "  ✓" : s === "mudou" ? "  · " + T("mudou", "cambió") : ""))); }), itens.length > 6 ? el("div", { class: "fld" }, el("span", null, "+ " + (itens.length - 6) + T(" eventos", " eventos"))) : null);
+    const corpo = [el("p", { class: "sm muted" }, mud ? T("O compromisso mudou desde que você levou ao calendário. No arquivo (.ics) o evento antigo é substituído. No link do Google Agenda ele cria um novo, e aí você apaga o antigo.",
+          "El compromiso cambió desde que lo llevaste al calendario. Con el archivo (.ics) el evento anterior se reemplaza. Con el enlace de Google Calendar se crea uno nuevo y tenés que borrar el anterior.")
+        : T("Escolha como levar. O Atlas não vê o seu calendário: ele só marca ✓ depois que você confirmar.", "Elegí cómo llevarlo. Atlas no ve tu calendario: solo marca ✓ cuando lo confirmes.")),
+      lista, conf];
+    const rod = [el("button", { class: "btn solid", onclick: () => { baixarIcs(itens); depois(); } }, T("Baixar arquivo (.ics)", "Descargar archivo (.ics)")),
+      itens.length === 1 ? el("button", { class: "btn", onclick: () => { window.open(urlGoogle(itens[0]), "_blank", "noopener"); depois(); } }, T("Abrir no Google Agenda", "Abrir en Google Calendar")) : null,
+      el("button", { class: "btn ghost", onclick: marcar }, T("Já está no meu calendário", "Ya está en mi calendario")),
+      todos ? el("button", { class: "btn ghost", onclick: () => { itens.forEach(i => { delete (S.cal || {})[i.uid]; }); save(); fecha(); render(); } }, T("Tirar a marca ✓", "Quitar la marca ✓")) : null];
+    return folha(itens.length > 1 ? T("Levar ao calendário", "Llevar al calendario") + " (" + itens.length + ")" : T("Levar ao calendário", "Llevar al calendario"), null, corpo, rod); }); }
+
+/* ===== sumário no topo de cada matéria ===== */
+function dots() { return el("span", { class: "dots", "aria-hidden": "true", html: '<svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>' }); }
+function sumario(c, m) {
+  const e = efet(c), mu = mudanca(c), sn = snap(c), g = (S.grade || {})[c.id] || {};
+  const hors = e.horarios.slice().sort((a, b) => ((a.dia + 6) % 7) - ((b.dia + 6) % 7) || a.ini.localeCompare(b.ini)), hit = hors.map(h => itemHorario(c, h, e)), pit = itensProva(c, e);
+  const vaz = el("span", { class: "muted" }, "—");
+  const lin = (r, v) => [el("dt", null, r), el("dd", null, v || vaz)];
+  const banner = mu && sn.adiou !== mu.h ? el("div", { class: "mudou", role: "status" }, el("b", null, T("Chegou atualização dos dados desta matéria", "Llegó una actualización de los datos de esta materia")),
+      el("ul", null, mu.linhas.map(x => el("li", null, x))), el("p", { class: "sm muted" }, T("Se você aceitar, os seus ajustes nesses itens são trocados pelos novos. Nada muda enquanto você não aceitar.", "Si aceptás, tus ajustes en esos ítems se reemplazan por los nuevos. Nada cambia mientras no aceptes.")),
+      Object.keys(S.cal || {}).some(u => u.startsWith("h-" + c.id + "-")) && hs(sn.v.horarios) !== hs(mu.o.horarios) ? el("p", { class: "sm muted" }, T("O Atlas não apaga eventos do seu calendário: se um horário saiu da lista, apague-o lá. Os que só mudaram de hora ou sala são atualizados pelo arquivo novo.", "Atlas no borra eventos de tu calendario: si un horario salió de la lista, borralo allá. Los que solo cambiaron de hora o aula se actualizan con el archivo nuevo.")) : null,
+      el("div", { class: "row" }, el("button", { class: "btn solid", onclick: () => aceitarMudanca(c, mu) }, T("Atualizar", "Actualizar")), el("button", { class: "btn", onclick: () => adiarMudanca(c, mu) }, T("Agora não", "Ahora no"))))
+    : mu ? el("p", { class: "sm" }, T("Há uma atualização que você adiou. ", "Hay una actualización que pospusiste. "), el("button", { class: "linkb", onclick: () => { delete sn.adiou; save(); render(); } }, T("Ver de novo", "Ver de nuevo"))) : null;
+  const per = e.periodo ? (PER[e.periodo.tipo] ? T(...PER[e.periodo.tipo]) + " · " : "") + fmtD(e.periodo.ini).slice(0, 5) + " " + T("a", "a") + " " + fmtD(e.periodo.fim) : null;
+  const horEl = hors.length ? el("div", { class: "hl" }, hors.map(h => el("div", null, el("b", null, diaNome(h.dia)), " " + h.ini + "–" + h.fim + (h.sala ? " · " + h.sala : "") + (h.tipo !== "aula" ? " · " + T(...TAULA[h.tipo]) : "")))) : e.textoHorario ? e.textoHorario : null;
+  const provEl = e.provas.length ? el("div", { class: "hl" }, e.provas.map(p => { return el("div", null, el("b", null, T(...TIPO[p[0]])), " " + fmt(p[1]) + horaTxt(p[1])); })) : null;
+  const idx = m ? el("details", { class: "mini-sec" }, el("summary", null, T("Índice de conteúdos", "Índice de contenidos"), el("small", null, "(" + m.unidades.reduce((a, u) => a + u.temas.length + (u.pendentes || []).length, 0) + ")")),
+      el("div", { class: "in idx" }, m.unidades.map((u, ui) => el("div", { class: "idx-u" }, el("a", { class: "idx-h", href: "#m-" + c.id + "-" + ui }, u.nome),
+        el("ol", null, u.temas.map(t => el("li", null, el("a", { href: "#t-" + c.id + "-" + t.id }, t.curto || t.nome))), (u.pendentes || []).map(p => el("li", { class: "muted" }, p + " · " + T("a estudar", "por estudiar"))))))))
+    : el("p", { class: "sm muted" }, T("Sem conteúdo no atlas ainda. Entra quando o primeiro tema desta matéria for estudado.", "Sin contenido en el atlas todavía. Entra cuando se estudie el primer tema de esta materia."));
+  const ok = hit.filter(i => !i.semPeriodo).length;
+  return el("section", { class: "card sum" }, el("details", { open: true },
+    el("summary", { class: "ct" }, T("Sumário da matéria", "Sumario de la materia")),
+    el("div", { class: "sum-in" }, banner,
+      el("dl", null, lin(T("Professor(es)", "Profesor(es)"), e.prof), e.comissao || e.turma ? lin(T("Comissão", "Comisión"), e.comissao || e.turma) : null, lin(T("Período", "Período"), per), lin(T("Horários", "Horarios"), horEl),
+        lin(T("Provas", "Exámenes"), provEl), e.regra ? lin(T("Aprovação", "Aprobación"), e.regra) : null, e.material ? lin(T("Material", "Material"), e.material) : null, e.obs ? lin(T("Observações", "Observaciones"), e.obs) : null),
+      el("div", { class: "row" }, hit.length ? botaoCal(hit, T("Horários no calendário", "Horarios en el calendario")) : null, pit.length ? botaoCal(pit, T("Provas no calendário", "Exámenes en el calendario")) : null,
+        el("button", { class: "btn", onclick: () => menuMateria(c) }, T("Editar", "Editar"))),
+      !hors.length && !e.prof && !e.periodo ? el("p", { class: "sm muted" }, T("Dica: conte na conversa de estudo o professor, o período e os horários. Eles entram aqui na próxima atualização.", "Tip: contá en la conversación de estudio el profesor, el período y los horarios. Entran acá en la próxima actualización.")) : null,
+      idx)));
+}
+const fmtD = s => s ? s.slice(8, 10) + "/" + s.slice(5, 7) + "/" + s.slice(0, 4) : "";
+function vMateriaVazia(c) { return el("div", { class: "inner", "data-m": c.id }, el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
+    el("span", { class: "kicker" }, provasDe(c).filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1])).join(" · ")),
+    el("div", { class: "htop" }, el("h1", null, nomeM(c)), el("button", { class: "pill dotsb", "aria-label": T("Opções da matéria", "Opciones de la materia"), onclick: () => menuMateria(c) }, dots()))), sumario(c, null)); }
+
+/* ===== menu ⋮ de cada matéria ===== */
+const SIT = { cursando: ["Estou cursando", "La estoy cursando"], outro_ano: ["Vou cursar em outro ano", "La voy a cursar otro año"], nao_sei: ["Ainda não sei", "Todavía no sé", "Fica em “Extra” até você decidir", "Queda en “Extra” hasta que decidas"], aprovada: ["Já fui aprovada(o)", "Ya la aprobé"], oculta: ["Não mostrar", "No mostrar"] };
 function menuMateria(c) {
-  const g = (S.grade || {})[c.id] || {}, sitAt = g.oculta ? "oculta" : g.status || (anoDe(c) !== c.ano ? "outro_ano" : "cursando");
-  const fecha = () => { fundo.remove(); document.removeEventListener("keydown", esc); };
-  const esc = e => { if (e.key === "Escape") fecha(); };
-  const rad = Object.keys(SIT).map(k => el("label", { class: "chk" }, el("input", { type: "radio", name: "sit", value: k, checked: k === sitAt, onchange: () => { anoBox.hidden = k !== "outro_ano"; notaBox.hidden = k !== "aprovada"; } }), el("span", null, T(...SIT[k]))));
-  const anoSel = el("select", { "aria-label": T("Em que ano", "En qué año") }, [1, 2, 3, 4, 5, 6].map(a => el("option", { value: String(a), selected: a === (anoDe(c) === 7 ? c.ano : anoDe(c)) }, a + "º " + T("ano", "año"))));
-  const anoBox = el("label", { hidden: sitAt !== "outro_ano" }, T("Em que ano", "En qué año"), anoSel);
+  const g = (S.grade || {})[c.id] || {}, sn = snap(c).v, e = efet(c), sitAt = g.oculta ? "oculta" : g.status || (anoDe(c) !== c.ano ? "outro_ano" : "cursando");
+  let hor = e.horarios.map(x => Object.assign({}, x)), prov = e.provas.map(x => x.slice());
+  const per = { tipo: (e.periodo || {}).tipo || "semestral", ini: (e.periodo || {}).ini || "", fim: (e.periodo || {}).fim || "" };
+  const st = el("p", { class: "erro sm", "aria-live": "polite" });
+  const sec = (rot, ...x) => el("section", { class: "sec" }, rot ? el("span", { class: "lb" }, rot) : null, ...x);
+  const fld = (rot, nodo, cls) => el("label", { class: "fld" + (cls ? " " + cls : "") }, el("span", null, rot), nodo);
+  const opts = (map, at) => Object.keys(map).map(k => el("option", { value: k, selected: k === at }, T(...map[k])));
+  const fFav = el("input", { type: "checkbox", class: "sw", role: "switch", checked: !!g.fav });
+  const rad = Object.keys(SIT).map(k => el("label", { class: "opt" }, el("input", { type: "radio", name: "sit", value: k, checked: k === sitAt, onchange: () => { anoBox.hidden = k !== "outro_ano"; notaBox.hidden = k !== "aprovada"; } }),
+    el("span", { class: "t" }, T(SIT[k][0], SIT[k][1]), SIT[k][2] ? el("small", null, T(SIT[k][2], SIT[k][3])) : null)));
+  const anoSelN = el("select", { "aria-label": T("Em que ano", "En qué año") }, [1, 2, 3, 4, 5, 6].map(a => el("option", { value: String(a), selected: a === (anoDe(c) === 7 ? c.ano : anoDe(c)) }, a + "º " + T("ano", "año"))));
+  const anoBox = fld(T("Em que ano", "En qué año"), anoSelN); anoBox.hidden = sitAt !== "outro_ano";
   const fNota = el("input", { type: "number", min: "0", max: "10", step: "0.1", inputmode: "decimal", value: g.final != null ? String(g.final) : "" });
-  const notaBox = el("label", { hidden: sitAt !== "aprovada" }, T("Nota final (opcional)", "Nota final (opcional)"), fNota);
-  const fProf = el("input", { maxlength: "60", placeholder: T("Ex.: Dra. Gómez", "Ej.: Dra. Gómez"), value: g.prof || "" });
-  const fFav = el("input", { type: "checkbox", checked: !!g.fav });
-  const fCom = el("input", { maxlength: "20", value: g.comissao || "" }), fHor = el("input", { maxlength: "40", placeholder: T("Ex.: ter e sex, 8h", "Ej.: mar y vie, 8 h"), value: g.horario || "" });
+  const notaBox = fld(T("Nota final (opcional)", "Nota final (opcional)"), fNota); notaBox.hidden = sitAt !== "aprovada";
+  const fProf = el("input", { maxlength: "60", placeholder: T("Ex.: Dra. Gómez", "Ej.: Dra. Gómez"), value: e.prof || "" });
+  const fCom = el("input", { maxlength: "20", placeholder: T("Ex.: B", "Ej.: B"), value: g.comissao || "" });
+  const fObs = el("textarea", { rows: "2", maxlength: "300", placeholder: T("Particularidades: sala, grupos, prática em semanas pares…", "Particularidades: aula, grupos, práctica en semanas pares…") }); fObs.value = e.obs || "";
+  const fPT = el("select", null, opts(PER, per.tipo)), fPI = el("input", { type: "date", value: per.ini }), fPF = el("input", { type: "date", value: per.fim });
+  fPT.onchange = () => { per.tipo = fPT.value; }; fPI.onchange = () => { per.ini = fPI.value; }; fPF.onchange = () => { per.fim = fPF.value; };
+  const cx = (rot, nodo, cls) => el("label", { class: "cx-l" + (cls ? " " + cls : "") }, el("span", null, rot), nodo);
+  const boxH = el("div", { class: "grp" }), boxP = el("div", { class: "grp" });
+  const sel = (map, at, fn) => { const s = el("select", { class: "cx" }, opts(map, at)); s.onchange = () => fn(s.value); return s; };
+  const inp = (attrs, fn) => { const i = el("input", Object.assign({ class: "cx" }, attrs)); i.oninput = i.onchange = () => fn(i.value); return i; };
+  const selDia = (at, fn) => { const x = el("select", { class: "cx" }, [1, 2, 3, 4, 5, 6, 0].map(d => el("option", { value: String(d), selected: d === at }, T(DIAS.pt[d], DIAS.es[d])))); x.onchange = () => fn(+x.value); return x; };
+  function pintaH() { boxH.replaceChildren(...hor.map((h, i) => el("div", { class: "rowc" },
+      cx(T("Dia", "Día"), selDia(h.dia, v => { h.dia = v; }), "c2"), cx(T("Início", "Inicio"), inp({ type: "time", value: h.ini }, v => { h.ini = v; })), cx(T("Fim", "Fin"), inp({ type: "time", value: h.fim }, v => { h.fim = v; })),
+      cx(T("Sala ou local", "Aula o lugar"), inp({ maxlength: "30", value: h.sala || "", placeholder: T("opcional", "opcional") }, v => { h.sala = v; })), cx(T("Tipo", "Tipo"), sel(TAULA, h.tipo || "aula", v => { h.tipo = v; })),
+      el("button", { class: "linkb rm", type: "button", onclick: () => { hor.splice(i, 1); pintaH(); } }, T("Remover horário", "Quitar horario")))),
+      el("button", { class: "add", type: "button", onclick: () => { hor.push({ id: "p" + Math.random().toString(36).slice(2, 7), dia: 1, ini: "", fim: "", sala: "", tipo: "aula" }); pintaH(); } }, "+ " + T("Adicionar horário", "Agregar horario"))); }
+  function pintaP() { boxP.replaceChildren(...prov.map((p, i) => el("div", { class: "rowc dois" },
+      cx(T("Prova", "Examen"), sel({ p: TIPO.p, f: TIPO.f, fc: TIPO.fc }, p[0], v => { p[0] = v; })), cx(T("Data e hora", "Fecha y hora"), inp({ type: "datetime-local", value: p[1].slice(0, 16) }, v => { p[1] = v ? v + ":00-03:00" : p[1]; })),
+      el("button", { class: "linkb rm", type: "button", onclick: () => { prov.splice(i, 1); pintaP(); } }, T("Remover prova", "Quitar examen")))),
+      el("button", { class: "add", type: "button", onclick: () => { prov.push(["p", hoje() + "T08:00:00-03:00"]); pintaP(); } }, "+ " + T("Adicionar prova", "Agregar examen"))); }
+  pintaH(); pintaP();
+  let fechaF = () => {};
   const salvar = () => { const k = (document.querySelector('.sheet input[name=sit]:checked') || {}).value || "cursando", n = {};
-    n.fav = fFav.checked; n.prof = fProf.value.trim().slice(0, 60); n.comissao = fCom.value.trim().slice(0, 20); n.horario = fHor.value.trim().slice(0, 40);
+    const hv = hor.filter(h => h.ini || h.fim);
+    if (hv.some(h => !h.ini || !h.fim || h.fim <= h.ini)) { st.textContent = T("Confira os horários: início e fim preenchidos e o fim depois do início.", "Revisá los horarios: inicio y fin completos y el fin después del inicio."); return; }
+    if (per.ini && per.fim && per.fim < per.ini) { st.textContent = T("O fim do período vem antes do início.", "El fin del período es anterior al inicio."); return; }
+    n.fav = fFav.checked; const pf = fProf.value.trim().slice(0, 60); n.prof = pf === (sn.prof || "") ? "" : pf; n.comissao = fCom.value.trim().slice(0, 20);
+    const ob = fObs.value.trim().slice(0, 300); n.obs = ob === (sn.obs || "") ? "" : ob;
+    const hn = normHs(hv); n.horarios = hs(hn) === hs(sn.horarios) ? null : hn;
+    const pv = per.ini && per.fim ? { tipo: per.tipo, ini: per.ini, fim: per.fim } : null; n.periodo = hs(pv) === hs(sn.periodo) ? null : pv;
+    n.provas = hs(prov) === hs(sn.provas) ? null : prov.filter(p => p[1]);
     n.oculta = k === "oculta"; n.status = k === "oculta" ? g.status || null : k;
     const aqui = anoDe(c) === 7 ? (anoAtual() === 7 ? c.ano : anoAtual()) : anoDe(c);
-    n.ano = k === "nao_sei" ? 7 : k === "outro_ano" ? +anoSel.value : aqui;
+    n.ano = k === "nao_sei" ? 7 : k === "outro_ano" ? +anoSelN.value : aqui;
     n.final = k === "aprovada" && fNota.value !== "" ? Math.max(0, Math.min(10, +fNota.value)) : (k === "aprovada" ? null : g.final ?? null);
-    setGrade(c.id, n); fecha(); render(); };
-  const fundo = el("div", { class: "fundo", onclick: e => { if (e.target === fundo) fecha(); } },
-    el("div", { class: "sheet", role: "dialog", "aria-modal": "true", "aria-label": nomeM(c) }, el("h2", null, nomeM(c)),
-      el("label", { class: "chk fav" }, fFav, el("span", null, "★ " + T("Favorita: aparece primeiro na lista", "Favorita: aparece primero en la lista"))),
-      el("fieldset", null, el("legend", { class: "ct" }, T("Situação", "Situación")), rad),
-      el("div", { class: "form" }, anoBox, notaBox, el("label", null, T("Professor(es)", "Profesor(es)"), fProf), el("label", null, T("Comissão", "Comisión"), fCom), el("label", { class: "tudo" }, T("Dias e horário", "Días y horario"), fHor)),
-      el("p", { class: "sm muted" }, T("Fica só com você, neste aparelho (e na sua conta, se entrou com Google).", "Queda solo con vos, en este dispositivo (y en tu cuenta, si entraste con Google).")),
-      el("div", { class: "row" }, el("button", { class: "btn solid", onclick: salvar }, T("Salvar", "Guardar")), el("button", { class: "btn", onclick: fecha }, T("Cancelar", "Cancelar")))));
-  document.body.append(fundo); document.addEventListener("keydown", esc); fundo.querySelector("input:checked, input").focus();
+    setGrade(c.id, n); fechaF(); render(); };
+  abrirFolha(fecha => { fechaF = fecha; return folha(nomeM(c), [rotAno(anoDe(c)), sn.turma ? T("dados da turma ", "datos del turno ") + sn.turma : null].filter(Boolean), [
+    el("div", { class: "grp" }, el("label", { class: "opt" }, el("span", { class: "t" }, "★ " + T("Favorita", "Favorita"), el("small", null, T("Aparece primeiro na lista", "Aparece primero en la lista"))), fFav)),
+    sec(T("Situação", "Situación"), el("div", { class: "grp" }, rad, anoBox, notaBox)),
+    sec(T("Sobre a matéria", "Sobre la materia"), el("div", { class: "grp" }, fld(T("Professor(es)", "Profesor(es)"), fProf), fld(T("Comissão", "Comisión"), fCom), fld(T("Observações", "Observaciones"), fObs))),
+    sec(T("Período", "Período"), el("div", { class: "grp" }, fld(T("Tipo", "Tipo"), fPT), el("div", { class: "fld2" }, fld(T("Início", "Inicio"), fPI), fld(T("Fim", "Fin"), fPF)))),
+    sec(T("Horários das aulas", "Horarios de clase"), boxH, el("p", { class: "sm muted nota" }, T("Cada horário vira um evento semanal até o fim do período, para levar ao calendário uma vez no começo do semestre.", "Cada horario es un evento semanal hasta el fin del período, para llevar al calendario una vez al comienzo del semestre."))),
+    sec(T("Datas das provas", "Fechas de los exámenes"), boxP, g.provas ? el("button", { class: "linkb", type: "button", onclick: () => { prov = sn.provas.map(x => x.slice()); pintaP(); } }, T("Voltar às datas oficiais", "Volver a las fechas oficiales")) : null),
+    el("p", { class: "sm muted nota" }, T("O que você muda aqui fica só com você, neste aparelho (e na sua conta, se entrou com Google).", "Lo que cambiás acá queda solo con vos, en este dispositivo (y en tu cuenta, si entraste con Google).")), st],
+    [el("button", { class: "btn", onclick: fecha }, T("Cancelar", "Cancelar")), el("button", { class: "btn solid", onclick: salvar }, T("Salvar", "Guardar"))]); });
 }
+/* minha semana (Agenda): horários das matérias que a pessoa cursa no ano atual */
+function semana() { const cs_ = CATALOGO.filter(c => anoDe(c) === anoAtual() && !fora(c)), itens = [], por = {};
+  cs_.forEach(c => { const e = efet(c); e.horarios.forEach(h => { if (h.dia == null || !h.ini) return; itens.push(itemHorario(c, h, e)); (por[h.dia] = por[h.dia] || []).push({ c, h }); }); });
+  if (!itens.length) return el("p", { class: "sm muted" }, T("Cadastre os horários das aulas no ⋮ de cada matéria: a sua semana aparece aqui e vai para o calendário de uma vez, no começo do semestre.", "Cargá los horarios de clase en el ⋮ de cada materia: tu semana aparece acá y va al calendario de una vez, al comienzo del semestre."));
+  return el("section", { class: "card" }, el("span", { class: "ct" }, T("Minha semana", "Mi semana")),
+    el("div", { class: "sem" }, [1, 2, 3, 4, 5, 6, 0].filter(d => por[d]).map(d => el("div", { class: "sem-d" }, el("b", null, diaNome(d)),
+      por[d].sort((a, b) => a.h.ini.localeCompare(b.h.ini)).map(x => el("div", { class: "sem-l", "data-m": x.c.id }, el("span", null, x.h.ini + "–" + x.h.fim), el("span", null, nomeM(x.c) + (x.h.sala ? " · " + x.h.sala : ""))))))),
+    el("div", { class: "row", style: "margin-top:10px" }, botaoCal(itens, T("Levar a semana ao calendário", "Llevar la semana al calendario")))); }
 
 /* ===== agenda: provas do curso + compromissos da própria pessoa ===== */
 const TIPOS = { exame: ["Exame", "Examen"], parcial: ["Parcial", "Parcial"], final: ["Final", "Final"], trabalho: ["Trabalho", "Trabajo práctico"], apresentacao: ["Apresentação", "Presentación"], pratica: ["Prática ou plantão", "Práctica o guardia"], outro: ["Outro", "Otro"] };
 const tipoTxt = t => T(...(TIPOS[t] || TIPOS.outro));
 const horaTxt = dt => /T\d\d:\d\d/.test(dt) && !/T00:00/.test(dt) ? ", " + new Date(dt).toLocaleTimeString(S.lang === "es" ? "es-AR" : "pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
 function comps(todos) {
-  const of = CATALOGO.filter(c => !fora(c)).flatMap(c => (c.provas || []).map(p => ({ k: c.id + "|" + p[1], mid: c.id, tipo: T(...TIPO[p[0]]), titulo: nomeM(c), dt: p[1] })));
-  const pes = (S.agenda || []).map(a => { const c = CATALOGO.find(x => x.id === a.mid); return { k: a.id, mid: a.mid, tipo: tipoTxt(a.tipo), titulo: a.titulo || (c ? nomeM(c) : ""), dt: a.dt, ref: a }; });
+  const of = CATALOGO.filter(c => !fora(c)).flatMap(c => { const e = efet(c), it = itensProva(c, e); return e.provas.map((p, i) => ({ k: c.id + "|" + p[1], mid: c.id, tipo: T(...TIPO[p[0]]), titulo: nomeM(c), dt: p[1], cal: it[i] })); });
+  const pes = (S.agenda || []).map(a => { const c = CATALOGO.find(x => x.id === a.mid); return { k: a.id, mid: a.mid, tipo: tipoTxt(a.tipo), titulo: a.titulo || (c ? nomeM(c) : ""), dt: a.dt, ref: a, cal: itemPessoal(a) }; });
   return of.concat(pes).filter(x => todos || new Date(x.dt) > Date.now()).sort((a, b) => new Date(a.dt) - new Date(b.dt));
 }
 function oQueFalta(mid) {
@@ -1002,12 +1238,12 @@ function vAgenda() {
         onchange: e => { const v = e.target.value === "" ? null : Math.max(0, Math.min(10, +e.target.value)); if (p.ref) p.ref.nota = v; else { S.notas = S.notas || {}; if (v == null) delete S.notas[nk]; else S.notas[nk] = v; } save(); } })) : null;
     return el("div", { class: "comp", "data-m": p.mid || "fisiologia" }, el("div", { class: "top" }, el("b", null, p.tipo + (p.titulo ? " · " + p.titulo : "")), el("span", { class: "in" }, f ? T("faltam ", "faltan ") + faltaTxt(f) : T("já passou", "ya pasó"))),
       el("span", { class: "sm muted" }, fmt(p.dt) + " " + p.dt.slice(0, 4) + horaTxt(p.dt)), !passado && p.mid ? el("span", { class: "sm" }, oQueFalta(p.mid)) : null, nota,
-      el("div", { class: "row" }, !passado && p.mid && M[p.mid] ? el("a", { class: "pill", href: "#m-" + p.mid }, T("Estudar", "Estudiar")) : null,
+      el("div", { class: "row" }, !passado && p.mid && M[p.mid] ? el("a", { class: "pill", href: "#m-" + p.mid }, T("Estudar", "Estudiar")) : null, !passado && p.cal ? botaoCal([p.cal]) : null,
         p.ref ? el("button", { class: "pill", onclick: e => { const b = e.currentTarget; if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = T("Toque de novo para excluir", "Tocá de nuevo para eliminar"); return; } S.agenda = S.agenda.filter(a => a !== p.ref); save(); render(); } }, T("Excluir", "Eliminar")) : null)); };
   return el("div", { class: "inner" }, el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
       el("h1", null, T("Agenda", "Agenda")), el("p", { class: "muted" }, T("Provas do curso e os seus compromissos, com o que ainda falta estudar para cada um.", "Exámenes de la carrera y tus compromisos, con lo que todavía falta estudiar para cada uno."))),
     el("div", { class: "row", style: "margin-top:14px" }, el("button", { class: "btn solid", onclick: () => { formAberto = !formAberto; render(); if (formAberto) document.getElementById("ag-tipo").focus(); } }, "+ " + T("Incluir novo compromisso", "Agregar nuevo compromiso"))),
-    el("div", { style: "display:flex;flex-direction:column;gap:12px;margin-top:14px" }, form,
+    el("div", { style: "display:flex;flex-direction:column;gap:12px;margin-top:14px" }, form, semana(),
       fut.length ? fut.map(p => cartao(p, false)) : el("p", { class: "muted" }, T("Nenhum compromisso futuro.", "Ningún compromiso futuro."))),
     pas.length ? el("section", { class: "sec" }, el("details", { class: "mini-sec" }, el("summary", null, T("Já passaram", "Ya pasaron"), el("small", null, "(" + pas.length + ")")),
       el("div", { class: "in" }, el("p", { class: "sm muted" }, T("Registrar a nota é opcional. Ela aparece na sua evolução, no Perfil.", "Registrar la nota es optativo. Aparece en tu evolución, en Perfil.")), pas.map(p => cartao(p, true))))) : null);
