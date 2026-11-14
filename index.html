@@ -280,7 +280,7 @@ details.mini-sec > .in { padding-bottom: 12px; display: flex; flex-direction: co
 /* opções da matéria */
 .tw { position: relative; display: grid } .tw > .tile { width: 100% }
 .tmenu { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: 800 1.1rem var(--fd); cursor: pointer; z-index: 1 }
-.badge.ok { background: var(--gr-s); color: var(--gr) }
+.badge.ok { background: var(--gr-s); color: var(--gr) } .estrela { color: var(--am) } .tile .tt { padding-right: 44px } .sheet .fav { font-weight: 700 !important }
 .fundo { position: fixed; inset: 0; z-index: 50; background: rgba(10, 10, 25, .45); display: flex; align-items: flex-end; justify-content: center }
 .sheet { --c: var(--vi); --cs: var(--vi-s); font-family: var(--fb); background: var(--surface); color: var(--ink); width: min(560px, 100%); max-height: 88vh; overflow: auto; border-radius: 22px 22px 0 0; padding: 20px 18px calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 14px; box-shadow: var(--sh) }
 .sheet h2 { font-size: 1.25rem; font-weight: 800 } .sheet fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px } .sheet .chk input { accent-color: var(--vi) }
@@ -547,6 +547,7 @@ function anoAtual() { const h = hoje(), ini = S.perfil && S.perfil.inicio; if (i
   let at = IDX.anos.length ? IDX.anos[0].ano : 1; IDX.anos.forEach(a => { if (a.inicio <= h) at = a.ano; }); return at; }
 /* grade pessoal: cada um esconde o que não cursa e pode mudar uma matéria de ano (7 = "Extra", depois do 6º) */
 let editGrade = false;
+const fav = c => !!((S.grade || {})[c.id] || {}).fav;
 const fora = c => oculta(c) || ((S.grade || {})[c.id] || {}).status === "aprovada";
 const anoDe = c => ((S.grade || {})[c.id] || {}).ano || c.ano, oculta = c => !!((S.grade || {})[c.id] || {}).oculta;
 function setGrade(id, m) { S.grade = S.grade || {}; S.grade[id] = Object.assign({}, S.grade[id], m); S.plano = null; save(); }
@@ -728,16 +729,16 @@ function vInicio() {
   const lista = pl.itens.length ? [el("div", { class: "plhead" }, el("div", { class: "track" }, barra), cont),
       el("ul", { class: "plan" }, verMais(itens, 2, T("Ver plano completo", "Ver plan completo"), T("Recolher plano", "Recoger plan")))]
     : el("p", { class: "muted", style: "margin-top:12px" }, T("Nada vence hoje. As revisões aparecem 1, 3 e 7 dias depois de cada tema estudado.", "Nada vence hoy. Los repasos aparecen 1, 3 y 7 días después de cada tema estudiado."));
-  const doAno = CATALOGO.filter(c => anoDe(c) === anoSel() && (editGrade || !oculta(c))), comConteudo = doAno.filter(c => M[c.id]), semConteudo = doAno.filter(c => !M[c.id]);
+  const doAno = CATALOGO.filter(c => anoDe(c) === anoSel() && (editGrade || !oculta(c))), favs = doAno.filter(fav), comConteudo = doAno.filter(c => !fav(c) && M[c.id]), semConteudo = doAno.filter(c => !fav(c) && !M[c.id]);
   const anoInfo = IDX.anos.find(a => a.ano === anoSel()) || {};
   const tile = c => { const m = M[c.id], p = (c.provas || []).find(x => new Date(x[1]) > Date.now()), ts = m ? temas(m) : [], g = (S.grade || {})[c.id] || {};
     const sit = g.status === "aprovada" ? el("span", { class: "badge ok" }, T("Aprovada", "Aprobada") + (g.final != null ? " · " + g.final : "")) : g.status === "nao_sei" ? el("span", { class: "badge part" }, T("A decidir", "A decidir"))
       : m ? el("span", { class: "badge" }, T("Abrir", "Abrir")) : el("span", { class: "badge todo" }, T("A começar", "Por empezar"));
     return el("div", { class: "tw" }, el("button", { class: "tile" + (m ? " done" : " empty"), "data-m": c.id, disabled: !m, onclick: () => { location.hash = "#m-" + c.id; } },
-      el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, nomeM(c)),
+      el("span", { class: "num" }, p ? T(...TIPO[p[0]]).split(" ")[0] + " " + fmt(p[1]) : T("Sem prova marcada", "Sin examen")), el("span", { class: "tt" }, g.fav ? el("span", { class: "estrela", "aria-label": T("Favorita", "Favorita") }, "★ ") : null, nomeM(c)),
       g.prof ? el("span", { class: "ts" }, T("Prof. ", "Prof. ") + g.prof) : null,
       el("span", { class: "ts" }, m ? ts.length + T(" temas estudados · ", " temas estudiados · ") + m.cartoes.length + T(" cartões", " tarjetas") : T("Sem conteúdo ainda. Entra quando você estudar o primeiro tema.", "Sin contenido todavía. Entra cuando estudies el primer tema.")), sit),
-      el("button", { class: "tmenu", "aria-label": T("Opções de ", "Opciones de ") + nomeM(c), onclick: () => menuMateria(c) }, "⋯")); };
+      el("button", { class: "tmenu", "aria-label": T("Opções de ", "Opciones de ") + nomeM(c), onclick: () => menuMateria(c) }, "⋮")); };
   const tl = comps().map(linhaComp);
   return el("div", { class: "inner" }, avisoTopo ? el("p", { class: "note", style: "margin-top:16px", role: "status" }, avisoTopo) : null, caixaImport(),
     el("section", { class: "hero" },
@@ -761,7 +762,7 @@ function vInicio() {
             const cb = el("input", { type: "checkbox", id: "gr-" + c.id, checked: !g.oculta, onchange: () => { setGrade(c.id, { oculta: !cb.checked }); } });
             const sel = el("select", { "aria-label": T("Ano de ", "Año de ") + nomeM(c), onchange: () => { setGrade(c.id, { ano: +sel.value }); render(); } }, [1, 2, 3, 4, 5, 6, 7].map(a => el("option", { value: String(a), selected: a === anoDe(c) }, a === 7 ? "Extra" : a + "º")));
             return el("div", { class: "grow" }, el("label", { class: "chk", for: "gr-" + c.id }, cb, el("span", null, nomeM(c))), sel); }) : el("p", { class: "muted" }, T("Nenhuma matéria neste ano.", "Ninguna materia en este año.")))
-        : doAno.length ? el("div", { class: "tiles" }, verMais([...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(comConteudo.length, innerWidth > 760 ? 4 : 2), T("Ver mais matérias", "Ver más materias")))
+        : doAno.length ? el("div", { class: "tiles" }, verMais([...favs.map(tile), ...comConteudo.map(tile), ...semConteudo.map(tile)], Math.max(favs.length + comConteudo.length, innerWidth > 760 ? 4 : 2), T("Ver mais matérias", "Ver más materias")))
         : el("p", { class: "muted" }, anoInfo.inicio > hoje() ? T("Este ano ainda não começou. As matérias entram aqui quando você estudar o primeiro tema.", "Este año todavía no empezó. Las materias entran aquí cuando estudies el primer tema.") : T("Nenhuma matéria aqui. Use o ⋯ de uma matéria para trazê-la para este ano.", "Ninguna materia acá. Usá el ⋯ de una materia para traerla a este año."))),
     el("section", { class: "sec" }, el("h2", null, T("Próximos compromissos", "Próximos compromisos")),
       el("ul", { class: "tl" }, tl.slice(0, 3)),
@@ -799,7 +800,7 @@ function vMateria(mid, abaIni) {
   return el("div", { class: "inner", "data-m": mid },
     el("header", { class: "mhead" }, el("a", { class: "pill", href: "#inicio", style: "align-self:flex-start" }, "← " + T("Início", "Inicio")),
       el("span", { class: "kicker" }, (c.provas || []).filter(p => new Date(p[1]) > Date.now()).map(p => T(...TIPO[p[0]]) + " " + fmt(p[1])).join(" · ")),
-      el("div", { class: "htop" }, el("h1", null, m.nome), el("button", { class: "pill", style: "min-width:44px;font-weight:800", "aria-label": T("Opções da matéria", "Opciones de la materia"), onclick: () => menuMateria(c) }, "⋯")),
+      el("div", { class: "htop" }, el("h1", null, m.nome), el("button", { class: "pill", style: "min-width:44px;font-weight:800", "aria-label": T("Opções da matéria", "Opciones de la materia"), onclick: () => menuMateria(c) }, "⋮")),
       infoMat(c), el("p", { class: "muted" }, m.sub)),
     abas("materia", lista, ini, id => marcaAba("m-" + mid, id)));
 }
@@ -936,9 +937,10 @@ function menuMateria(c) {
   const fNota = el("input", { type: "number", min: "0", max: "10", step: "0.1", inputmode: "decimal", value: g.final != null ? String(g.final) : "" });
   const notaBox = el("label", { hidden: sitAt !== "aprovada" }, T("Nota final (opcional)", "Nota final (opcional)"), fNota);
   const fProf = el("input", { maxlength: "60", placeholder: T("Ex.: Dra. Gómez", "Ej.: Dra. Gómez"), value: g.prof || "" });
+  const fFav = el("input", { type: "checkbox", checked: !!g.fav });
   const fCom = el("input", { maxlength: "20", value: g.comissao || "" }), fHor = el("input", { maxlength: "40", placeholder: T("Ex.: ter e sex, 8h", "Ej.: mar y vie, 8 h"), value: g.horario || "" });
   const salvar = () => { const k = (document.querySelector('.sheet input[name=sit]:checked') || {}).value || "cursando", n = {};
-    n.prof = fProf.value.trim().slice(0, 60); n.comissao = fCom.value.trim().slice(0, 20); n.horario = fHor.value.trim().slice(0, 40);
+    n.fav = fFav.checked; n.prof = fProf.value.trim().slice(0, 60); n.comissao = fCom.value.trim().slice(0, 20); n.horario = fHor.value.trim().slice(0, 40);
     n.oculta = k === "oculta"; n.status = k === "oculta" ? g.status || null : k;
     const aqui = anoDe(c) === 7 ? (anoAtual() === 7 ? c.ano : anoAtual()) : anoDe(c);
     n.ano = k === "nao_sei" ? 7 : k === "outro_ano" ? +anoSel.value : aqui;
@@ -946,6 +948,7 @@ function menuMateria(c) {
     setGrade(c.id, n); fecha(); render(); };
   const fundo = el("div", { class: "fundo", onclick: e => { if (e.target === fundo) fecha(); } },
     el("div", { class: "sheet", role: "dialog", "aria-modal": "true", "aria-label": nomeM(c) }, el("h2", null, nomeM(c)),
+      el("label", { class: "chk fav" }, fFav, el("span", null, "★ " + T("Favorita: aparece primeiro na lista", "Favorita: aparece primero en la lista"))),
       el("fieldset", null, el("legend", { class: "ct" }, T("Situação", "Situación")), rad),
       el("div", { class: "form" }, anoBox, notaBox, el("label", null, T("Professor(es)", "Profesor(es)"), fProf), el("label", null, T("Comissão", "Comisión"), fCom), el("label", { class: "tudo" }, T("Dias e horário", "Días y horario"), fHor)),
       el("p", { class: "sm muted" }, T("Fica só com você, neste aparelho (e na sua conta, se entrou com Google).", "Queda solo con vos, en este dispositivo (y en tu cuenta, si entraste con Google).")),
