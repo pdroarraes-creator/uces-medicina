@@ -35,6 +35,77 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
         a.rotulo(T("vasos porta", "vasos porta"), [-.85, .2, 0], { on: "tudo ant", show: "tudo ant" });
       }, EIXO_EST, { cap: T("Gire para ver o que fica na frente (adeno-hipófise) e atrás (neuro-hipófise). Formas e posições aproximadas. ", "Gira para ver qué queda adelante (adenohipófisis) y atrás (neurohipófisis). Formas y posiciones aproximadas. ") + AVISO, reserva: () => figuras.eixo2d(), dist: 9.2, zoom: { horm: [1.9, [-.58, -.8, 0]] } });
     },
+    hipoCunha() {
+      let sd = 5; const rnd = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      const f = n => n.toFixed(1), pt = p => f(p[0]) + "," + f(p[1]);
+      const Y0 = 130, Y1 = 440, DX = 34, DY = -26;
+      const xL = y => 14 + 26 * (y - Y0) / (Y1 - Y0), xR = y => 184 - 26 * (y - Y0) / (Y1 - Y0);
+      const fx = (y, u) => xL(y) + u * (xR(y) - xL(y)), sp = (t, y) => [xR(y) + DX * t, y + DY * t];
+      const Z = { cap: [130, 139], ant: [139, 298], int: [298, 326], pos: [326, 440] };
+      const c = (x, y, r, fill, st, sw) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fill}" stroke="${st}" stroke-width="${sw}"/>`;
+      const nuc = (x, y, r) => c(x, y, r, "url(#hcNu)", "#2f1846", .4);
+      const rbc = (x, y, s) => `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(2.2 * s)}" ry="${f(1.3 * s)}" fill="#d9483c" stroke="#8f2a22" stroke-width=".3"/>`;
+      /* cápsula */
+      let cap = `<rect x="0" y="130" width="200" height="9" fill="url(#hcCap)"/><path d="M10 134 q10 -3 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#6f86b8" stroke-width=".9"/>`;
+      /* adeno-hipófise: cordões de células ao redor de sinusoides */
+      let ant = `<rect x="0" y="139" width="200" height="159" fill="#e9c3d0"/>`;
+      const sinus = []; for (let k = 1; k < 5; k++) sinus.push(k / 5);
+      sinus.forEach((u, k) => { ant += `<path d="M${f(fx(142, u))} 140 C${f(fx(180, u) + 8)} 175 ${f(fx(220, u) - 9)} 230 ${f(fx(296, u))} 297" fill="none" stroke="#bfc9ec" stroke-width="7" stroke-linecap="round"/><path d="M${f(fx(142, u))} 140 C${f(fx(180, u) + 8)} 175 ${f(fx(220, u) - 9)} 230 ${f(fx(296, u))} 297" fill="none" stroke="#6a78c0" stroke-width=".9" opacity=".8"/>`; for (let i = 0; i < 5; i++) { const y = 150 + rnd() * 140; ant += rbc(fx(y, u) + (u * 0), y, .75); } });
+      const tipo = () => { const r = rnd(); return r < .34 ? "a" : r < .62 ? "b" : "c"; };
+      for (let band = 0; band <= 5; band++) { const ua = band / 5.0, ub = (band + 1) / 5.0; for (let y = 144; y < 294; y += 11.6) { const jit = (rnd() - .5) * 2.5, uu = [ua + .045, ub - .045], n = 2; for (let i = 0; i < n; i++) { const u = uu[0] + (uu[1] - uu[0]) * (i + .5) / n, x = fx(y, Math.max(.03, Math.min(.97, u))) + jit, r = 4.8 + rnd() * 1.6, t = band === 0 || band === 5 ? (i ? tipo() : tipo()) : tipo();
+        if (x < fx(y, 0) + 2 || x > fx(y, 1) - 2) continue;
+        if (t === "a") { ant += c(x, y, r, "url(#hcAc)", "#a8431f", .5) + nuc(x + (rnd() - .5), y + (rnd() - .5), r * .36); for (let g = 0; g < 7; g++) ant += `<circle cx="${f(x + (rnd() - .5) * r * 1.3)}" cy="${f(y + (rnd() - .5) * r * 1.3)}" r=".5" fill="#8a2c10"/>`; }
+        else if (t === "b") { ant += c(x, y, r, "url(#hcBa)", "#3d2f84", .5) + nuc(x + (rnd() - .5), y + (rnd() - .5), r * .36); for (let g = 0; g < 7; g++) ant += `<circle cx="${f(x + (rnd() - .5) * r * 1.3)}" cy="${f(y + (rnd() - .5) * r * 1.3)}" r=".5" fill="#20185a"/>`; }
+        else ant += c(x, y, r * .92, "url(#hcCr)", "#b7a3bd", .5) + nuc(x + (rnd() - .5), y + (rnd() - .5), r * .4); } } }
+      /* pars intermédia: cistos de coloide */
+      let int = `<rect x="0" y="298" width="200" height="28" fill="#cdb6d8"/>`;
+      for (let i = 0; i < 6; i++) { const x = fx(312, (i + .5) / 6), rx = 11 + rnd() * 3; int += `<ellipse cx="${f(x)}" cy="${f(312 + (rnd() - .5) * 4)}" rx="${f(rx)}" ry="8" fill="#f4e6f0" stroke="#8b6aa2" stroke-width="1.2"/><ellipse cx="${f(x - 2)}" cy="310" rx="${f(rx * .55)}" ry="3.2" fill="#fff" opacity=".7"/>`; for (let k = 0; k < 6; k++) { const an = k / 6 * 6.283; int += nuc(x + Math.cos(an) * (rx + 2), 312 + Math.sin(an) * 9.6, 1.8); } }
+      /* neuro-hipófise: axônios, pituícitos, corpos de Herring */
+      let pos = `<rect x="0" y="326" width="200" height="114" fill="#f3dfe6"/>`;
+      for (let i = 0; i < 26; i++) { const u = (i + rnd()) / 26, x0 = fx(326, u); pos += `<path d="M${f(x0)} 327 C${f(x0 + (rnd() - .5) * 14)} 360 ${f(x0 + (rnd() - .5) * 14)} 400 ${f(fx(440, u) + (rnd() - .5) * 6)} 439" fill="none" stroke="#d98aa6" stroke-width=".8" opacity=".85"/>`; }
+      for (let i = 0; i < 9; i++) { const y = 340 + rnd() * 90, x = fx(y, .06 + rnd() * .88); pos += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(3.4 + rnd() * 2)}" ry="${f(2.8 + rnd() * 1.4)}" fill="url(#hcHe)" stroke="#b03a63" stroke-width=".7"/>`; }
+      for (let i = 0; i < 24; i++) { const y = 333 + rnd() * 102, x = fx(y, .04 + rnd() * .92), r = 3.4 + rnd() * 1.4; pos += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r * 1.25)}" ry="${f(r * .85)}" transform="rotate(${f(rnd() * 180)} ${f(x)} ${f(y)})" fill="#caa3c4" stroke="#6b3d73" stroke-width=".5" opacity=".9"/>` + nuc(x, y, r * .58); }
+      [.3, .7].forEach(u => { pos += `<path d="M${f(fx(332, u))} 327 C${f(fx(360, u) + 10)} 360 ${f(fx(400, u) - 10)} 395 ${f(fx(438, u))} 439" fill="none" stroke="#c0392b" stroke-width="1.7" opacity=".85"/>`; for (let i = 0; i < 4; i++) { const y = 340 + rnd() * 90; pos += rbc(fx(y, u), y, .7); } });
+      /* lateral */
+      const sband = (z, base, fill, st, rr) => { const [ya, yb] = Z[z]; let s = `<polygon points="${[sp(0, ya), sp(1, ya), sp(1, yb), sp(0, yb)].map(pt).join(" ")}" fill="${base}"/>`, row = 0;
+        for (let y = ya + rr; y < yb; y += rr * 2.1, row++) for (let i = 0; i < 9; i++) { const t = (i + .5 + (row % 2 ? .5 : 0)) / 9.5; if (t > 1) continue; const p = sp(t, y), cc = z === "ant" ? (rnd() < .34 ? "#f0a070" : rnd() < .5 ? "#8c7bd0" : fill) : fill; s += c(p[0], p[1], rr, cc, st, .35); } return s; };
+      const side = { cap: sband("cap", "#c7b2cf", "#d8c4de", "#8d78a5", 2.1), ant: sband("ant", "#d9a8bb", "#f1d9e3", "#9c6b84", 2.6), int: sband("int", "#b79ac6", "#e8d9ef", "#7c5a92", 2.6), pos: sband("pos", "#e3c3cf", "#f4e3ea", "#b07a92", 3) };
+      /* face de cima */
+      let top = `<polygon points="14,130 184,130 218,104 48,104" fill="url(#hcTop)"/>`;
+      for (let i = 1; i < 11; i++) { const t = i / 11, x0 = 14 + 34 * t, y0 = 130 - 26 * t; top += `<path d="M${f(x0)} ${f(y0)} q10 ${f(-1.5 - rnd() * 1.5)} 21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0" fill="none" stroke="${i % 2 ? "#8aa0cc" : "#d79aa8"}" stroke-width=".7" opacity=".85"/>`; }
+      /* localizador: cabeça de perfil com a sela turca */
+      const loc = `<g transform="translate(236 4)"><path d="M6 44 C6 12 40 0 66 8 C94 16 104 40 96 60 C90 72 70 74 60 70 L56 58 C46 62 34 60 28 54 C16 56 6 52 6 44 Z" fill="#f1e3da" stroke="#a98a74" stroke-width="1.2"/><path d="M40 28 C52 20 70 24 74 36 C70 42 52 46 40 40 Z" fill="#d8c4de" stroke="#8d78a5" stroke-width=".8"/><ellipse cx="60" cy="50" rx="5.5" ry="4.2" fill="#e58aa0" stroke="#a9384f" stroke-width=".9"/><ellipse cx="68" cy="52" rx="3" ry="3.6" fill="#8c7bd0" stroke="#3d2f84" stroke-width=".8"/><rect x="52" y="43" width="22" height="18" rx="3" fill="none" stroke="#d63b2c" stroke-width="1.7"/></g><path d="M308 38 L219 105" stroke="#d63b2c" stroke-width=".9" stroke-dasharray="3 2" opacity=".8"/><text x="236" y="94" class="mut" font-size="10">${T("onde é o corte", "dónde es el corte")}</text>`;
+      const lab = (on, ys, nome, l2, l3) => { const t = sp(.55, ys + 14.3); return `<g data-on="${on}"><path d="M232 ${f(ys)} L${f(t[0])} ${f(t[1])}" stroke="currentColor" stroke-width=".8" opacity=".6"/><circle cx="${f(t[0])}" cy="${f(t[1])}" r="1.8" fill="currentColor"/><text x="236" y="${f(ys + 4)}" class="cap">${nome}</text>${l2 ? `<text x="236" y="${f(ys + 16)}" class="mut">${l2}</text>` : ""}${l3 ? `<text x="236" y="${f(ys + 28)}" class="mut">${l3}</text>` : ""}</g>`; };
+      const labels = lab("tudo", 120.2, T("Cápsula", "Cápsula")) + lab("tudo ant", 170, T("Adeno-hipófise", "Adenohipófisis"), T("células em cordões", "células en cordones"), T("e sinusoides", "y sinusoides")) + lab("tudo ant", 222, T("Acidófilas", "Acidófilas"), T("GH e prolactina", "GH y prolactina")) + lab("tudo ant", 262, T("Basófilas", "Basófilas"), "ACTH, TSH, FSH, LH") + lab("tudo", 301, T("Pars intermédia", "Pars intermedia"), T("cistos de coloide", "quistes de coloide")) + lab("tudo post", 372, T("Neuro-hipófise", "Neurohipófisis"), T("axônios + pituícitos", "axones + pituicitos"), T("guarda ADH, ocitocina", "guarda ADH, oxitocina"));
+      return U.estados(T("A hipófise em corte: o que cada lobo tem por dentro", "La hipófisis en corte: qué tiene cada lóbulo por dentro"), `<svg class="sv" viewBox="0 0 360 462" role="img" aria-label="${T("Bloco em corte da hipófise com a adeno-hipófise, a pars intermédia e a neuro-hipófise", "Bloque en corte de la hipófisis con la adenohipófisis, la pars intermedia y la neurohipófisis")}">
+        <defs>
+          <radialGradient id="hcAc" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#ffd2b0"/><stop offset=".6" stop-color="#ee8f5a"/><stop offset="1" stop-color="#b94a22"/></radialGradient>
+          <radialGradient id="hcBa" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#cfc6f4"/><stop offset=".6" stop-color="#7e6cc6"/><stop offset="1" stop-color="#3f3189"/></radialGradient>
+          <radialGradient id="hcCr" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#fbf6fb"/><stop offset=".7" stop-color="#eadcea"/><stop offset="1" stop-color="#c6b1c9"/></radialGradient>
+          <radialGradient id="hcHe" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#ffc4d2"/><stop offset="1" stop-color="#d9557c"/></radialGradient>
+          <radialGradient id="hcNu" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#8a5fb0"/><stop offset="1" stop-color="#2f1846"/></radialGradient>
+          <linearGradient id="hcCap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9c3cf"/><stop offset="1" stop-color="#b9c6e6"/></linearGradient>
+          <linearGradient id="hcTop" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f1d4dc"/><stop offset="1" stop-color="#c9d4ee"/></linearGradient>
+          <linearGradient id="hcLit" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></linearGradient>
+          <filter id="hcBl" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
+          <clipPath id="hcF"><polygon points="14,130 184,130 158,440 40,440"/></clipPath>
+          <clipPath id="hcS"><polygon points="184,130 218,104 192,414 158,440"/></clipPath>
+        </defs>
+        <ellipse cx="108" cy="448" rx="94" ry="6" fill="#000" opacity=".16" filter="url(#hcBl)"/>
+        <g clip-path="url(#hcS)"><g data-on="tudo">${side.cap}</g><g data-on="tudo ant">${side.ant}</g><g data-on="tudo">${side.int}</g><g data-on="tudo post">${side.pos}</g><rect x="150" y="90" width="80" height="360" fill="#1c1030" opacity=".14"/></g>
+        <g clip-path="url(#hcF)"><g data-on="tudo">${cap}</g><g data-on="tudo ant">${ant}</g><g data-on="tudo">${int}</g><g data-on="tudo post">${pos}</g>
+          <rect x="10" y="125" width="180" height="320" fill="url(#hcLit)"/><path d="M0 139 H200 M0 298 H200 M0 326 H200" stroke="#fff" stroke-width=".7" opacity=".4"/></g>
+        <g data-on="tudo">${top}</g>
+        <polygon points="14,130 184,130 158,440 40,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="184,130 218,104 192,414 158,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="14,130 184,130 218,104 48,104" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        ${loc}${labels}
+      </svg>`, [
+        { id: "tudo", r: T("Visão geral", "Vista general"), d: T("<b>Dois tecidos diferentes num órgão só.</b> A adeno-hipófise é glandular (células em cordões, com capilares); a neuro-hipófise é tecido nervoso (axônios e células de sustentação).", "<b>Dos tejidos distintos en un solo órgano.</b> La adenohipófisis es glandular (células en cordones, con capilares); la neurohipófisis es tejido nervioso (axones y células de sostén).") },
+        { id: "ant", r: "Adeno-hipófise", d: T("<b>Glândula verdadeira.</b> Acidófilas (GH e prolactina), basófilas (ACTH, TSH, FSH e LH) e cromófobas (pouco hormônio). Os capilares sinusoides recebem os fatores do hipotálamo pelos vasos porta.", "<b>Glándula verdadera.</b> Acidófilas (GH y prolactina), basófilas (ACTH, TSH, FSH y LH) y cromófobas (poca hormona). Los capilares sinusoides reciben los factores del hipotálamo por los vasos porta.") },
+        { id: "post", r: "Neuro-hipófise", d: T("<b>Não fabrica hormônio.</b> Guarda ADH e ocitocina que vêm dos axônios do hipotálamo. Os corpos de Herring são os acúmulos desses hormônios; os pituícitos sustentam o tecido.", "<b>No fabrica hormona.</b> Guarda ADH y oxitocina que vienen de los axones del hipotálamo. Los cuerpos de Herring son los acúmulos de esas hormonas; los pituicitos sostienen el tejido.") }
+      ], { cap: T("Ilustração própria e simplificada: o corte mostra como as células se arrumam em cada lobo. Formas e proporções aproximadas. ", "Ilustración propia y simplificada: el corte muestra cómo se ordenan las células en cada lóbulo. Formas y proporciones aproximadas. ") + AVISO });
+    },
     eixo2d() {
       return U.estados(T("O hipotálamo e os dois lobos da hipófise", "El hipotálamo y los dos lóbulos de la hipófisis"), `<svg class="sv" viewBox="0 0 360 340" role="img" aria-label="${T("Hipotálamo ligado à adeno-hipófise por vasos porta e à neuro-hipófise por axônios", "Hipotálamo unido a la adenohipófisis por vasos porta y a la neurohipófisis por axones")}">
         <path class="f-vi" d="M40 34 Q180 2 320 34 Q334 96 262 108 L206 112 L200 124 L160 124 L154 112 L98 108 Q26 96 40 34z"/>
@@ -268,6 +339,100 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
         { id: "med", r: T("Medula", "Médula"), d: T("<b>Medula.</b> Células maiores, entre vasos, no centro da glândula. Secreta adrenalina e noradrenalina.", "<b>Médula.</b> Células más grandes, entre vasos, en el centro de la glándula. Secreta adrenalina y noradrenalina.") }
       ], { cap: T("Esquema desenhado, não é foto de lâmina. ", "Esquema dibujado, no es foto de un preparado. ") + AVISO });
     },
+    supraCunha() {
+      let sd = 11; const rnd = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      const f = n => n.toFixed(1), pt = p => f(p[0]) + "," + f(p[1]);
+      const Y0 = 130, Y1 = 440, DX = 34, DY = -26;
+      const xL = y => 14 + 26 * (y - Y0) / (Y1 - Y0), xR = y => 184 - 26 * (y - Y0) / (Y1 - Y0);
+      const fx = (y, u) => xL(y) + u * (xR(y) - xL(y)), sp = (t, y) => [xR(y) + DX * t, y + DY * t];
+      const Z = { cap: [130, 139], glo: [139, 178], fas: [178, 318], ret: [318, 362], med: [362, 440] };
+      const c = (x, y, r, fill, st, sw) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fill}" stroke="${st}" stroke-width="${sw}"/>`;
+      const nuc = (x, y, r) => c(x, y, r, "url(#cuNu)", "#2f1846", .4);
+      const dot = (x, y, r, fl) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fl}"/>`;
+      const rbc = (x, y, s) => `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(2.2 * s)}" ry="${f(1.3 * s)}" fill="#d9483c" stroke="#8f2a22" stroke-width=".3"/>`;
+      /* ---- frente: cápsula ---- */
+      let cap = `<rect x="0" y="130" width="200" height="9" fill="url(#cuCap)"/><path d="M10 133 q10 -3 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#6f86b8" stroke-width=".9"/><path d="M10 136.5 q10 -2.5 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#c98a98" stroke-width=".9"/>`;
+      for (let i = 0; i < 9; i++) cap += `<ellipse cx="${f(22 + i * 18 + rnd() * 6)}" cy="${f(133.5 + rnd() * 3)}" rx="3.2" ry="1" fill="#4b2a63" opacity=".8"/>`;
+      /* ---- frente: glomerular (novelos) ---- */
+      let glo = `<rect x="0" y="139" width="200" height="39" fill="#b94d78"/>`;
+      [[.17, 1.0, 158], [.5, .84, 160.5], [.83, 1.08, 156.5]].forEach(a => { const cx = fx(158, a[0]), cy = a[2], k = a[1], n = a[1] < .9 ? 7 : 9, R = 12 * k, rr = 6 * k;
+        for (let i = 0; i < n; i++) { const an = i / n * 6.283 + rnd() * .3, d = R * (.92 + rnd() * .16); glo += c(cx + Math.cos(an) * d, cy + Math.sin(an) * d * .95, rr * (.9 + rnd() * .2), "url(#cuGl)", "#7c2650", .6); }
+        glo += c(cx, cy, rr * .95, "url(#cuGl)", "#7c2650", .6);
+        for (let i = 0; i < n; i++) { const an = i / n * 6.283; glo += nuc(cx + Math.cos(an) * R + (rnd() - .5) * 1.6, cy + Math.sin(an) * R * .95 + (rnd() - .5) * 1.6, 1.9 * k); }
+        glo += nuc(cx, cy, 1.9 * k); });
+      [.33, .67].forEach(u => { glo += `<path d="M${f(fx(142, u))} 140 q6 19 0 37" fill="none" stroke="#c0392b" stroke-width="1.7" opacity=".85"/>`; });
+      /* ---- frente: fasciculada (colunas de células espumosas entre capilares) ---- */
+      let fas = `<rect x="0" y="178" width="200" height="140" fill="#a8372f"/>`;
+      for (let k = 0; k < 6; k++) { const a = (k + .07) / 6, b = (k + .93) / 6;
+        fas += `<polygon points="${pt([fx(178, a), 178])} ${pt([fx(178, b), 178])} ${pt([fx(318, b), 318])} ${pt([fx(318, a), 318])}" fill="url(#cuCol)" stroke="#bd9538" stroke-width=".8"/>`;
+        let y = 181; while (y < 312) { const w = fx(y, b) - fx(y, a), r = (w / 2 - 1.2) * (.8 + rnd() * .22), cx = (fx(y, a) + fx(y, b)) / 2 + (rnd() - .5) * (w / 2 - r), cy = y + r;
+          fas += c(cx, cy, r, "url(#cuFa)", "#d4ac52", .5);
+          for (let i = 0; i < 14; i++) { const an = rnd() * 6.283, d = Math.sqrt(rnd()) * r * .8; fas += `<circle cx="${f(cx + Math.cos(an) * d)}" cy="${f(cy + Math.sin(an) * d)}" r="${f(r * (.06 + rnd() * .16))}" fill="#fffdf0" stroke="#d9b24c" stroke-width=".4" opacity=".95"/>`; }
+          fas += nuc(cx + (rnd() - .5) * w * .18, cy + (rnd() - .5) * r * .4, r * .24); y += 2 * r * .88; } }
+      for (let k = 1; k < 6; k++) { const u = k / 6; fas += `<path d="M${f(fx(178, u))} 178 L${f(fx(318, u))} 318" stroke="#e8776a" stroke-width="1" opacity=".75"/>`; for (let i = 0; i < 4; i++) { const y = 186 + rnd() * 124; fas += rbc(fx(y, u), y, .8); } }
+      /* ---- frente: reticular (cordões em rede) ---- */
+      let ret = `<rect x="0" y="318" width="200" height="44" fill="#d9a28b"/>`, cords = "", cells = "";
+      for (let i = 0; i < 11; i++) { const y = 322 + rnd() * 36; ret += `<ellipse cx="${f(fx(y, rnd()))}" cy="${f(y)}" rx="${f(4 + rnd() * 2)}" ry="${f(1.6 + rnd() * .8)}" fill="#cc4a3e" stroke="#8f2a22" stroke-width=".4" opacity=".9"/>`; }
+      const cy0 = [328, 341, 354], P = [];
+      cy0.forEach((by, j) => { const row = []; for (let x = fx(by, 0) - 4, n = 0; x < fx(by, 1) + 8; x += 9.5, n++) row.push([x, by + Math.sin(x / 11 + j * 2) * 3.2]); P.push(row); cords += `<path d="${row.map((p, i) => (i ? "L" : "M") + f(p[0]) + " " + f(p[1])).join(" ")}" fill="none" stroke="#9a4f3a" stroke-width="10" stroke-linecap="round" opacity=".55"/><path d="${row.map((p, i) => (i ? "L" : "M") + f(p[0]) + " " + f(p[1])).join(" ")}" fill="none" stroke="#e7b9a3" stroke-width="7" stroke-linecap="round" opacity=".9"/>`; row.forEach((p, ix) => { if (ix % 2 === (j % 2)) return; cells += c(p[0], p[1], 5.3, "url(#cuRe)", "#7c4020", .6) + nuc(p[0] + (rnd() - .5), p[1] + (rnd() - .5), 1.9) + dot(p[0] - 1.6, p[1] + 1.5, .6, "#3a2218") + dot(p[0] + 1.8, p[1] - 1.2, .6, "#3a2218"); }); });
+      [0, 1].forEach(j => { for (let i = 0; i < 3; i++) { const a = P[j][2 + i * 3 + (j % 2)], b = P[j + 1][3 + i * 3 - (j % 2)]; if (!a || !b) continue; const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2; cords += `<path d="M${f(a[0])} ${f(a[1])} L${f(b[0])} ${f(b[1])}" stroke="#e7b9a3" stroke-width="6" stroke-linecap="round" opacity=".9"/>`; cells += c(mx, my, 4.6, "url(#cuRe)", "#7c4020", .6) + nuc(mx, my, 1.7); } });
+      ret += cords + cells;
+      /* ---- frente: medula (células cromafins, veia central) ---- */
+      const lx = fx(402, .66), ly = 403;
+      let med = `<rect x="0" y="362" width="200" height="78" fill="#8466b3"/>`;
+      for (let r = 0; r < 6; r++) for (let q = 0; q < 8; q++) { const y = 370 + r * 13 + (rnd() - .5) * 3, x = fx(y, 0) + 8 + q * 15.5 + (r % 2 ? 7 : 0) + (rnd() - .5) * 3;
+        if (x > fx(y, 1) - 4 || y > 436) continue; if (((x - lx) / 29) ** 2 + ((y - ly) / 15) ** 2 < 1) continue;
+        const rr = 7.2 + rnd() * 1.3; med += c(x, y, rr, "url(#cuMe)", "#5c3d90", .6) + nuc(x + (rnd() - .5) * 2, y + (rnd() - .5) * 2, 2.5); for (let i = 0; i < 4; i++) med += dot(x + (rnd() - .5) * rr * 1.3, y + (rnd() - .5) * rr * 1.3, .55, "#4a2c7a"); }
+      const bl = []; for (let i = 0; i < 14; i++) { const an = i / 14 * 6.283, rx = 23 * (.88 + rnd() * .24), ry = 11 * (.86 + rnd() * .3); bl.push([lx + Math.cos(an) * rx, ly + Math.sin(an) * ry - Math.cos(an) * 2]); }
+      const bp = "M" + bl.map(q => f(q[0]) + " " + f(q[1])).join(" L") + " Z";
+      med += `<path d="${bp}" fill="#c9d2f6" stroke="#8f9bd8" stroke-width="5.5" stroke-linejoin="round"/><path d="${bp}" fill="#dfe5fb" stroke="#5a63b8" stroke-width="1.3" stroke-linejoin="round"/><ellipse cx="${f(lx - 3)}" cy="${ly - 2.5}" rx="14" ry="4.5" fill="#f2f5ff" opacity=".7"/>`;
+      bl.forEach((q, i) => { if (i % 2) med += `<ellipse cx="${f(q[0])}" cy="${f(q[1])}" rx="2" ry=".9" fill="#3d4590" opacity=".85"/>`; });
+      med += rbc(lx - 8, ly + 1, 1.2) + rbc(lx + 5, ly - 2, 1.2) + rbc(lx + 11, ly + 3, 1.1);
+      /* ---- lateral (corte transversal: células vistas de cima) ---- */
+      const sband = (z, base, fill, st, rr, caps) => { const [ya, yb] = Z[z]; let s = `<polygon points="${[sp(0, ya), sp(1, ya), sp(1, yb), sp(0, yb)].map(pt).join(" ")}" fill="${base}"/>`, row = 0;
+        for (let y = ya + rr; y < yb; y += rr * 2.1, row++) for (let i = 0; i < 9; i++) { const t = (i + .5 + (row % 2 ? .5 : 0)) / 9.5; if (t > 1) continue; const p = sp(t, y); s += c(p[0], p[1], rr, fill, st, .35); if (caps && rnd() < .12) s += dot(p[0] + rr, p[1] + rr, .9, "#c0392b"); } return s; };
+      const side = { cap: sband("cap", "#c7b2cf", "#d8c4de", "#8d78a5", 2.1, 0), glo: sband("glo", "#b04a78", "#e68db0", "#8f2f5c", 2.7, 1), fas: sband("fas", "#a8372f", "#f1d98a", "#b8902f", 2.7, 1), ret: sband("ret", "#c98670", "#e2ad97", "#8a4636", 2.6, 1), med: sband("med", "#7f62b0", "#c6aae6", "#5c3d90", 3.1, 0) };
+      /* ---- face de cima: superfície da cápsula ---- */
+      let top = `<polygon points="14,130 184,130 218,104 48,104" fill="url(#cuTop)"/>`;
+      for (let i = 1; i < 11; i++) { const t = i / 11, x0 = 14 + 34 * t, y0 = 130 - 26 * t; top += `<path d="M${f(x0)} ${f(y0)} q10 ${f(-1.5 - rnd() * 1.5)} 21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0" fill="none" stroke="${i % 2 ? "#8aa0cc" : "#d79aa8"}" stroke-width=".7" opacity=".85"/>`; }
+      for (let i = 0; i < 12; i++) { const t = .08 + rnd() * .84, u = .05 + rnd() * .9; top += `<ellipse cx="${f(14 + 170 * u + 34 * t)}" cy="${f(130 - 26 * t)}" rx="3" ry=".9" fill="#4b2a63" opacity=".55"/>`; }
+      /* ---- localizador ---- */
+      const loc = `<g transform="translate(236 4)"><path d="M10 66 Q4 56 14 46 L44 10 Q52 2 60 10 L96 52 Q104 62 94 68 Q60 76 10 66 Z" fill="#ecc267" stroke="#a9792d" stroke-width="1.3"/><path d="M10 66 Q4 56 14 46 L44 10 Q52 2 60 10 L96 52 Q104 62 94 68 Q60 76 10 66 Z" transform="translate(52 44) scale(.6) translate(-52 -44)" fill="#9b3d3d"/><ellipse cx="50" cy="48" rx="8" ry="4.6" fill="#4f78cf" stroke="#2c4c99" stroke-width=".8"/><ellipse cx="62" cy="40" rx="2.6" ry="2" fill="#d9483c"/><ellipse cx="40" cy="56" rx="3" ry="2.2" fill="#4f78cf"/><rect x="71.5" y="21.5" width="13" height="19" rx="2" transform="rotate(48 78 31)" fill="none" stroke="#d63b2c" stroke-width="1.7"/></g><path d="M314 36 L219 105" stroke="#d63b2c" stroke-width=".9" stroke-dasharray="3 2" opacity=".8"/><text x="240" y="90" class="mut" font-size="10">${T("onde é o corte", "dónde es el corte")}</text>`;
+      /* ---- rótulos com linha de chamada ---- */
+      const lab = (on, ys, nome, l2, l3) => { const t = sp(.55, ys + 14.3); return `<g data-on="${on}"><path d="M232 ${f(ys)} L${f(t[0])} ${f(t[1])}" stroke="currentColor" stroke-width=".8" opacity=".6"/><circle cx="${f(t[0])}" cy="${f(t[1])}" r="1.8" fill="currentColor"/><text x="236" y="${f(ys + 4)}" class="cap">${nome}</text>${l2 ? `<text x="236" y="${f(ys + 16)}" class="mut">${l2}</text>` : ""}${l3 ? `<text x="236" y="${f(ys + 28)}" class="mut">${l3}</text>` : ""}</g>`; };
+      const labels = lab("tudo", 120.2, T("Cápsula", "Cápsula")) + lab("tudo glo", 144.2, "Zona glomerular", T("aldosterona", "aldosterona")) + lab("tudo fr", 233.7, "Zona fasciculada", T("cortisol", "cortisol")) + lab("tudo fr", 325.7, "Zona reticular", T("androgênios", "andrógenos")) + lab("tudo med", 386.7, T("Medula", "Médula"), T("adrenalina e", "adrenalina y"), "noradrenalina");
+      return U.estados(T("A suprarrenal em corte: de fora para dentro, como cada camada é", "La suprarrenal en corte: de afuera hacia adentro, cómo es cada capa"), `<svg class="sv" viewBox="0 0 360 462" role="img" aria-label="${T("Bloco em corte da suprarrenal mostrando a cápsula, as três camadas do córtex e a medula com a veia central", "Bloque en corte de la suprarrenal que muestra la cápsula, las tres capas de la corteza y la médula con la vena central")}">
+        <defs>
+          <radialGradient id="cuGl" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#f6bdd5"/><stop offset=".6" stop-color="#d4698f"/><stop offset="1" stop-color="#8f2f5c"/></radialGradient>
+          <radialGradient id="cuFa" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#fffbe6"/><stop offset=".65" stop-color="#f6e29b"/><stop offset="1" stop-color="#d9b04a"/></radialGradient>
+          <radialGradient id="cuRe" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#f1c8b5"/><stop offset=".6" stop-color="#c98169"/><stop offset="1" stop-color="#8a4636"/></radialGradient>
+          <radialGradient id="cuMe" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#e8d9f6"/><stop offset=".6" stop-color="#b393d6"/><stop offset="1" stop-color="#6f4aa3"/></radialGradient>
+          <radialGradient id="cuNu" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#8a5fb0"/><stop offset="1" stop-color="#2f1846"/></radialGradient>
+          <linearGradient id="cuCol" x1="0" x2="1"><stop offset="0" stop-color="#d9b04a"/><stop offset=".28" stop-color="#fbeeb4"/><stop offset=".62" stop-color="#f6e29b"/><stop offset="1" stop-color="#cfa23f"/></linearGradient>
+          <linearGradient id="cuCap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9c3cf"/><stop offset="1" stop-color="#b9c6e6"/></linearGradient>
+          <linearGradient id="cuTop" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f1d4dc"/><stop offset="1" stop-color="#c9d4ee"/></linearGradient>
+          <linearGradient id="cuLit" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></linearGradient>
+          <filter id="cuBl" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
+          <clipPath id="cuF"><polygon points="14,130 184,130 158,440 40,440"/></clipPath>
+          <clipPath id="cuS"><polygon points="184,130 218,104 192,414 158,440"/></clipPath>
+        </defs>
+        <ellipse cx="108" cy="448" rx="94" ry="6" fill="#000" opacity=".16" filter="url(#cuBl)"/>
+        <g clip-path="url(#cuS)">
+          <g data-on="tudo">${side.cap}</g><g data-on="tudo glo">${side.glo}</g><g data-on="tudo fr">${side.fas}${side.ret}</g><g data-on="tudo med">${side.med}</g>
+          <rect x="150" y="90" width="80" height="360" fill="#1c1030" opacity=".14"/>
+        </g>
+        <g clip-path="url(#cuF)">
+          <g data-on="tudo">${cap}</g><g data-on="tudo glo">${glo}</g><g data-on="tudo fr">${fas}${ret}</g><g data-on="tudo med">${med}</g>
+          <rect x="10" y="125" width="180" height="320" fill="url(#cuLit)"/>
+          <path d="M0 139 H200 M0 178 H200 M0 318 H200 M0 362 H200" stroke="#fff" stroke-width=".7" opacity=".4"/>
+        </g>
+        <g data-on="tudo">${top}</g><rect x="0" y="0" width="0" height="0"/>
+        <polygon points="14,130 184,130 158,440 40,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="184,130 218,104 192,414 158,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="14,130 184,130 218,104 48,104" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        ${loc}${labels}
+      </svg>`, SUPRA_EST, { cap: T("Ilustração própria e simplificada: o corte mostra como as células se arrumam em cada camada. Formas e proporções aproximadas. ", "Ilustración propia y simplificada: el corte muestra cómo se ordenan las células en cada capa. Formas y proporciones aproximadas. ") + AVISO });
+    },
     supra2d() {
       return U.estados(T("A suprarrenal em corte: medula e as três camadas do córtex", "La suprarrenal en corte: médula y las tres capas de la corteza"), `<svg class="sv" viewBox="0 0 360 260" role="img" aria-label="${T("Corte da suprarrenal: glomerular por fora, fasciculada, reticular e medula no centro", "Corte de la suprarrenal: glomerular por fuera, fasciculada, reticular y médula en el centro")}">
         <g data-on="tudo glo"><ellipse class="f-bl" cx="180" cy="130" rx="168" ry="120"/><text x="180" y="27" text-anchor="middle">glomerular</text><text x="180" y="243" text-anchor="middle" class="mut">aldosterona</text></g>
@@ -492,7 +657,7 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
   };
   const temas = [
     { id: "eixo", n: "9.1", nome: T("Eixo hipotálamo-hipófise", "Eje hipotálamo-hipófisis"), curto: T("Eixo", "Eje"), sub: T("Conexão neural e vasos porta, hormônios do hipotálamo e da hipófise, alças", "Conexión neural y vasos porta, hormonas del hipotálamo y de la hipófisis, asas"), estudado: "2026-11-09",
-      figuras: ["eixo", "hipot", "alcas"],
+      figuras: ["eixo", "hipoCunha", "hipot", "alcas"],
       chave: T("A posterior recebe axônios; a anterior recebe hormônios pelos vasos porta, em alta concentração.", "La posterior recibe axones; la anterior recibe hormonas por los vasos porta, en alta concentración."),
       resumo: [["", [
         T("Hipófise posterior (neuro-hipófise): conexão NEURAL. Corpos celulares no hipotálamo (núcleo supraóptico: ADH; núcleo paraventricular: ocitocina), axônios descem até a neuro-hipófise, onde os hormônios são armazenados e liberados. Origem: tecido neural.", "Hipófisis posterior (neurohipófisis): conexión NEURAL. Cuerpos celulares en el hipotálamo (núcleo supraóptico: ADH; núcleo paraventricular: oxitocina); los axones descienden hasta la neurohipófisis, donde las hormonas se almacenan y se liberan. Origen: tejido neural."),
@@ -689,7 +854,7 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
 
     { id: "supra", n: "9.6", nome: T("Suprarrenal: zonas, cortisol e aldosterona", "Suprarrenal: zonas, cortisol y aldosterona"), curto: "Suprarrenal", sub: T("Zonas, ritmo e freio do cortisol, aldosterona, sete ações, androgênios", "Zonas, ritmo y freno del cortisol, aldosterona, siete acciones, andrógenos"), estudado: "2026-11-10",
       aviso: T("As doenças (Addison, Cushing e Conn) estão no tema seguinte.", "Las enfermedades (Addison, Cushing y Conn) están en el tema siguiente."),
-      figuras: ["supra", "supraHist", "aldo"],
+      figuras: ["supra", "supraCunha", "supraHist", "aldo"],
       chave: T("Cortisol: eixo CRH, ACTH, freado pelo próprio cortisol. Aldosterona: angiotensina II e potássio; retém sódio e elimina potássio e hidrogênio.", "Cortisol: eje CRH, ACTH, frenado por el propio cortisol. Aldosterona: angiotensina II y potasio; retiene sodio y elimina potasio e hidrógeno."),
       resumo: [[T("Zonas e regulação", "Zonas y regulación"), [
         T("MEDULA (interna, cerca de 20%, neuroectodérmica): adrenalina e noradrenalina. CÓRTEX (externo, cerca de 80%, mesodérmico): esteroides.", "MÉDULA (interna, cerca del 20%, neuroectodérmica): adrenalina y noradrenalina. CORTEZA (externa, cerca del 80%, mesodérmica): esteroides."),
