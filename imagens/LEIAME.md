@@ -21,3 +21,4 @@ Nada além disso. Na dúvida sobre a origem, não entra.
 
 | Arquivo | O que mostra | Autor / obra / ano | Licença | Página de origem |
 |---|---|---|---|---|
+| imagens/fisiologia/gray1185-suprarrenal-corte.png | Corte histológico da suprarrenal: cápsula, zonas do córtex e medula | H. V. Carter, em H. Gray, Anatomy of the Human Body, 20ª ed., 1918, fig. 1185 | Domínio público | https://commons.wikimedia.org/wiki/File:Gray1185.png (recortada para tirar os nomes em inglês; sem retoque) |

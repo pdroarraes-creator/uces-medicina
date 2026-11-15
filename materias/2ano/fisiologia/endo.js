@@ -268,6 +268,20 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
         { id: "med", r: T("Medula", "Médula"), d: T("<b>Medula.</b> Células maiores, entre vasos, no centro da glândula. Secreta adrenalina e noradrenalina.", "<b>Médula.</b> Células más grandes, entre vasos, en el centro de la glándula. Secreta adrenalina y noradrenalina.") }
       ], { cap: T("Esquema desenhado, não é foto de lâmina. ", "Esquema dibujado, no es foto de un preparado. ") + AVISO });
     },
+    supraReal() {
+      return U.prancha(T("A suprarrenal de verdade: corte ao microscópio", "La suprarrenal de verdad: corte al microscopio"),
+        { src: "imagens/fisiologia/gray1185-suprarrenal-corte.png",
+          alt: T("Gravura histórica de um corte da suprarrenal, com cápsula, três camadas do córtex e medula", "Grabado histórico de un corte de la suprarrenal, con cápsula, tres capas de la corteza y médula"),
+          credito: T("Gray, Anatomia do Corpo Humano (20ª ed., 1918), fig. 1185, ilustração de H. V. Carter. Domínio público. Recortada, sem retoque.", "Gray, Anatomía del Cuerpo Humano (20.ª ed., 1918), fig. 1185, ilustración de H. V. Carter. Dominio público. Recortada, sin retoque."),
+          link: "https://commons.wikimedia.org/wiki/File:Gray1185.png" },
+        [
+          { x: 50, y: 3.3, on: "tudo", t: T("Cápsula", "Cápsula"), d: T("Envoltório de tecido conjuntivo da glândula.", "Envoltorio de tejido conectivo de la glándula.") },
+          { x: 55, y: 12.1, on: "tudo glo", t: "Zona glomerular", d: T("Células em novelos logo abaixo da cápsula. Produz <b>aldosterona</b> (mineralocorticoide).", "Células en ovillos justo bajo la cápsula. Produce <b>aldosterona</b> (mineralocorticoide).") },
+          { x: 55, y: 33, on: "tudo fr", t: "Zona fasciculada", d: T("Células em colunas, a camada mais espessa do córtex. Produz <b>cortisol</b> (glicocorticoide) sob o eixo CRH, ACTH.", "Células en columnas, la capa más gruesa de la corteza. Produce <b>cortisol</b> (glucocorticoide) bajo el eje CRH, ACTH.") },
+          { x: 55, y: 57.6, on: "tudo fr", t: "Zona reticular", d: T("Células em rede, junto à medula. Produz <b>androgênios</b> suprarrenais, também sob a ACTH.", "Células en red, junto a la médula. Produce <b>andrógenos</b> suprarrenales, también bajo la ACTH.") },
+          { x: 31, y: 87.9, on: "tudo med", t: T("Medula", "Médula"), d: T("Centro da glândula. Produz <b>adrenalina e noradrenalina</b>; origem neuroectodérmica.", "Centro de la glándula. Produce <b>adrenalina y noradrenalina</b>; origen neuroectodérmico.") }
+        ], SUPRA_EST, { cap: T("Gravura histórica: serve para ver a organização em camadas, não para medir espessuras. Os nomes são do Atlas.", "Grabado histórico: sirve para ver la organización en capas, no para medir espesores. Los nombres son del Atlas.") });
+    },
     supra2d() {
       return U.estados(T("A suprarrenal em corte: medula e as três camadas do córtex", "La suprarrenal en corte: médula y las tres capas de la corteza"), `<svg class="sv" viewBox="0 0 360 260" role="img" aria-label="${T("Corte da suprarrenal: glomerular por fora, fasciculada, reticular e medula no centro", "Corte de la suprarrenal: glomerular por fuera, fasciculada, reticular y médula en el centro")}">
         <g data-on="tudo glo"><ellipse class="f-bl" cx="180" cy="130" rx="168" ry="120"/><text x="180" y="27" text-anchor="middle">glomerular</text><text x="180" y="243" text-anchor="middle" class="mut">aldosterona</text></g>
@@ -689,7 +703,7 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
 
     { id: "supra", n: "9.6", nome: T("Suprarrenal: zonas, cortisol e aldosterona", "Suprarrenal: zonas, cortisol y aldosterona"), curto: "Suprarrenal", sub: T("Zonas, ritmo e freio do cortisol, aldosterona, sete ações, androgênios", "Zonas, ritmo y freno del cortisol, aldosterona, siete acciones, andrógenos"), estudado: "2026-11-10",
       aviso: T("As doenças (Addison, Cushing e Conn) estão no tema seguinte.", "Las enfermedades (Addison, Cushing y Conn) están en el tema siguiente."),
-      figuras: ["supra", "supraHist", "aldo"],
+      figuras: ["supra", "supraHist", "supraReal", "aldo"],
       chave: T("Cortisol: eixo CRH, ACTH, freado pelo próprio cortisol. Aldosterona: angiotensina II e potássio; retém sódio e elimina potássio e hidrogênio.", "Cortisol: eje CRH, ACTH, frenado por el propio cortisol. Aldosterona: angiotensina II y potasio; retiene sodio y elimina potasio e hidrógeno."),
       resumo: [[T("Zonas e regulação", "Zonas y regulación"), [
         T("MEDULA (interna, cerca de 20%, neuroectodérmica): adrenalina e noradrenalina. CÓRTEX (externo, cerca de 80%, mesodérmico): esteroides.", "MÉDULA (interna, cerca del 20%, neuroectodérmica): adrenalina y noradrenalina. CORTEZA (externa, cerca del 80%, mesodérmica): esteroides."),

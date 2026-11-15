@@ -139,8 +139,8 @@ details > summary::-webkit-details-marker { display: none }
 .fig h3 { font-size: 1rem; font-weight: 800 } .fig svg.sv { width: 100%; height: auto; display: block; max-height: 70vh }
 .fig .desc { background: var(--sunk); border-radius: 12px; padding: 10px 14px; font-size: .95rem } .fig .desc b { color: var(--c) }
 .fig figcaption { font-size: .82rem; color: var(--muted) }
-.prancha { position: relative; background: #fff; border-radius: 12px; overflow: hidden; line-height: 0 }
-.prancha img { width: 100%; height: auto; display: block }
+.prancha { position: relative; background: #fff; border-radius: 12px; overflow: hidden; line-height: 0; width: fit-content; max-width: 100%; margin: 0 auto }
+.prancha img { width: auto; max-width: 100%; max-height: 70vh; height: auto; display: block }
 .prancha .vazio { line-height: 1.5; padding: 32px 16px; text-align: center; color: #5a5f7b; font-size: .9rem }
 .prancha .pino { position: absolute; transform: translate(-50%, -50%); min-width: 26px; height: 26px; padding: 0 6px; border-radius: 13px; border: 2px solid #fff; background: #14152e; color: #fff; font: 700 .78rem/22px var(--fd, inherit); text-align: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.45); transition: opacity .2s, background .2s }
 .prancha .pino::after { content: ""; position: absolute; inset: -10px }
