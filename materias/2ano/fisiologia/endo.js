@@ -298,27 +298,27 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
       for (let i = 0; i < 9; i++) cap += `<ellipse cx="${f(22 + i * 18 + rnd() * 6)}" cy="${f(133.5 + rnd() * 3)}" rx="3.2" ry="1" fill="#4b2a63" opacity=".8"/>`;
       /* ---- frente: glomerular (novelos) ---- */
       let glo = `<rect x="0" y="139" width="200" height="39" fill="#b94d78"/>`;
-      [[.5 - .01 - .33, 0], [.5, 1], [.5 + .33, 2]].forEach(a => { const cx = fx(158, a[0]), cy = 158.5;
-        for (let i = 0; i < 8; i++) { const an = i / 8 * 6.283 + rnd() * .25; glo += c(cx + Math.cos(an) * 12.2, cy + Math.sin(an) * 11.6, 6.1, "url(#cuGl)", "#7c2650", .6); }
-        glo += c(cx, cy, 5.8, "url(#cuGl)", "#7c2650", .6);
-        for (let i = 0; i < 8; i++) { const an = i / 8 * 6.283; glo += nuc(cx + Math.cos(an) * 12.2 + (rnd() - .5) * 1.4, cy + Math.sin(an) * 11.6 + (rnd() - .5) * 1.4, 1.9); }
-        glo += nuc(cx, cy, 1.9); });
+      [[.17, 1.0, 158], [.5, .84, 160.5], [.83, 1.08, 156.5]].forEach(a => { const cx = fx(158, a[0]), cy = a[2], k = a[1], n = a[1] < .9 ? 7 : 9, R = 12 * k, rr = 6 * k;
+        for (let i = 0; i < n; i++) { const an = i / n * 6.283 + rnd() * .3, d = R * (.92 + rnd() * .16); glo += c(cx + Math.cos(an) * d, cy + Math.sin(an) * d * .95, rr * (.9 + rnd() * .2), "url(#cuGl)", "#7c2650", .6); }
+        glo += c(cx, cy, rr * .95, "url(#cuGl)", "#7c2650", .6);
+        for (let i = 0; i < n; i++) { const an = i / n * 6.283; glo += nuc(cx + Math.cos(an) * R + (rnd() - .5) * 1.6, cy + Math.sin(an) * R * .95 + (rnd() - .5) * 1.6, 1.9 * k); }
+        glo += nuc(cx, cy, 1.9 * k); });
       [.33, .67].forEach(u => { glo += `<path d="M${f(fx(142, u))} 140 q6 19 0 37" fill="none" stroke="#c0392b" stroke-width="1.7" opacity=".85"/>`; });
       /* ---- frente: fasciculada (colunas de células espumosas entre capilares) ---- */
       let fas = `<rect x="0" y="178" width="200" height="140" fill="#a8372f"/>`;
       for (let k = 0; k < 6; k++) { const a = (k + .07) / 6, b = (k + .93) / 6;
         fas += `<polygon points="${pt([fx(178, a), 178])} ${pt([fx(178, b), 178])} ${pt([fx(318, b), 318])} ${pt([fx(318, a), 318])}" fill="url(#cuCol)" stroke="#bd9538" stroke-width=".8"/>`;
-        let y = 181; while (y < 312) { const w = fx(y, b) - fx(y, a), r = w / 2 - 1.2, cx = (fx(y, a) + fx(y, b)) / 2, cy = y + r;
+        let y = 181; while (y < 312) { const w = fx(y, b) - fx(y, a), r = (w / 2 - 1.2) * (.8 + rnd() * .22), cx = (fx(y, a) + fx(y, b)) / 2 + (rnd() - .5) * (w / 2 - r), cy = y + r;
           fas += c(cx, cy, r, "url(#cuFa)", "#d4ac52", .5);
-          for (let i = 0; i < 6; i++) { const an = rnd() * 6.283, d = Math.sqrt(rnd()) * r * .72; fas += `<circle cx="${f(cx + Math.cos(an) * d)}" cy="${f(cy + Math.sin(an) * d)}" r="${f(r * (.1 + rnd() * .12))}" fill="#fffdf0" stroke="#e4c46c" stroke-width=".35" opacity=".92"/>`; }
-          fas += nuc(cx + (rnd() - .5) * w * .18, cy + (rnd() - .5) * r * .4, r * .24); y += 2 * r * .93; } }
+          for (let i = 0; i < 14; i++) { const an = rnd() * 6.283, d = Math.sqrt(rnd()) * r * .8; fas += `<circle cx="${f(cx + Math.cos(an) * d)}" cy="${f(cy + Math.sin(an) * d)}" r="${f(r * (.06 + rnd() * .16))}" fill="#fffdf0" stroke="#d9b24c" stroke-width=".4" opacity=".95"/>`; }
+          fas += nuc(cx + (rnd() - .5) * w * .18, cy + (rnd() - .5) * r * .4, r * .24); y += 2 * r * .88; } }
       for (let k = 1; k < 6; k++) { const u = k / 6; fas += `<path d="M${f(fx(178, u))} 178 L${f(fx(318, u))} 318" stroke="#e8776a" stroke-width="1" opacity=".75"/>`; for (let i = 0; i < 4; i++) { const y = 186 + rnd() * 124; fas += rbc(fx(y, u), y, .8); } }
       /* ---- frente: reticular (cordões em rede) ---- */
       let ret = `<rect x="0" y="318" width="200" height="44" fill="#d9a28b"/>`, cords = "", cells = "";
       for (let i = 0; i < 11; i++) { const y = 322 + rnd() * 36; ret += `<ellipse cx="${f(fx(y, rnd()))}" cy="${f(y)}" rx="${f(4 + rnd() * 2)}" ry="${f(1.6 + rnd() * .8)}" fill="#cc4a3e" stroke="#8f2a22" stroke-width=".4" opacity=".9"/>`; }
       const cy0 = [328, 341, 354], P = [];
-      cy0.forEach((by, j) => { const row = []; for (let x = fx(by, 0) - 4, n = 0; x < fx(by, 1) + 8; x += 9.5, n++) row.push([x, by + Math.sin(x / 11 + j * 2) * 3.2]); P.push(row); cords += `<path d="${row.map((p, i) => (i ? "L" : "M") + f(p[0]) + " " + f(p[1])).join(" ")}" fill="none" stroke="#b9705a" stroke-width="8" stroke-linecap="round" opacity=".5"/>`; row.forEach((p, ix) => { if (ix % 2 === (j % 2)) return; cells += c(p[0], p[1], 5.3, "url(#cuRe)", "#7c4020", .6) + nuc(p[0] + (rnd() - .5), p[1] + (rnd() - .5), 1.9) + dot(p[0] - 1.6, p[1] + 1.5, .6, "#3a2218") + dot(p[0] + 1.8, p[1] - 1.2, .6, "#3a2218"); }); });
-      [0, 1].forEach(j => { for (let i = 0; i < 3; i++) { const a = P[j][2 + i * 3 + (j % 2)], b = P[j + 1][3 + i * 3 - (j % 2)]; if (!a || !b) continue; const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2; cords += `<path d="M${f(a[0])} ${f(a[1])} L${f(b[0])} ${f(b[1])}" stroke="#b9705a" stroke-width="7" stroke-linecap="round" opacity=".5"/>`; cells += c(mx, my, 4.6, "url(#cuRe)", "#7c4020", .6) + nuc(mx, my, 1.7); } });
+      cy0.forEach((by, j) => { const row = []; for (let x = fx(by, 0) - 4, n = 0; x < fx(by, 1) + 8; x += 9.5, n++) row.push([x, by + Math.sin(x / 11 + j * 2) * 3.2]); P.push(row); cords += `<path d="${row.map((p, i) => (i ? "L" : "M") + f(p[0]) + " " + f(p[1])).join(" ")}" fill="none" stroke="#9a4f3a" stroke-width="10" stroke-linecap="round" opacity=".55"/><path d="${row.map((p, i) => (i ? "L" : "M") + f(p[0]) + " " + f(p[1])).join(" ")}" fill="none" stroke="#e7b9a3" stroke-width="7" stroke-linecap="round" opacity=".9"/>`; row.forEach((p, ix) => { if (ix % 2 === (j % 2)) return; cells += c(p[0], p[1], 5.3, "url(#cuRe)", "#7c4020", .6) + nuc(p[0] + (rnd() - .5), p[1] + (rnd() - .5), 1.9) + dot(p[0] - 1.6, p[1] + 1.5, .6, "#3a2218") + dot(p[0] + 1.8, p[1] - 1.2, .6, "#3a2218"); }); });
+      [0, 1].forEach(j => { for (let i = 0; i < 3; i++) { const a = P[j][2 + i * 3 + (j % 2)], b = P[j + 1][3 + i * 3 - (j % 2)]; if (!a || !b) continue; const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2; cords += `<path d="M${f(a[0])} ${f(a[1])} L${f(b[0])} ${f(b[1])}" stroke="#e7b9a3" stroke-width="6" stroke-linecap="round" opacity=".9"/>`; cells += c(mx, my, 4.6, "url(#cuRe)", "#7c4020", .6) + nuc(mx, my, 1.7); } });
       ret += cords + cells;
       /* ---- frente: medula (células cromafins, veia central) ---- */
       const lx = fx(402, .66), ly = 403;
@@ -326,7 +326,11 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
       for (let r = 0; r < 6; r++) for (let q = 0; q < 8; q++) { const y = 370 + r * 13 + (rnd() - .5) * 3, x = fx(y, 0) + 8 + q * 15.5 + (r % 2 ? 7 : 0) + (rnd() - .5) * 3;
         if (x > fx(y, 1) - 4 || y > 436) continue; if (((x - lx) / 29) ** 2 + ((y - ly) / 15) ** 2 < 1) continue;
         const rr = 7.2 + rnd() * 1.3; med += c(x, y, rr, "url(#cuMe)", "#5c3d90", .6) + nuc(x + (rnd() - .5) * 2, y + (rnd() - .5) * 2, 2.5); for (let i = 0; i < 4; i++) med += dot(x + (rnd() - .5) * rr * 1.3, y + (rnd() - .5) * rr * 1.3, .55, "#4a2c7a"); }
-      med += `<ellipse cx="${f(lx)}" cy="${ly}" rx="23" ry="11" transform="rotate(-8 ${f(lx)} ${ly})" fill="#c9d2f6" stroke="#5a63b8" stroke-width="1.8"/><ellipse cx="${f(lx - 3)}" cy="${ly - 2.5}" rx="15" ry="5.5" transform="rotate(-8 ${f(lx)} ${ly})" fill="#e6ebfd" opacity=".75"/>` + rbc(lx - 8, ly + 1, 1.2) + rbc(lx + 5, ly - 2, 1.2) + rbc(lx + 11, ly + 3, 1.1);
+      const bl = []; for (let i = 0; i < 14; i++) { const an = i / 14 * 6.283, rx = 23 * (.88 + rnd() * .24), ry = 11 * (.86 + rnd() * .3); bl.push([lx + Math.cos(an) * rx, ly + Math.sin(an) * ry - Math.cos(an) * 2]); }
+      const bp = "M" + bl.map(q => f(q[0]) + " " + f(q[1])).join(" L") + " Z";
+      med += `<path d="${bp}" fill="#c9d2f6" stroke="#8f9bd8" stroke-width="5.5" stroke-linejoin="round"/><path d="${bp}" fill="#dfe5fb" stroke="#5a63b8" stroke-width="1.3" stroke-linejoin="round"/><ellipse cx="${f(lx - 3)}" cy="${ly - 2.5}" rx="14" ry="4.5" fill="#f2f5ff" opacity=".7"/>`;
+      bl.forEach((q, i) => { if (i % 2) med += `<ellipse cx="${f(q[0])}" cy="${f(q[1])}" rx="2" ry=".9" fill="#3d4590" opacity=".85"/>`; });
+      med += rbc(lx - 8, ly + 1, 1.2) + rbc(lx + 5, ly - 2, 1.2) + rbc(lx + 11, ly + 3, 1.1);
       /* ---- lateral (corte transversal: células vistas de cima) ---- */
       const sband = (z, base, fill, st, rr, caps) => { const [ya, yb] = Z[z]; let s = `<polygon points="${[sp(0, ya), sp(1, ya), sp(1, yb), sp(0, yb)].map(pt).join(" ")}" fill="${base}"/>`, row = 0;
         for (let y = ya + rr; y < yb; y += rr * 2.1, row++) for (let i = 0; i < 9; i++) { const t = (i + .5 + (row % 2 ? .5 : 0)) / 9.5; if (t > 1) continue; const p = sp(t, y); s += c(p[0], p[1], rr, fill, st, .35); if (caps && rnd() < .12) s += dot(p[0] + rr, p[1] + rr, .9, "#c0392b"); } return s; };
