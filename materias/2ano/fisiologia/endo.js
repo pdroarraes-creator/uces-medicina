@@ -282,6 +282,96 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
           { x: 31, y: 87.9, on: "tudo med", t: T("Medula", "Médula"), d: T("Centro da glândula. Produz <b>adrenalina e noradrenalina</b>; origem neuroectodérmica.", "Centro de la glándula. Produce <b>adrenalina y noradrenalina</b>; origen neuroectodérmico.") }
         ], SUPRA_EST, { cap: T("Gravura histórica: serve para ver a organização em camadas, não para medir espessuras. Os nomes são do Atlas.", "Grabado histórico: sirve para ver la organización en capas, no para medir espesores. Los nombres son del Atlas.") });
     },
+    supraCunha() {
+      let sd = 11; const rnd = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      const f = n => n.toFixed(1), pt = p => f(p[0]) + "," + f(p[1]);
+      const Y0 = 130, Y1 = 440, DX = 34, DY = -26;
+      const xL = y => 14 + 26 * (y - Y0) / (Y1 - Y0), xR = y => 184 - 26 * (y - Y0) / (Y1 - Y0);
+      const fx = (y, u) => xL(y) + u * (xR(y) - xL(y)), sp = (t, y) => [xR(y) + DX * t, y + DY * t];
+      const Z = { cap: [130, 139], glo: [139, 178], fas: [178, 318], ret: [318, 362], med: [362, 440] };
+      const c = (x, y, r, fill, st, sw) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fill}" stroke="${st}" stroke-width="${sw}"/>`;
+      const nuc = (x, y, r) => c(x, y, r, "url(#cuNu)", "#2f1846", .4);
+      const dot = (x, y, r, fl) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fl}"/>`;
+      const rbc = (x, y, s) => `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(2.2 * s)}" ry="${f(1.3 * s)}" fill="#d9483c" stroke="#8f2a22" stroke-width=".3"/>`;
+      /* ---- frente: cápsula ---- */
+      let cap = `<rect x="0" y="130" width="200" height="9" fill="url(#cuCap)"/><path d="M10 133 q10 -3 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#6f86b8" stroke-width=".9"/><path d="M10 136.5 q10 -2.5 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#c98a98" stroke-width=".9"/>`;
+      for (let i = 0; i < 9; i++) cap += `<ellipse cx="${f(22 + i * 18 + rnd() * 6)}" cy="${f(133.5 + rnd() * 3)}" rx="3.2" ry="1" fill="#4b2a63" opacity=".8"/>`;
+      /* ---- frente: glomerular (novelos) ---- */
+      let glo = `<rect x="0" y="139" width="200" height="39" fill="#b94d78"/>`;
+      [[.5 - .01 - .33, 0], [.5, 1], [.5 + .33, 2]].forEach(a => { const cx = fx(158, a[0]), cy = 158.5;
+        for (let i = 0; i < 8; i++) { const an = i / 8 * 6.283 + rnd() * .25; glo += c(cx + Math.cos(an) * 12.2, cy + Math.sin(an) * 11.6, 6.1, "url(#cuGl)", "#7c2650", .6); }
+        glo += c(cx, cy, 5.8, "url(#cuGl)", "#7c2650", .6);
+        for (let i = 0; i < 8; i++) { const an = i / 8 * 6.283; glo += nuc(cx + Math.cos(an) * 12.2 + (rnd() - .5) * 1.4, cy + Math.sin(an) * 11.6 + (rnd() - .5) * 1.4, 1.9); }
+        glo += nuc(cx, cy, 1.9); });
+      [.33, .67].forEach(u => { glo += `<path d="M${f(fx(142, u))} 140 q6 19 0 37" fill="none" stroke="#c0392b" stroke-width="1.7" opacity=".85"/>`; });
+      /* ---- frente: fasciculada (colunas de células espumosas entre capilares) ---- */
+      let fas = `<rect x="0" y="178" width="200" height="140" fill="#a8372f"/>`;
+      for (let k = 0; k < 6; k++) { const a = (k + .07) / 6, b = (k + .93) / 6;
+        fas += `<polygon points="${pt([fx(178, a), 178])} ${pt([fx(178, b), 178])} ${pt([fx(318, b), 318])} ${pt([fx(318, a), 318])}" fill="url(#cuCol)" stroke="#bd9538" stroke-width=".8"/>`;
+        let y = 181; while (y < 312) { const w = fx(y, b) - fx(y, a), r = w / 2 - 1.2, cx = (fx(y, a) + fx(y, b)) / 2, cy = y + r;
+          fas += c(cx, cy, r, "url(#cuFa)", "#d4ac52", .5);
+          for (let i = 0; i < 6; i++) { const an = rnd() * 6.283, d = Math.sqrt(rnd()) * r * .72; fas += `<circle cx="${f(cx + Math.cos(an) * d)}" cy="${f(cy + Math.sin(an) * d)}" r="${f(r * (.1 + rnd() * .12))}" fill="#fffdf0" stroke="#e4c46c" stroke-width=".35" opacity=".92"/>`; }
+          fas += nuc(cx + (rnd() - .5) * w * .18, cy + (rnd() - .5) * r * .4, r * .24); y += 2 * r * .93; } }
+      for (let k = 1; k < 6; k++) { const u = k / 6; fas += `<path d="M${f(fx(178, u))} 178 L${f(fx(318, u))} 318" stroke="#e8776a" stroke-width="1" opacity=".75"/>`; for (let i = 0; i < 4; i++) { const y = 186 + rnd() * 124; fas += rbc(fx(y, u), y, .8); } }
+      /* ---- frente: reticular (cordões em rede) ---- */
+      let ret = `<rect x="0" y="318" width="200" height="44" fill="#d9a28b"/>`, cords = "", cells = "";
+      for (let i = 0; i < 11; i++) { const y = 322 + rnd() * 36; ret += `<ellipse cx="${f(fx(y, rnd()))}" cy="${f(y)}" rx="${f(4 + rnd() * 2)}" ry="${f(1.6 + rnd() * .8)}" fill="#cc4a3e" stroke="#8f2a22" stroke-width=".4" opacity=".9"/>`; }
+      const cy0 = [328, 341, 354], P = [];
+      cy0.forEach((by, j) => { const row = []; for (let x = fx(by, 0) - 4, n = 0; x < fx(by, 1) + 8; x += 9.5, n++) row.push([x, by + Math.sin(x / 11 + j * 2) * 3.2]); P.push(row); cords += `<path d="${row.map((p, i) => (i ? "L" : "M") + f(p[0]) + " " + f(p[1])).join(" ")}" fill="none" stroke="#b9705a" stroke-width="8" stroke-linecap="round" opacity=".5"/>`; row.forEach((p, ix) => { if (ix % 2 === (j % 2)) return; cells += c(p[0], p[1], 5.3, "url(#cuRe)", "#7c4020", .6) + nuc(p[0] + (rnd() - .5), p[1] + (rnd() - .5), 1.9) + dot(p[0] - 1.6, p[1] + 1.5, .6, "#3a2218") + dot(p[0] + 1.8, p[1] - 1.2, .6, "#3a2218"); }); });
+      [0, 1].forEach(j => { for (let i = 0; i < 3; i++) { const a = P[j][2 + i * 3 + (j % 2)], b = P[j + 1][3 + i * 3 - (j % 2)]; if (!a || !b) continue; const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2; cords += `<path d="M${f(a[0])} ${f(a[1])} L${f(b[0])} ${f(b[1])}" stroke="#b9705a" stroke-width="7" stroke-linecap="round" opacity=".5"/>`; cells += c(mx, my, 4.6, "url(#cuRe)", "#7c4020", .6) + nuc(mx, my, 1.7); } });
+      ret += cords + cells;
+      /* ---- frente: medula (células cromafins, veia central) ---- */
+      const lx = fx(402, .66), ly = 403;
+      let med = `<rect x="0" y="362" width="200" height="78" fill="#8466b3"/>`;
+      for (let r = 0; r < 6; r++) for (let q = 0; q < 8; q++) { const y = 370 + r * 13 + (rnd() - .5) * 3, x = fx(y, 0) + 8 + q * 15.5 + (r % 2 ? 7 : 0) + (rnd() - .5) * 3;
+        if (x > fx(y, 1) - 4 || y > 436) continue; if (((x - lx) / 29) ** 2 + ((y - ly) / 15) ** 2 < 1) continue;
+        const rr = 7.2 + rnd() * 1.3; med += c(x, y, rr, "url(#cuMe)", "#5c3d90", .6) + nuc(x + (rnd() - .5) * 2, y + (rnd() - .5) * 2, 2.5); for (let i = 0; i < 4; i++) med += dot(x + (rnd() - .5) * rr * 1.3, y + (rnd() - .5) * rr * 1.3, .55, "#4a2c7a"); }
+      med += `<ellipse cx="${f(lx)}" cy="${ly}" rx="23" ry="11" transform="rotate(-8 ${f(lx)} ${ly})" fill="#c9d2f6" stroke="#5a63b8" stroke-width="1.8"/><ellipse cx="${f(lx - 3)}" cy="${ly - 2.5}" rx="15" ry="5.5" transform="rotate(-8 ${f(lx)} ${ly})" fill="#e6ebfd" opacity=".75"/>` + rbc(lx - 8, ly + 1, 1.2) + rbc(lx + 5, ly - 2, 1.2) + rbc(lx + 11, ly + 3, 1.1);
+      /* ---- lateral (corte transversal: células vistas de cima) ---- */
+      const sband = (z, base, fill, st, rr, caps) => { const [ya, yb] = Z[z]; let s = `<polygon points="${[sp(0, ya), sp(1, ya), sp(1, yb), sp(0, yb)].map(pt).join(" ")}" fill="${base}"/>`, row = 0;
+        for (let y = ya + rr; y < yb; y += rr * 2.1, row++) for (let i = 0; i < 9; i++) { const t = (i + .5 + (row % 2 ? .5 : 0)) / 9.5; if (t > 1) continue; const p = sp(t, y); s += c(p[0], p[1], rr, fill, st, .35); if (caps && rnd() < .12) s += dot(p[0] + rr, p[1] + rr, .9, "#c0392b"); } return s; };
+      const side = { cap: sband("cap", "#c7b2cf", "#d8c4de", "#8d78a5", 2.1, 0), glo: sband("glo", "#b04a78", "#e68db0", "#8f2f5c", 2.7, 1), fas: sband("fas", "#a8372f", "#f1d98a", "#b8902f", 2.7, 1), ret: sband("ret", "#c98670", "#e2ad97", "#8a4636", 2.6, 1), med: sband("med", "#7f62b0", "#c6aae6", "#5c3d90", 3.1, 0) };
+      /* ---- face de cima: superfície da cápsula ---- */
+      let top = `<polygon points="14,130 184,130 218,104 48,104" fill="url(#cuTop)"/>`;
+      for (let i = 1; i < 11; i++) { const t = i / 11, x0 = 14 + 34 * t, y0 = 130 - 26 * t; top += `<path d="M${f(x0)} ${f(y0)} q10 ${f(-1.5 - rnd() * 1.5)} 21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0" fill="none" stroke="${i % 2 ? "#8aa0cc" : "#d79aa8"}" stroke-width=".7" opacity=".85"/>`; }
+      for (let i = 0; i < 12; i++) { const t = .08 + rnd() * .84, u = .05 + rnd() * .9; top += `<ellipse cx="${f(14 + 170 * u + 34 * t)}" cy="${f(130 - 26 * t)}" rx="3" ry=".9" fill="#4b2a63" opacity=".55"/>`; }
+      /* ---- localizador ---- */
+      const loc = `<g transform="translate(236 4)"><path d="M10 66 Q4 56 14 46 L44 10 Q52 2 60 10 L96 52 Q104 62 94 68 Q60 76 10 66 Z" fill="#ecc267" stroke="#a9792d" stroke-width="1.3"/><path d="M10 66 Q4 56 14 46 L44 10 Q52 2 60 10 L96 52 Q104 62 94 68 Q60 76 10 66 Z" transform="translate(52 44) scale(.6) translate(-52 -44)" fill="#9b3d3d"/><ellipse cx="50" cy="48" rx="8" ry="4.6" fill="#4f78cf" stroke="#2c4c99" stroke-width=".8"/><ellipse cx="62" cy="40" rx="2.6" ry="2" fill="#d9483c"/><ellipse cx="40" cy="56" rx="3" ry="2.2" fill="#4f78cf"/><rect x="71.5" y="21.5" width="13" height="19" rx="2" transform="rotate(48 78 31)" fill="none" stroke="#d63b2c" stroke-width="1.7"/></g><path d="M314 36 L219 105" stroke="#d63b2c" stroke-width=".9" stroke-dasharray="3 2" opacity=".8"/><text x="240" y="90" class="mut" font-size="10">${T("onde é o corte", "dónde es el corte")}</text>`;
+      /* ---- rótulos com linha de chamada ---- */
+      const lab = (on, ys, nome, l2, l3) => { const t = sp(.55, ys + 14.3); return `<g data-on="${on}"><path d="M232 ${f(ys)} L${f(t[0])} ${f(t[1])}" stroke="currentColor" stroke-width=".8" opacity=".6"/><circle cx="${f(t[0])}" cy="${f(t[1])}" r="1.8" fill="currentColor"/><text x="236" y="${f(ys + 4)}" class="cap">${nome}</text>${l2 ? `<text x="236" y="${f(ys + 16)}" class="mut">${l2}</text>` : ""}${l3 ? `<text x="236" y="${f(ys + 28)}" class="mut">${l3}</text>` : ""}</g>`; };
+      const labels = lab("tudo", 120.2, T("Cápsula", "Cápsula")) + lab("tudo glo", 144.2, "Zona glomerular", T("aldosterona", "aldosterona")) + lab("tudo fr", 233.7, "Zona fasciculada", T("cortisol", "cortisol")) + lab("tudo fr", 325.7, "Zona reticular", T("androgênios", "andrógenos")) + lab("tudo med", 386.7, T("Medula", "Médula"), T("adrenalina e", "adrenalina y"), "noradrenalina");
+      return U.estados(T("A suprarrenal em corte: de fora para dentro, como cada camada é", "La suprarrenal en corte: de afuera hacia adentro, cómo es cada capa"), `<svg class="sv" viewBox="0 0 360 462" role="img" aria-label="${T("Bloco em corte da suprarrenal mostrando a cápsula, as três camadas do córtex e a medula com a veia central", "Bloque en corte de la suprarrenal que muestra la cápsula, las tres capas de la corteza y la médula con la vena central")}">
+        <defs>
+          <radialGradient id="cuGl" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#f6bdd5"/><stop offset=".6" stop-color="#d4698f"/><stop offset="1" stop-color="#8f2f5c"/></radialGradient>
+          <radialGradient id="cuFa" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#fffbe6"/><stop offset=".65" stop-color="#f6e29b"/><stop offset="1" stop-color="#d9b04a"/></radialGradient>
+          <radialGradient id="cuRe" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#f1c8b5"/><stop offset=".6" stop-color="#c98169"/><stop offset="1" stop-color="#8a4636"/></radialGradient>
+          <radialGradient id="cuMe" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#e8d9f6"/><stop offset=".6" stop-color="#b393d6"/><stop offset="1" stop-color="#6f4aa3"/></radialGradient>
+          <radialGradient id="cuNu" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#8a5fb0"/><stop offset="1" stop-color="#2f1846"/></radialGradient>
+          <linearGradient id="cuCol" x1="0" x2="1"><stop offset="0" stop-color="#d9b04a"/><stop offset=".28" stop-color="#fbeeb4"/><stop offset=".62" stop-color="#f6e29b"/><stop offset="1" stop-color="#cfa23f"/></linearGradient>
+          <linearGradient id="cuCap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9c3cf"/><stop offset="1" stop-color="#b9c6e6"/></linearGradient>
+          <linearGradient id="cuTop" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f1d4dc"/><stop offset="1" stop-color="#c9d4ee"/></linearGradient>
+          <linearGradient id="cuLit" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></linearGradient>
+          <filter id="cuBl" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
+          <clipPath id="cuF"><polygon points="14,130 184,130 158,440 40,440"/></clipPath>
+          <clipPath id="cuS"><polygon points="184,130 218,104 192,414 158,440"/></clipPath>
+        </defs>
+        <ellipse cx="108" cy="448" rx="94" ry="6" fill="#000" opacity=".16" filter="url(#cuBl)"/>
+        <g clip-path="url(#cuS)">
+          <g data-on="tudo">${side.cap}</g><g data-on="tudo glo">${side.glo}</g><g data-on="tudo fr">${side.fas}${side.ret}</g><g data-on="tudo med">${side.med}</g>
+          <rect x="150" y="90" width="80" height="360" fill="#1c1030" opacity=".14"/>
+        </g>
+        <g clip-path="url(#cuF)">
+          <g data-on="tudo">${cap}</g><g data-on="tudo glo">${glo}</g><g data-on="tudo fr">${fas}${ret}</g><g data-on="tudo med">${med}</g>
+          <rect x="10" y="125" width="180" height="320" fill="url(#cuLit)"/>
+          <path d="M0 139 H200 M0 178 H200 M0 318 H200 M0 362 H200" stroke="#fff" stroke-width=".7" opacity=".4"/>
+        </g>
+        <g data-on="tudo">${top}</g><rect x="0" y="0" width="0" height="0"/>
+        <polygon points="14,130 184,130 158,440 40,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="184,130 218,104 192,414 158,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="14,130 184,130 218,104 48,104" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        ${loc}${labels}
+      </svg>`, SUPRA_EST, { cap: T("Ilustração própria e simplificada: o corte mostra como as células se arrumam em cada camada. Formas e proporções aproximadas. ", "Ilustración propia y simplificada: el corte muestra cómo se ordenan las células en cada capa. Formas y proporciones aproximadas. ") + AVISO });
+    },
     supra2d() {
       return U.estados(T("A suprarrenal em corte: medula e as três camadas do córtex", "La suprarrenal en corte: médula y las tres capas de la corteza"), `<svg class="sv" viewBox="0 0 360 260" role="img" aria-label="${T("Corte da suprarrenal: glomerular por fora, fasciculada, reticular e medula no centro", "Corte de la suprarrenal: glomerular por fuera, fasciculada, reticular y médula en el centro")}">
         <g data-on="tudo glo"><ellipse class="f-bl" cx="180" cy="130" rx="168" ry="120"/><text x="180" y="27" text-anchor="middle">glomerular</text><text x="180" y="243" text-anchor="middle" class="mut">aldosterona</text></g>
@@ -703,7 +793,7 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
 
     { id: "supra", n: "9.6", nome: T("Suprarrenal: zonas, cortisol e aldosterona", "Suprarrenal: zonas, cortisol y aldosterona"), curto: "Suprarrenal", sub: T("Zonas, ritmo e freio do cortisol, aldosterona, sete ações, androgênios", "Zonas, ritmo y freno del cortisol, aldosterona, siete acciones, andrógenos"), estudado: "2026-11-10",
       aviso: T("As doenças (Addison, Cushing e Conn) estão no tema seguinte.", "Las enfermedades (Addison, Cushing y Conn) están en el tema siguiente."),
-      figuras: ["supra", "supraHist", "supraReal", "aldo"],
+      figuras: ["supra", "supraCunha", "supraHist", "supraReal", "aldo"],
       chave: T("Cortisol: eixo CRH, ACTH, freado pelo próprio cortisol. Aldosterona: angiotensina II e potássio; retém sódio e elimina potássio e hidrogênio.", "Cortisol: eje CRH, ACTH, frenado por el propio cortisol. Aldosterona: angiotensina II y potasio; retiene sodio y elimina potasio e hidrógeno."),
       resumo: [[T("Zonas e regulação", "Zonas y regulación"), [
         T("MEDULA (interna, cerca de 20%, neuroectodérmica): adrenalina e noradrenalina. CÓRTEX (externo, cerca de 80%, mesodérmico): esteroides.", "MÉDULA (interna, cerca del 20%, neuroectodérmica): adrenalina y noradrenalina. CORTEZA (externa, cerca del 80%, mesodérmica): esteroides."),
