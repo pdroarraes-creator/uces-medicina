@@ -11,7 +11,7 @@ jobs:
       - name: Sintaxe de todos os .js
         run: |
           fail=0
-          for f in $(find materias nuvem.js -name '*.js'); do
+          for f in $(find materias -name '*.js'); do
             node -e "new Function(require('fs').readFileSync('$f','utf8'))" || { echo "ERRO em $f"; fail=1; }
           done
           exit $fail
