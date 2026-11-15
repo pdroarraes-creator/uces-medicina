@@ -22,3 +22,16 @@ jobs:
           const fs=require('fs');let bad=0;
           window.INDICE.anos.forEach(a=>a.materias.forEach(m=>(m.arquivos||[]).forEach(f=>{if(!fs.existsSync(f)){console.log('FALTA',f);bad=1}})));
           process.exit(bad)"
+  navegador:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-save playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Abrir o Atlas, cada matéria e cada tema
+        run: |
+          python3 -m http.server 8766 >/dev/null 2>&1 &
+          sleep 1
+          node tests/smoke.js
