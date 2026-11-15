@@ -35,6 +35,77 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
         a.rotulo(T("vasos porta", "vasos porta"), [-.85, .2, 0], { on: "tudo ant", show: "tudo ant" });
       }, EIXO_EST, { cap: T("Gire para ver o que fica na frente (adeno-hipófise) e atrás (neuro-hipófise). Formas e posições aproximadas. ", "Gira para ver qué queda adelante (adenohipófisis) y atrás (neurohipófisis). Formas y posiciones aproximadas. ") + AVISO, reserva: () => figuras.eixo2d(), dist: 9.2, zoom: { horm: [1.9, [-.58, -.8, 0]] } });
     },
+    hipoCunha() {
+      let sd = 5; const rnd = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+      const f = n => n.toFixed(1), pt = p => f(p[0]) + "," + f(p[1]);
+      const Y0 = 130, Y1 = 440, DX = 34, DY = -26;
+      const xL = y => 14 + 26 * (y - Y0) / (Y1 - Y0), xR = y => 184 - 26 * (y - Y0) / (Y1 - Y0);
+      const fx = (y, u) => xL(y) + u * (xR(y) - xL(y)), sp = (t, y) => [xR(y) + DX * t, y + DY * t];
+      const Z = { cap: [130, 139], ant: [139, 298], int: [298, 326], pos: [326, 440] };
+      const c = (x, y, r, fill, st, sw) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${fill}" stroke="${st}" stroke-width="${sw}"/>`;
+      const nuc = (x, y, r) => c(x, y, r, "url(#hcNu)", "#2f1846", .4);
+      const rbc = (x, y, s) => `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(2.2 * s)}" ry="${f(1.3 * s)}" fill="#d9483c" stroke="#8f2a22" stroke-width=".3"/>`;
+      /* cápsula */
+      let cap = `<rect x="0" y="130" width="200" height="9" fill="url(#hcCap)"/><path d="M10 134 q10 -3 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#6f86b8" stroke-width=".9"/>`;
+      /* adeno-hipófise: cordões de células ao redor de sinusoides */
+      let ant = `<rect x="0" y="139" width="200" height="159" fill="#e9c3d0"/>`;
+      const sinus = []; for (let k = 1; k < 5; k++) sinus.push(k / 5);
+      sinus.forEach((u, k) => { ant += `<path d="M${f(fx(142, u))} 140 C${f(fx(180, u) + 8)} 175 ${f(fx(220, u) - 9)} 230 ${f(fx(296, u))} 297" fill="none" stroke="#bfc9ec" stroke-width="7" stroke-linecap="round"/><path d="M${f(fx(142, u))} 140 C${f(fx(180, u) + 8)} 175 ${f(fx(220, u) - 9)} 230 ${f(fx(296, u))} 297" fill="none" stroke="#6a78c0" stroke-width=".9" opacity=".8"/>`; for (let i = 0; i < 5; i++) { const y = 150 + rnd() * 140; ant += rbc(fx(y, u) + (u * 0), y, .75); } });
+      const tipo = () => { const r = rnd(); return r < .34 ? "a" : r < .62 ? "b" : "c"; };
+      for (let band = 0; band <= 5; band++) { const ua = band / 5.0, ub = (band + 1) / 5.0; for (let y = 144; y < 294; y += 11.6) { const jit = (rnd() - .5) * 2.5, uu = [ua + .045, ub - .045], n = 2; for (let i = 0; i < n; i++) { const u = uu[0] + (uu[1] - uu[0]) * (i + .5) / n, x = fx(y, Math.max(.03, Math.min(.97, u))) + jit, r = 4.8 + rnd() * 1.6, t = band === 0 || band === 5 ? (i ? tipo() : tipo()) : tipo();
+        if (x < fx(y, 0) + 2 || x > fx(y, 1) - 2) continue;
+        if (t === "a") { ant += c(x, y, r, "url(#hcAc)", "#a8431f", .5) + nuc(x + (rnd() - .5), y + (rnd() - .5), r * .36); for (let g = 0; g < 7; g++) ant += `<circle cx="${f(x + (rnd() - .5) * r * 1.3)}" cy="${f(y + (rnd() - .5) * r * 1.3)}" r=".5" fill="#8a2c10"/>`; }
+        else if (t === "b") { ant += c(x, y, r, "url(#hcBa)", "#3d2f84", .5) + nuc(x + (rnd() - .5), y + (rnd() - .5), r * .36); for (let g = 0; g < 7; g++) ant += `<circle cx="${f(x + (rnd() - .5) * r * 1.3)}" cy="${f(y + (rnd() - .5) * r * 1.3)}" r=".5" fill="#20185a"/>`; }
+        else ant += c(x, y, r * .92, "url(#hcCr)", "#b7a3bd", .5) + nuc(x + (rnd() - .5), y + (rnd() - .5), r * .4); } } }
+      /* pars intermédia: cistos de coloide */
+      let int = `<rect x="0" y="298" width="200" height="28" fill="#cdb6d8"/>`;
+      for (let i = 0; i < 6; i++) { const x = fx(312, (i + .5) / 6), rx = 11 + rnd() * 3; int += `<ellipse cx="${f(x)}" cy="${f(312 + (rnd() - .5) * 4)}" rx="${f(rx)}" ry="8" fill="#f4e6f0" stroke="#8b6aa2" stroke-width="1.2"/><ellipse cx="${f(x - 2)}" cy="310" rx="${f(rx * .55)}" ry="3.2" fill="#fff" opacity=".7"/>`; for (let k = 0; k < 6; k++) { const an = k / 6 * 6.283; int += nuc(x + Math.cos(an) * (rx + 2), 312 + Math.sin(an) * 9.6, 1.8); } }
+      /* neuro-hipófise: axônios, pituícitos, corpos de Herring */
+      let pos = `<rect x="0" y="326" width="200" height="114" fill="#f3dfe6"/>`;
+      for (let i = 0; i < 26; i++) { const u = (i + rnd()) / 26, x0 = fx(326, u); pos += `<path d="M${f(x0)} 327 C${f(x0 + (rnd() - .5) * 14)} 360 ${f(x0 + (rnd() - .5) * 14)} 400 ${f(fx(440, u) + (rnd() - .5) * 6)} 439" fill="none" stroke="#d98aa6" stroke-width=".8" opacity=".85"/>`; }
+      for (let i = 0; i < 9; i++) { const y = 340 + rnd() * 90, x = fx(y, .06 + rnd() * .88); pos += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(3.4 + rnd() * 2)}" ry="${f(2.8 + rnd() * 1.4)}" fill="url(#hcHe)" stroke="#b03a63" stroke-width=".7"/>`; }
+      for (let i = 0; i < 24; i++) { const y = 333 + rnd() * 102, x = fx(y, .04 + rnd() * .92), r = 3.4 + rnd() * 1.4; pos += `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(r * 1.25)}" ry="${f(r * .85)}" transform="rotate(${f(rnd() * 180)} ${f(x)} ${f(y)})" fill="#caa3c4" stroke="#6b3d73" stroke-width=".5" opacity=".9"/>` + nuc(x, y, r * .58); }
+      [.3, .7].forEach(u => { pos += `<path d="M${f(fx(332, u))} 327 C${f(fx(360, u) + 10)} 360 ${f(fx(400, u) - 10)} 395 ${f(fx(438, u))} 439" fill="none" stroke="#c0392b" stroke-width="1.7" opacity=".85"/>`; for (let i = 0; i < 4; i++) { const y = 340 + rnd() * 90; pos += rbc(fx(y, u), y, .7); } });
+      /* lateral */
+      const sband = (z, base, fill, st, rr) => { const [ya, yb] = Z[z]; let s = `<polygon points="${[sp(0, ya), sp(1, ya), sp(1, yb), sp(0, yb)].map(pt).join(" ")}" fill="${base}"/>`, row = 0;
+        for (let y = ya + rr; y < yb; y += rr * 2.1, row++) for (let i = 0; i < 9; i++) { const t = (i + .5 + (row % 2 ? .5 : 0)) / 9.5; if (t > 1) continue; const p = sp(t, y), cc = z === "ant" ? (rnd() < .34 ? "#f0a070" : rnd() < .5 ? "#8c7bd0" : fill) : fill; s += c(p[0], p[1], rr, cc, st, .35); } return s; };
+      const side = { cap: sband("cap", "#c7b2cf", "#d8c4de", "#8d78a5", 2.1), ant: sband("ant", "#d9a8bb", "#f1d9e3", "#9c6b84", 2.6), int: sband("int", "#b79ac6", "#e8d9ef", "#7c5a92", 2.6), pos: sband("pos", "#e3c3cf", "#f4e3ea", "#b07a92", 3) };
+      /* face de cima */
+      let top = `<polygon points="14,130 184,130 218,104 48,104" fill="url(#hcTop)"/>`;
+      for (let i = 1; i < 11; i++) { const t = i / 11, x0 = 14 + 34 * t, y0 = 130 - 26 * t; top += `<path d="M${f(x0)} ${f(y0)} q10 ${f(-1.5 - rnd() * 1.5)} 21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0 t21 0" fill="none" stroke="${i % 2 ? "#8aa0cc" : "#d79aa8"}" stroke-width=".7" opacity=".85"/>`; }
+      /* localizador: cabeça de perfil com a sela turca */
+      const loc = `<g transform="translate(236 4)"><path d="M6 44 C6 12 40 0 66 8 C94 16 104 40 96 60 C90 72 70 74 60 70 L56 58 C46 62 34 60 28 54 C16 56 6 52 6 44 Z" fill="#f1e3da" stroke="#a98a74" stroke-width="1.2"/><path d="M40 28 C52 20 70 24 74 36 C70 42 52 46 40 40 Z" fill="#d8c4de" stroke="#8d78a5" stroke-width=".8"/><ellipse cx="60" cy="50" rx="5.5" ry="4.2" fill="#e58aa0" stroke="#a9384f" stroke-width=".9"/><ellipse cx="68" cy="52" rx="3" ry="3.6" fill="#8c7bd0" stroke="#3d2f84" stroke-width=".8"/><rect x="52" y="43" width="22" height="18" rx="3" fill="none" stroke="#d63b2c" stroke-width="1.7"/></g><path d="M308 38 L219 105" stroke="#d63b2c" stroke-width=".9" stroke-dasharray="3 2" opacity=".8"/><text x="236" y="94" class="mut" font-size="10">${T("onde é o corte", "dónde es el corte")}</text>`;
+      const lab = (on, ys, nome, l2, l3) => { const t = sp(.55, ys + 14.3); return `<g data-on="${on}"><path d="M232 ${f(ys)} L${f(t[0])} ${f(t[1])}" stroke="currentColor" stroke-width=".8" opacity=".6"/><circle cx="${f(t[0])}" cy="${f(t[1])}" r="1.8" fill="currentColor"/><text x="236" y="${f(ys + 4)}" class="cap">${nome}</text>${l2 ? `<text x="236" y="${f(ys + 16)}" class="mut">${l2}</text>` : ""}${l3 ? `<text x="236" y="${f(ys + 28)}" class="mut">${l3}</text>` : ""}</g>`; };
+      const labels = lab("tudo", 120.2, T("Cápsula", "Cápsula")) + lab("tudo ant", 170, T("Adeno-hipófise", "Adenohipófisis"), T("células em cordões", "células en cordones"), T("e sinusoides", "y sinusoides")) + lab("tudo ant", 222, T("Acidófilas", "Acidófilas"), T("GH e prolactina", "GH y prolactina")) + lab("tudo ant", 262, T("Basófilas", "Basófilas"), "ACTH, TSH, FSH, LH") + lab("tudo", 301, T("Pars intermédia", "Pars intermedia"), T("cistos de coloide", "quistes de coloide")) + lab("tudo post", 372, T("Neuro-hipófise", "Neurohipófisis"), T("axônios + pituícitos", "axones + pituicitos"), T("guarda ADH, ocitocina", "guarda ADH, oxitocina"));
+      return U.estados(T("A hipófise em corte: o que cada lobo tem por dentro", "La hipófisis en corte: qué tiene cada lóbulo por dentro"), `<svg class="sv" viewBox="0 0 360 462" role="img" aria-label="${T("Bloco em corte da hipófise com a adeno-hipófise, a pars intermédia e a neuro-hipófise", "Bloque en corte de la hipófisis con la adenohipófisis, la pars intermedia y la neurohipófisis")}">
+        <defs>
+          <radialGradient id="hcAc" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#ffd2b0"/><stop offset=".6" stop-color="#ee8f5a"/><stop offset="1" stop-color="#b94a22"/></radialGradient>
+          <radialGradient id="hcBa" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#cfc6f4"/><stop offset=".6" stop-color="#7e6cc6"/><stop offset="1" stop-color="#3f3189"/></radialGradient>
+          <radialGradient id="hcCr" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#fbf6fb"/><stop offset=".7" stop-color="#eadcea"/><stop offset="1" stop-color="#c6b1c9"/></radialGradient>
+          <radialGradient id="hcHe" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#ffc4d2"/><stop offset="1" stop-color="#d9557c"/></radialGradient>
+          <radialGradient id="hcNu" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#8a5fb0"/><stop offset="1" stop-color="#2f1846"/></radialGradient>
+          <linearGradient id="hcCap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9c3cf"/><stop offset="1" stop-color="#b9c6e6"/></linearGradient>
+          <linearGradient id="hcTop" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#f1d4dc"/><stop offset="1" stop-color="#c9d4ee"/></linearGradient>
+          <linearGradient id="hcLit" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".16"/></linearGradient>
+          <filter id="hcBl" x="-20%" y="-200%" width="140%" height="500%"><feGaussianBlur stdDeviation="4"/></filter>
+          <clipPath id="hcF"><polygon points="14,130 184,130 158,440 40,440"/></clipPath>
+          <clipPath id="hcS"><polygon points="184,130 218,104 192,414 158,440"/></clipPath>
+        </defs>
+        <ellipse cx="108" cy="448" rx="94" ry="6" fill="#000" opacity=".16" filter="url(#hcBl)"/>
+        <g clip-path="url(#hcS)"><g data-on="tudo">${side.cap}</g><g data-on="tudo ant">${side.ant}</g><g data-on="tudo">${side.int}</g><g data-on="tudo post">${side.pos}</g><rect x="150" y="90" width="80" height="360" fill="#1c1030" opacity=".14"/></g>
+        <g clip-path="url(#hcF)"><g data-on="tudo">${cap}</g><g data-on="tudo ant">${ant}</g><g data-on="tudo">${int}</g><g data-on="tudo post">${pos}</g>
+          <rect x="10" y="125" width="180" height="320" fill="url(#hcLit)"/><path d="M0 139 H200 M0 298 H200 M0 326 H200" stroke="#fff" stroke-width=".7" opacity=".4"/></g>
+        <g data-on="tudo">${top}</g>
+        <polygon points="14,130 184,130 158,440 40,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="184,130 218,104 192,414 158,440" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        <polygon points="14,130 184,130 218,104 48,104" fill="none" stroke="#4d3a28" stroke-width="1"/>
+        ${loc}${labels}
+      </svg>`, [
+        { id: "tudo", r: T("Visão geral", "Vista general"), d: T("<b>Dois tecidos diferentes num órgão só.</b> A adeno-hipófise é glandular (células em cordões, com capilares); a neuro-hipófise é tecido nervoso (axônios e células de sustentação).", "<b>Dos tejidos distintos en un solo órgano.</b> La adenohipófisis es glandular (células en cordones, con capilares); la neurohipófisis es tejido nervioso (axones y células de sostén).") },
+        { id: "ant", r: "Adeno-hipófise", d: T("<b>Glândula verdadeira.</b> Acidófilas (GH e prolactina), basófilas (ACTH, TSH, FSH e LH) e cromófobas (pouco hormônio). Os capilares sinusoides recebem os fatores do hipotálamo pelos vasos porta.", "<b>Glándula verdadera.</b> Acidófilas (GH y prolactina), basófilas (ACTH, TSH, FSH y LH) y cromófobas (poca hormona). Los capilares sinusoides reciben los factores del hipotálamo por los vasos porta.") },
+        { id: "post", r: "Neuro-hipófise", d: T("<b>Não fabrica hormônio.</b> Guarda ADH e ocitocina que vêm dos axônios do hipotálamo. Os corpos de Herring são os acúmulos desses hormônios; os pituícitos sustentam o tecido.", "<b>No fabrica hormona.</b> Guarda ADH y oxitocina que vienen de los axones del hipotálamo. Los cuerpos de Herring son los acúmulos de esas hormonas; los pituicitos sostienen el tejido.") }
+      ], { cap: T("Ilustração própria e simplificada: o corte mostra como as células se arrumam em cada lobo. Formas e proporções aproximadas. ", "Ilustración propia y simplificada: el corte muestra cómo se ordenan las células en cada lóbulo. Formas y proporciones aproximadas. ") + AVISO });
+    },
     eixo2d() {
       return U.estados(T("O hipotálamo e os dois lobos da hipófise", "El hipotálamo y los dos lóbulos de la hipófisis"), `<svg class="sv" viewBox="0 0 360 340" role="img" aria-label="${T("Hipotálamo ligado à adeno-hipófise por vasos porta e à neuro-hipófise por axônios", "Hipotálamo unido a la adenohipófisis por vasos porta y a la neurohipófisis por axones")}">
         <path class="f-vi" d="M40 34 Q180 2 320 34 Q334 96 262 108 L206 112 L200 124 L160 124 L154 112 L98 108 Q26 96 40 34z"/>
@@ -267,20 +338,6 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
         { id: "fr", r: T("Fasciculada e reticular", "Fasciculada y reticular"), d: T("<b>Fasciculada = feixes:</b> colunas retas e longas, a zona mais espessa. <b>Reticular = rede:</b> cordões que se cruzam. As duas secretam glicocorticoides e androgênios.", "<b>Fasciculada = haces:</b> columnas rectas y largas, la zona más gruesa. <b>Reticular = red:</b> cordones que se cruzan. Las dos secretan glucocorticoides y andrógenos.") },
         { id: "med", r: T("Medula", "Médula"), d: T("<b>Medula.</b> Células maiores, entre vasos, no centro da glândula. Secreta adrenalina e noradrenalina.", "<b>Médula.</b> Células más grandes, entre vasos, en el centro de la glándula. Secreta adrenalina y noradrenalina.") }
       ], { cap: T("Esquema desenhado, não é foto de lâmina. ", "Esquema dibujado, no es foto de un preparado. ") + AVISO });
-    },
-    supraReal() {
-      return U.prancha(T("A suprarrenal de verdade: corte ao microscópio", "La suprarrenal de verdad: corte al microscopio"),
-        { src: "imagens/fisiologia/gray1185-suprarrenal-corte.png",
-          alt: T("Gravura histórica de um corte da suprarrenal, com cápsula, três camadas do córtex e medula", "Grabado histórico de un corte de la suprarrenal, con cápsula, tres capas de la corteza y médula"),
-          credito: T("Gray, Anatomia do Corpo Humano (20ª ed., 1918), fig. 1185, ilustração de H. V. Carter. Domínio público. Recortada, sem retoque.", "Gray, Anatomía del Cuerpo Humano (20.ª ed., 1918), fig. 1185, ilustración de H. V. Carter. Dominio público. Recortada, sin retoque."),
-          link: "https://commons.wikimedia.org/wiki/File:Gray1185.png" },
-        [
-          { x: 50, y: 3.3, on: "tudo", t: T("Cápsula", "Cápsula"), d: T("Envoltório de tecido conjuntivo da glândula.", "Envoltorio de tejido conectivo de la glándula.") },
-          { x: 55, y: 12.1, on: "tudo glo", t: "Zona glomerular", d: T("Células em novelos logo abaixo da cápsula. Produz <b>aldosterona</b> (mineralocorticoide).", "Células en ovillos justo bajo la cápsula. Produce <b>aldosterona</b> (mineralocorticoide).") },
-          { x: 55, y: 33, on: "tudo fr", t: "Zona fasciculada", d: T("Células em colunas, a camada mais espessa do córtex. Produz <b>cortisol</b> (glicocorticoide) sob o eixo CRH, ACTH.", "Células en columnas, la capa más gruesa de la corteza. Produce <b>cortisol</b> (glucocorticoide) bajo el eje CRH, ACTH.") },
-          { x: 55, y: 57.6, on: "tudo fr", t: "Zona reticular", d: T("Células em rede, junto à medula. Produz <b>androgênios</b> suprarrenais, também sob a ACTH.", "Células en red, junto a la médula. Produce <b>andrógenos</b> suprarrenales, también bajo la ACTH.") },
-          { x: 31, y: 87.9, on: "tudo med", t: T("Medula", "Médula"), d: T("Centro da glândula. Produz <b>adrenalina e noradrenalina</b>; origem neuroectodérmica.", "Centro de la glándula. Produce <b>adrenalina y noradrenalina</b>; origen neuroectodérmico.") }
-        ], SUPRA_EST, { cap: T("Gravura histórica: serve para ver a organização em camadas, não para medir espessuras. Os nomes são do Atlas.", "Grabado histórico: sirve para ver la organización en capas, no para medir espesores. Los nombres son del Atlas.") });
     },
     supraCunha() {
       let sd = 11; const rnd = () => { sd = sd + 0x6D2B79F5 | 0; let t = Math.imul(sd ^ sd >>> 15, 1 | sd); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -600,7 +657,7 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
   };
   const temas = [
     { id: "eixo", n: "9.1", nome: T("Eixo hipotálamo-hipófise", "Eje hipotálamo-hipófisis"), curto: T("Eixo", "Eje"), sub: T("Conexão neural e vasos porta, hormônios do hipotálamo e da hipófise, alças", "Conexión neural y vasos porta, hormonas del hipotálamo y de la hipófisis, asas"), estudado: "2026-11-09",
-      figuras: ["eixo", "hipot", "alcas"],
+      figuras: ["eixo", "hipoCunha", "hipot", "alcas"],
       chave: T("A posterior recebe axônios; a anterior recebe hormônios pelos vasos porta, em alta concentração.", "La posterior recibe axones; la anterior recibe hormonas por los vasos porta, en alta concentración."),
       resumo: [["", [
         T("Hipófise posterior (neuro-hipófise): conexão NEURAL. Corpos celulares no hipotálamo (núcleo supraóptico: ADH; núcleo paraventricular: ocitocina), axônios descem até a neuro-hipófise, onde os hormônios são armazenados e liberados. Origem: tecido neural.", "Hipófisis posterior (neurohipófisis): conexión NEURAL. Cuerpos celulares en el hipotálamo (núcleo supraóptico: ADH; núcleo paraventricular: oxitocina); los axones descienden hasta la neurohipófisis, donde las hormonas se almacenan y se liberan. Origen: tejido neural."),
@@ -797,7 +854,7 @@ window.registrarUnidade("fisiologia", "endo", 1, (T, U, H) => {
 
     { id: "supra", n: "9.6", nome: T("Suprarrenal: zonas, cortisol e aldosterona", "Suprarrenal: zonas, cortisol y aldosterona"), curto: "Suprarrenal", sub: T("Zonas, ritmo e freio do cortisol, aldosterona, sete ações, androgênios", "Zonas, ritmo y freno del cortisol, aldosterona, siete acciones, andrógenos"), estudado: "2026-11-10",
       aviso: T("As doenças (Addison, Cushing e Conn) estão no tema seguinte.", "Las enfermedades (Addison, Cushing y Conn) están en el tema siguiente."),
-      figuras: ["supra", "supraCunha", "supraHist", "supraReal", "aldo"],
+      figuras: ["supra", "supraCunha", "supraHist", "aldo"],
       chave: T("Cortisol: eixo CRH, ACTH, freado pelo próprio cortisol. Aldosterona: angiotensina II e potássio; retém sódio e elimina potássio e hidrogênio.", "Cortisol: eje CRH, ACTH, frenado por el propio cortisol. Aldosterona: angiotensina II y potasio; retiene sodio y elimina potasio e hidrógeno."),
       resumo: [[T("Zonas e regulação", "Zonas y regulación"), [
         T("MEDULA (interna, cerca de 20%, neuroectodérmica): adrenalina e noradrenalina. CÓRTEX (externo, cerca de 80%, mesodérmico): esteroides.", "MÉDULA (interna, cerca del 20%, neuroectodérmica): adrenalina y noradrenalina. CORTEZA (externa, cerca del 80%, mesodérmica): esteroides."),

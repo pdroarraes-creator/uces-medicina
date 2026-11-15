@@ -139,20 +139,6 @@ details > summary::-webkit-details-marker { display: none }
 .fig h3 { font-size: 1rem; font-weight: 800 } .fig svg.sv { width: 100%; height: auto; display: block; max-height: 70vh }
 .fig .desc { background: var(--sunk); border-radius: 12px; padding: 10px 14px; font-size: .95rem } .fig .desc b { color: var(--c) }
 .fig figcaption { font-size: .82rem; color: var(--muted) }
-.prancha { position: relative; background: #fff; border-radius: 12px; overflow: hidden; line-height: 0; width: fit-content; max-width: 100%; margin: 0 auto }
-.prancha img { width: auto; max-width: 100%; max-height: 70vh; height: auto; display: block }
-.prancha .vazio { line-height: 1.5; padding: 32px 16px; text-align: center; color: #5a5f7b; font-size: .9rem }
-.prancha .pino { position: absolute; transform: translate(-50%, -50%); min-width: 26px; height: 26px; padding: 0 6px; border-radius: 13px; border: 2px solid #fff; background: #14152e; color: #fff; font: 700 .78rem/22px var(--fd, inherit); text-align: center; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.45); transition: opacity .2s, background .2s }
-.prancha .pino::after { content: ""; position: absolute; inset: -10px }
-.prancha .pino.dim { opacity: .18 } .prancha .pino.sel { background: var(--c); transform: translate(-50%, -50%) scale(1.25); z-index: 2 }
-.prancha .pino:focus-visible, .leg button:focus-visible { outline: 3px solid var(--c); outline-offset: 2px }
-.leg { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px }
-.leg button { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; text-align: left; background: var(--sunk); color: var(--ink); border: 1px solid transparent; border-radius: 10px; padding: 6px 10px; font-size: .9rem; cursor: pointer }
-.leg button.sel { border-color: var(--c) } .leg button.dim { opacity: .4 }
-.leg .n { flex: none; min-width: 24px; height: 24px; border-radius: 12px; background: #14152e; color: #fff; font: 700 .75rem/24px var(--fd, inherit); text-align: center }
-.leg .oculto { color: var(--muted); font-style: italic }
-.fig .credito { font-size: .74rem; color: var(--muted) } .fig .credito a { color: inherit }
-@media (prefers-reduced-motion: reduce) { .prancha .pino { transition: none } }
 .cena { position: relative; border-radius: 16px; background: radial-gradient(120% 90% at 50% 20%, var(--surface), var(--sunk)); border: 1px solid var(--line); overflow: hidden; touch-action: pan-y; cursor: grab; min-height: 220px; user-select: none; -webkit-user-select: none }
 .cena:active { cursor: grabbing } .cena:focus-visible { outline: 3px solid var(--c); outline-offset: 2px } .cena canvas { display: block; width: 100%; height: auto }
 .cena .rot { position: absolute; transform: translate(-50%, -50%); font: 700 .7rem var(--fb); color: var(--ink); background: var(--surface); border: 1px solid var(--line); padding: 2px 7px; border-radius: 999px; pointer-events: none; white-space: nowrap; box-shadow: var(--sh-s) }
@@ -231,8 +217,6 @@ textarea.ta { width: 100%; font: inherit; font-size: .98rem; color: var(--ink); 
 .gauge i { position: absolute; top: -5px; width: 8px; height: 26px; border-radius: 4px; background: var(--ink); transform: translateX(-50%); transition: left .5s cubic-bezier(.3,1.4,.5,1) }
 .gl { display: flex; justify-content: space-between; font-size: .8rem; font-weight: 700; color: var(--muted) }
 .refl { background: var(--sunk); border-radius: 14px; padding: 12px 14px } .refl summary { cursor: pointer; font-weight: 700; font-size: .95rem } .refl p { margin-top: 6px; font-size: .93rem }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .82rem; color: var(--muted); font-weight: 600 } .legend span { display: inline-flex; align-items: center; gap: 6px }
-.legend i { width: 14px; height: 14px; border-radius: 50%; display: inline-block }
 
 /* vocabulário das figuras */
 .sv text { font-family: var(--fb); font-size: 12.5px; font-weight: 700; fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round }
@@ -449,43 +433,6 @@ const U = {
       desc.innerHTML = e.d; if (opts.onState) opts.onState(id, box); }
     estados.forEach(e => seg.append(el("button", { "data-id": e.id, onclick: () => set(e.id) }, e.r)));
     set(estados[0].id); return box;
-  },
-  /* prancha real: imagem de fonte confiável (domínio público ou enviada pelo Pedro) + pinos numerados e legenda em HTML.
-     img = { src, alt, credito: "Autor, obra, ano. Licença." (obrigatório), link: página de origem }
-     rotulos = [{ x, y (em % da imagem), t: nome, d: explicação curta (opcional), on: "a b" (estados em que fica aceso) }]
-     estados = mesmo formato de U.estados (opcional). Modo "Testar": esconde os nomes; toque no número para conferir.
-     Para marcar posições: abra o atlas com ?marcar na URL e toque na imagem; as coordenadas aparecem abaixo dela. */
-  prancha(titulo, img, rotulos, estados, opts) {
-    opts = opts || {}; estados = estados || [];
-    const desc = el("div", { class: "desc", "aria-live": "polite" }), pal = el("div", { class: "prancha" }), leg = el("ol", { class: "leg" });
-    const foto = el("img", { src: img.src, alt: img.alt || titulo, loading: "lazy", decoding: "async" });
-    foto.addEventListener("error", () => { pal.replaceChildren(el("div", { class: "vazio" }, T("Imagem ainda não adicionada.", "Imagen aún no agregada."))); leg.remove(); modo.remove(); });
-    pal.append(foto);
-    let teste = false, sel = -1, estado = estados.length ? estados[0].id : null; const visto = new Set();
-    const pinos = rotulos.map((r, i) => el("button", { class: "pino", style: "left:" + r.x + "%;top:" + r.y + "%", "aria-label": String(i + 1), onclick: () => escolher(i) }, String(i + 1)));
-    const itens = rotulos.map((r, i) => { const nome = el("span"); const b = el("button", { onclick: () => escolher(i) }, el("span", { class: "n" }, String(i + 1)), nome); b._nome = nome; return b; });
-    pinos.forEach(p => pal.append(p)); itens.forEach(b => leg.append(el("li", null, b)));
-    const aceso = r => !r.on || !estado || r.on.split(" ").includes(estado);
-    function pintar() {
-      rotulos.forEach((r, i) => { const on = aceso(r), mostra = !teste || visto.has(i);
-        pinos[i].classList.toggle("dim", !on); pinos[i].classList.toggle("sel", i === sel);
-        itens[i].classList.toggle("dim", !on); itens[i].classList.toggle("sel", i === sel);
-        itens[i]._nome.textContent = mostra ? r.t : T("toque para ver", "toca para ver"); itens[i]._nome.className = mostra ? "" : "oculto";
-        pinos[i].setAttribute("aria-label", mostra ? (i + 1) + ": " + r.t : String(i + 1)); });
-      const r = rotulos[sel], e = estados.find(x => x.id === estado);
-      desc.innerHTML = r && (!teste || visto.has(sel)) ? "<b>" + (sel + 1) + ". " + r.t + ".</b> " + (r.d || "") : e ? e.d : T("Toque num número para ver a estrutura.", "Toca un número para ver la estructura."); }
-    function escolher(i) { sel = sel === i && !teste ? -1 : i; if (teste) visto.add(i); pintar(); }
-    const modo = el("div", { class: "seg", role: "group", "aria-label": T("Modo", "Modo") },
-      el("button", { "aria-pressed": "true", onclick: ev => trocar(false, ev.currentTarget) }, T("Estudar", "Estudiar")),
-      el("button", { "aria-pressed": "false", onclick: ev => trocar(true, ev.currentTarget) }, T("Testar", "Probar")));
-    function trocar(v, b) { teste = v; visto.clear(); sel = -1; [...modo.children].forEach(x => x.setAttribute("aria-pressed", String(x === b))); pintar(); }
-    const seg = estados.length ? el("div", { class: "seg", role: "group", "aria-label": titulo }) : null;
-    estados.forEach(e => seg.append(el("button", { "data-id": e.id, "aria-pressed": String(e.id === estado), onclick: () => { estado = e.id; sel = -1; [...seg.children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.id === estado))); pintar(); } }, e.r)));
-    const cred = el("div", { class: "credito" }, img.link ? el("a", { href: img.link, target: "_blank", rel: "noopener" }, img.credito) : img.credito);
-    if (new URLSearchParams(location.search).has("marcar")) foto.addEventListener("click", ev => { const q = foto.getBoundingClientRect();
-      desc.textContent = "x: " + ((ev.clientX - q.left) / q.width * 100).toFixed(1) + ", y: " + ((ev.clientY - q.top) / q.height * 100).toFixed(1); });
-    pintar();
-    return el("figure", { class: "fig" }, el("h3", null, titulo), pal, modo, seg, desc, leg, cred, opts.cap ? el("figcaption", null, opts.cap) : null);
   },
   medidores(defs) {
     const node = el("div", { class: "meters" }), map = {};
