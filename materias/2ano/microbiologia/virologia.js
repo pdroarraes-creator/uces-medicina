@@ -212,6 +212,21 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
           U.el("li", null, T("Nenhuma é citolítica: quem lesa o fígado são os LT CD8+ (no D e no E, também as NK).", "Ninguna es citolítica: quien lesiona el hígado son los LT CD8+ (en la D y la E, también las NK).")),
           U.el("li", null, T("Crônica = mais de 6 meses (B: HBsAg; C: RNA). Transaminases acima de 10 vezes, ALT maior que AST.", "Crónica = más de 6 meses (B: HBsAg; C: ARN). Transaminasas más de 10 veces, ALT mayor que AST.")),
           U.el("li", null, T("Só a B é DNA; só a D é RNA negativa.", "Solo la B es ADN; solo la D es ARN negativo.")))),
+        U.el("details", { class: "mini-sec hq-tr" }, U.el("summary", null, T("Truques para lembrar", "Trucos para recordar"), U.el("small", null, T("criados no estudo", "creados en el estudio"))),
+          U.el("div", { class: "in" }, U.el("dl", { class: "hq-dl" }, ...[
+            [T("A de Água", "A de Agua"), T("passa pela água e pelos alimentos (fecal-oral).", "pasa por el agua y los alimentos (fecal-oral).")],
+            [T("B de Banco de DNA", "B de Banco de ADN"), T("é a única das cinco com DNA.", "es la única de las cinco con ADN.")],
+            [T("C de Crônico, o camaleão", "C de Crónico, el camaleón"), T("a maioria cronifica.", "la mayoría cronifica.")],
+            [T("D de Dependente", "D de Dependiente"), T("só se forma com o HBsAg do B.", "solo se forma con el HBsAg del B.")],
+            [T("E de Embarazada", "E de Embarazada"), T("é grave na gestante no 3º trimestre.", "es grave en la embarazada en el 3º trimestre.")],
+            [T("Coinfecção: 90% Corre", "Coinfección: 90% Corre"), T("B e D chegam juntos e 90% eliminam (curam).", "B y D llegan juntos y el 90% los elimina (cura).")],
+            [T("Superinfecção: 90% Super-fica", "Sobreinfección: 90% Super-queda"), T("o D chega quando o B já está lá e 90% cronificam.", "el D llega cuando el B ya está y el 90% cronifica.")],
+            [T("A polícia", "La policía"), T("nenhum vírus destrói o fígado sozinho: quem lesa são os LT CD8+ (no D e no E, também as NK).", "ningún virus destruye el hígado solo: quien lesiona son los LT CD8+ (en la D y la E, también las NK).")],
+            [T("A testemunha", "El testigo"), T("o anti-HCV viu o vírus passar: mostra exposição, mas não diz se ainda está ativo.", "el anti-HCV vio pasar al virus: muestra exposición, pero no dice si sigue activo.")],
+            [T("A câmera", "La cámara"), T("a PCR do RNA flagra o vírus agora: infecção ativa.", "la PCR del ARN filma al virus ahora: infección activa.")],
+            [T("A rosquinha de cabeça para baixo", "La rosquilla al revés"), T("só a D é negativa, e o RNA dela é circular.", "solo la D es negativa, y su ARN es circular.")],
+            [T("O semáforo", "El semáforo"), T("o que fazer com o recém-nascido conforme a mãe (figura do semáforo, mais abaixo).", "qué hacer con el recién nacido según la madre (figura del semáforo, más abajo).")]
+          ].flatMap(([t, d]) => [U.el("dt", null, t), U.el("dd", null, d)])))),
         U.el("figcaption", null, T("Quadro feito a partir das aulas. Na D, o diagnóstico está numa imagem do slide e ficou sem dado aqui.", "Cuadro hecho a partir de las clases. En la D, el diagnóstico está en una imagen de la diapositiva y quedó sin dato acá.")));
     },
     hepVirions: () => {
