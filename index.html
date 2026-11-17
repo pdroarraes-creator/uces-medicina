@@ -119,6 +119,10 @@ input.txt { font: inherit; color: var(--ink); background: var(--sunk); border: 1
 .ntab tbody th { font-weight: 400 } .nmat { all: unset; cursor: pointer; font: 700 .92rem/1.25 var(--fb); color: var(--ink); overflow-wrap: break-word; hyphens: auto; min-height: 28px; display: block } .nmat:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; border-radius: 6px } .nmat::after { content: "▾"; color: var(--muted); margin-left: 6px; font-size: .8em } .nmat[aria-expanded=true]::after { content: "▴" }
 .ntab .par span { display: inline-block; min-width: 1.9em; text-align: center; padding: 2px 5px; margin: 1px 3px 1px 0; border-radius: 7px; background: var(--sunk); font-weight: 600; font-size: .9rem } .ntab .par .vz { background: none; color: var(--muted) }
 .ntab tr.det td { border-top: 0; padding: 0 4px 10px } .ntab tr.det ul { margin: 0; padding-left: 1.1em; font-size: .9rem; display: flex; flex-direction: column; gap: 4px }
+.cmp.hep { min-width: 600px; table-layout: fixed } .cmp.hep tbody th { width: 76px; position: sticky; left: 0; z-index: 1; background: var(--surface) } .cmp.hep td:first-child { position: sticky; left: 0; background: var(--surface) }
+.cmp.hep .cel { font-size: .7rem; min-height: 52px; overflow-wrap: anywhere; hyphens: auto } .cel.boca { background: color-mix(in srgb, #3f7fbf 9%, var(--surface)) } .cel.sang { background: color-mix(in srgb, #b9302a 7%, var(--surface)) }
+.hq b { display: block; font: 800 1.15rem var(--fd) } .hq span { display: inline-flex; align-items: center; gap: 3px; font: 600 .7rem var(--fb); color: var(--muted) } .hq-mn { margin: 0 0 8px; font-size: .92rem } .hq-ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px }
+.sv .hv-l { font: 800 15px var(--fd) }
 .hoje, .retomar { display: flex; flex-direction: column; gap: 10px } .hoje { margin-top: 14px; gap: 14px } .retomar .btn.cta { max-width: none; margin-top: 0 }
 .unit { padding-block: 26px 6px; display: flex; flex-direction: column; gap: 14px }
 .unit-h { display: flex; flex-direction: column; gap: 4px } .unit-h h2 { font-size: 1.3rem; font-weight: 800 }

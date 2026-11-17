@@ -183,7 +183,89 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
         ${tx(50, 174, T("catarata", "cataratas"), { a: "middle" })}${tx(50, 188, T("e cegueira", "y ceguera"), { a: "middle", c: "mut" })}${tx(137, 174, T("hipoacusia", "hipoacusia"), { a: "middle" })}${tx(224, 174, T("cardiopatia", "cardiopatía"), { a: "middle" })}${tx(224, 188, T("congênita", "congénita"), { a: "middle", c: "mut" })}${tx(311, 174, T("retardo", "retraso"), { a: "middle" })}${tx(311, 188, T("mental", "mental"), { a: "middle", c: "mut" })}
       </svg>`;
       return U.el("figure", { class: "fig" }, U.el("h3", null, T("Síndrome da rubéola congênita", "Síndrome de rubéola congénita")), U.el("div", { html: svg }), U.el("figcaption", null, CAP));
-    }
+    },
+    hepQuadro: () => {
+      const BOCA = ["A", "E"], C = (pt, es) => T(pt, es);
+      const L = [
+        [T("Genoma", "Genoma"), C("RNA+ simples", "ARN+ simple"), C("DNA parcial dupla fita", "ADN parcial doble cadena"), C("RNA+ simples", "ARN+ simple"), C("RNA− circular", "ARN− circular"), C("RNA+ simples", "ARN+ simple")],
+        [T("Envelope", "Envoltura"), C("não (nu)", "no (desnudo)"), C("sim", "sí"), C("sim", "sí"), C("usa a casca do B (HBsAg)", "usa la envoltura del B (HBsAg)"), C("não (nu)", "no (desnudo)")],
+        [T("Família", "Familia"), "Picornaviridae\nHepatovirus", "Hepadnaviridae\nOrthohepadnavirus", "Flaviviridae\nHepacivirus", C("gênero Deltavirus", "género Deltavirus"), "Hepeviridae\nOrthohepevirus"],
+        [T("Transmissão", "Transmisión"), C("fecal-oral: água e alimentos", "fecal-oral: agua y alimentos"), C("sangue, sexo e parto (o mais frequente)", "sangre, sexo y parto (el más frecuente)"), C("sangue, sexo e parto", "sangre, sexo y parto"), C("sangue (e sexo), junto com o B", "sangre (y sexo), junto con el B"), C("água (genótipos 1 e 2); carne de porco (3 e 4)", "agua (genotipos 1 y 2); carne de cerdo (3 y 4)")],
+        [T("Evolução", "Evolución"), C("aguda; menor de 4 anos: assintomática", "aguda; menor de 4 años: asintomática"), C("RN: cronifica; adulto: até 10%", "RN: cronifica; adulto: hasta 10%"), C("a MAIORIA cronifica", "la MAYORÍA cronifica"), C("coinfecção: 90% curam; superinfecção: 90% crônica", "coinfección: 90% cura; sobreinfección: 90% crónica"), C("aguda; crônica em imunossuprimido", "aguda; crónica en inmunosuprimido")],
+        [T("Diagnóstico", "Diagnóstico"), C("IgM anti-HAV (até 14 semanas)", "IgM anti-HAV (hasta 14 semanas)"), C("HBsAg e IgM anti-HBc; anti-HBs = cura ou vacina", "HBsAg e IgM anti-HBc; anti-HBs = curación o vacuna"), C("anti-HCV = exposição; PCR do RNA = ativa", "anti-HCV = exposición; PCR del ARN = activa"), "—", C("IgM e IgG específicas", "IgM e IgG específicas")],
+        [T("Prevenção e alerta", "Prevención y alerta"), C("vacina aos 12 meses; isolar 7 dias", "vacuna a los 12 meses; aislar 7 días"), C("vacina (é o HBsAg); RN: semáforo", "vacuna (es el HBsAg); RN: semáforo"), C("antivirais: cura acima de 95%", "antivirales: curación mayor al 95%"), C("prevenir o B previne o D", "prevenir el B previene el D"), C("gestante no 3º trimestre: até 25% de mortalidade", "embarazada en 3º trimestre: hasta 25% de mortalidad")]];
+      const gota = (cor, sangue) => `<svg viewBox="0 0 12 16" width="11" height="14" aria-hidden="true"><path d="M6 1C6 1 1 7.5 1 10.5A5 5 0 0 0 11 10.5C11 7.5 6 1 6 1Z" fill="${cor}"${sangue ? "" : ' fill-opacity=".9"'}/></svg>`;
+      const cont = U.el("div", { class: "muted sm", "aria-live": "polite" }), cels = []; let teste = false;
+      const pinta = () => { let ab = 0; cels.forEach(c => { c.b.classList.toggle("cob", teste && !c.ab); c.b.setAttribute("aria-label", teste && !c.ab ? T("Coberta. Toque para ver.", "Cubierta. Tocá para ver.") : c.t); if (c.ab) ab++; });
+        cont.textContent = teste ? ab + T(" de ", " de ") + cels.length + T(" casas abertas. Diga a resposta antes de tocar.", " casillas abiertas. Decí la respuesta antes de tocar.") : T("Leia por linha e deslize para o lado para ver as cinco.", "Leé por fila y deslizá hacia el costado para ver las cinco."); };
+      const cab = l => { const b = BOCA.includes(l); return U.el("th", { scope: "col", class: "hq " + (b ? "boca" : "sang") }, U.el("b", null, l), U.el("span", { html: gota(b ? "#3f7fbf" : "#b9302a", !b) + " " + (b ? T("boca", "boca") : T("sangue", "sangre")) })); };
+      const tb = U.el("table", { class: "cmp hep" }, U.el("thead", null, U.el("tr", null, U.el("td", null, ""), ["A", "B", "C", "D", "E"].map(cab))),
+        U.el("tbody", null, L.map(l => U.el("tr", null, U.el("th", { scope: "row" }, l[0]), [1, 2, 3, 4, 5].map(i => { const v = l[i], c = { ab: false, t: v };
+          c.b = U.el("button", { class: "cel tx " + (v === "—" ? "na" : BOCA.includes("ABCDE"[i - 1]) ? "boca" : "sang"), onclick: () => { if (!teste) return; c.ab = !c.ab; pinta(); } }, U.el("span", null, ...v.split("\n").flatMap((x, k) => k ? [U.el("br"), x] : [x]))); cels.push(c); return U.el("td", null, c.b); })))));
+      const seg = U.el("div", { class: "seg", role: "group", "aria-label": T("Modo", "Modo") });
+      const modo = t => { teste = t; cels.forEach(c => c.ab = false); [...seg.children].forEach((b, i) => b.setAttribute("aria-pressed", String(!!i === t))); pinta(); };
+      seg.append(U.el("button", { onclick: () => modo(false) }, T("Estudar", "Estudiar")), U.el("button", { onclick: () => modo(true) }, T("Testar: cobrir tudo", "Probar: cubrir todo"))); modo(false);
+      return U.el("figure", { class: "fig" }, U.el("h3", null, T("Hepatites A a E lado a lado", "Hepatitis A a E lado a lado")),
+        U.el("p", { class: "hq-mn" }, U.el("b", null, T("Vogais pela boca", "Vocales por la boca")), " (A, E) · ", U.el("b", null, T("consoantes pelo sangue", "consonantes por la sangre")), " (B, C, D)"),
+        seg, cont, U.el("div", { class: "cmpw" }, tb),
+        U.el("div", { class: "desc" }, U.el("ul", { class: "hq-ul" },
+          U.el("li", null, T("Nenhuma é citolítica: quem lesa o fígado são os LT CD8+ (no D e no E, também as NK).", "Ninguna es citolítica: quien lesiona el hígado son los LT CD8+ (en la D y la E, también las NK).")),
+          U.el("li", null, T("Crônica = mais de 6 meses (B: HBsAg; C: RNA). Transaminases acima de 10 vezes, ALT maior que AST.", "Crónica = más de 6 meses (B: HBsAg; C: ARN). Transaminasas más de 10 veces, ALT mayor que AST.")),
+          U.el("li", null, T("Só a B é DNA; só a D é RNA negativa.", "Solo la B es ADN; solo la D es ARN negativo.")))),
+        U.el("figcaption", null, T("Quadro feito a partir das aulas. Na D, o diagnóstico está numa imagem do slide e ficou sem dado aqui.", "Cuadro hecho a partir de las clases. En la D, el diagnóstico está en una imagen de la diapositiva y quedó sin dato acá.")));
+    },
+    hepVirions: () => {
+      const cx = [38, 109, 180, 251, 322], cy = 92, R = 27;
+      const ico = (x, y, r, cor, st) => { let p = ""; for (let i = 0; i < 6; i++) { const a = i / 6 * 6.2832 - 1.5708; p += f(x + r * Math.cos(a)) + "," + f(y + r * Math.sin(a)) + " "; }
+        let fac = ""; for (let i = 0; i < 6; i += 2) { const a = i / 6 * 6.2832 - 1.5708; fac += `<path d="M${x} ${y}L${f(x + r * Math.cos(a))} ${f(y + r * Math.sin(a))}" stroke="${st}" stroke-width=".8" opacity=".55"/>`; }
+        return `<polygon points="${p}" fill="${cor}" stroke="${st}" stroke-width="1.6" stroke-linejoin="round"/>${fac}`; };
+      const rna = (x, y, w, cor) => { let d = `M${f(x - w)} ${y}`; for (let i = 1; i <= 8; i++) d += `Q${f(x - w + (i - .5) * w / 4)} ${f(y + (i % 2 ? -3.4 : 3.4))} ${f(x - w + i * w / 4)} ${y}`; return `<path d="${d}" fill="none" stroke="${cor}" stroke-width="1.6" stroke-linecap="round"/>`; };
+      const env = (x, y, r, esp, corEsp) => { let s = ""; for (let i = 0; i < 16; i++) { const a = i / 16 * 6.2832, c = Math.cos(a), n = Math.sin(a);
+          s += esp === "s" ? `<path d="M${f(x + r * c)} ${f(y + r * n)}L${f(x + (r + 5) * c)} ${f(y + (r + 5) * n)}" stroke="${corEsp}" stroke-width="2.2" stroke-linecap="round"/><circle cx="${f(x + (r + 6) * c)}" cy="${f(y + (r + 6) * n)}" r="2.1" fill="${corEsp}"/>`
+            : `<path d="M${f(x + r * c)} ${f(y + r * n)}L${f(x + (r + 6) * c)} ${f(y + (r + 6) * n)}" stroke="${corEsp}" stroke-width="1.5"/><path d="M${f(x + (r + 6) * c - 2.4 * n)} ${f(y + (r + 6) * n + 2.4 * c)}L${f(x + (r + 6) * c + 2.4 * n)} ${f(y + (r + 6) * n - 2.4 * c)}" stroke="${corEsp}" stroke-width="2"/>`; }
+        return s + `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#hvE)" stroke="#a9772e" stroke-width="2.6"/><circle cx="${x}" cy="${y}" r="${r - 3.2}" fill="none" stroke="#e5c17a" stroke-width="1"/>`; };
+      const HBS = "#d08a1e";
+      const A = `<g data-on="A tudo">${ico(cx[0], cy, 21, "#d9e6f5", "#3f6a9c")}${rna(cx[0], cy, 10, "#7b2d8e")}</g>`;
+      const B = `<g data-on="B tudo">${env(cx[1], cy, R, "s", HBS)}${ico(cx[1], cy, 15, "#efe2c8", "#8a6d3a")}<path d="M${cx[1] + 7} ${cy}A7 7 0 1 1 ${cx[1]} ${cy - 7}" fill="none" stroke="#7b2d8e" stroke-width="1.7"/><circle cx="${cx[1]}" cy="${cy}" r="9.5" fill="none" stroke="#c07fd0" stroke-width="1.5"/></g>`;
+      const Cv = `<g data-on="C tudo">${env(cx[2], cy, R, "t", "#5c7d3a")}${ico(cx[2], cy, 15, "#e6eedb", "#5c7d3a")}${rna(cx[2], cy, 7.5, "#7b2d8e")}</g>`;
+      const D = `<g data-on="D tudo">${env(cx[3], cy, R - 4, "s", HBS)}<circle cx="${cx[3]}" cy="${cy}" r="11" fill="none" stroke="#b44d7a" stroke-width="2.2"/>${[0, 1, 2, 3, 4, 5].map(i => { const a = i / 6 * 6.2832; return `<circle cx="${f(cx[3] + 15 * Math.cos(a))}" cy="${f(cy + 15 * Math.sin(a))}" r="2.6" fill="#7d6bb8"/>`; }).join("")}</g>`;
+      const E = `<g data-on="E tudo">${ico(cx[4], cy, 21, "#dcefe0", "#3d7a51")}${rna(cx[4], cy, 10, "#7b2d8e")}</g>`;
+      const nome = (i, l, s1, s2) => `<g data-on="${l} tudo">${tx(cx[i], 150, l, { a: "middle", c: "hv-l" })}${tx(cx[i], 166, s1, { a: "middle", c: "mut" })}${tx(cx[i], 179, s2, { a: "middle", c: "mut" })}</g>`;
+      const svg = `<svg class="sv" viewBox="0 0 360 236" role="img" aria-label="${T("Os cinco vírus das hepatites desenhados lado a lado", "Los cinco virus de las hepatitis dibujados lado a lado")}"><defs><radialGradient id="hvE" cx=".4" cy=".35"><stop offset="0" stop-color="#fbf1d8"/><stop offset="1" stop-color="#ecd29a"/></radialGradient></defs>
+        <rect x="4" y="34" width="70" height="152" rx="10" fill="#3f7fbf" opacity=".07"/><rect x="287" y="34" width="70" height="152" rx="10" fill="#3f7fbf" opacity=".07"/><rect x="76" y="34" width="208" height="152" rx="10" fill="#b9302a" opacity=".06"/>
+        ${tx(38, 26, T("boca", "boca"), { a: "middle", c: "mut" })}${tx(180, 26, T("sangue", "sangre"), { a: "middle", c: "mut" })}${tx(322, 26, T("boca", "boca"), { a: "middle", c: "mut" })}
+        ${A}${B}${Cv}${D}${E}
+        ${nome(0, "A", T("nu", "desnudo"), "RNA+")}${nome(1, "B", T("envelope", "envoltura"), "DNA")}${nome(2, "C", T("envelope", "envoltura"), "RNA+")}${nome(3, "D", T("casca do B", "envoltura del B"), T("RNA− circular", "ARN− circular"))}${nome(4, "E", T("nu", "desnudo"), "RNA+")}
+        <g data-show="B">${lab(cx[1] + 25, cy - 18, 150, 210, ["HBsAg", T("superfície (casca)", "superficie (envoltura)")])}${lab(cx[1] - 10, cy + 8, 30, 210, ["HBcAg", T("core", "core")])}</g>
+        <g data-show="D">${lab(cx[3] + 18, cy - 20, 150, 210, [T("HBsAg emprestado do B", "HBsAg prestado del B"), T("sem o B, não se forma", "sin el B, no se forma")])}${lab(cx[3] - 11, cy, 30, 210, [T("RNA− circular", "ARN− circular")])}</g>
+        <g data-show="A E">${tx(180, 210, T("sem envelope: resiste no ambiente", "sin envoltura: resiste en el ambiente"), { a: "middle" })}${tx(180, 224, T("e passa pela via fecal-oral", "y pasa por la vía fecal-oral"), { a: "middle", c: "mut" })}</g>
+        <g data-show="tudo">${tx(180, 210, T("A e E sem envelope; B, C e D com envelope", "A y E sin envoltura; B, C y D con envoltura"), { a: "middle" })}${tx(180, 224, T("a D usa a mesma casca do B (mesma cor)", "la D usa la misma envoltura del B (mismo color)"), { a: "middle", c: "mut" })}</g>
+        <g data-show="C">${tx(180, 210, T("RNA+ com envelope: a que mais cronifica", "ARN+ con envoltura: la que más cronifica"), { a: "middle" })}</g>
+      </svg>`;
+      return U.estados(T("Os cinco vírus lado a lado", "Los cinco virus lado a lado"), svg, [
+        { id: "tudo", r: T("Todos", "Todos"), d: T("Compare a <b>casca</b>: A e E são nus, B, C e D têm envelope. A D não tem casca própria: usa o <b>HBsAg do B</b>.", "Compará la <b>envoltura</b>: A y E son desnudos, B, C y D tienen envoltura. La D no tiene envoltura propia: usa el <b>HBsAg del B</b>.") },
+        { id: "A", r: "A", d: T("<b>A:</b> Picornaviridae, RNA+ de fita simples, sem envelope. Fecal-oral; aguda.", "<b>A:</b> Picornaviridae, ARN+ simple cadena, sin envoltura. Fecal-oral; aguda.") },
+        { id: "B", r: "B", d: T("<b>B:</b> Hepadnaviridae, a única de DNA (parcialmente de dupla fita), com envelope. O <b>HBsAg</b> é a casca; o <b>HBcAg</b> é o core (daí o anti-HBc).", "<b>B:</b> Hepadnaviridae, la única de ADN (parcialmente doble cadena), con envoltura. El <b>HBsAg</b> es la envoltura; el <b>HBcAg</b> es el core (de ahí el anti-HBc).") },
+        { id: "C", r: "C", d: T("<b>C:</b> Flaviviridae, Hepacivirus, RNA+ com envelope. A maioria cronifica; os antivirais curam mais de 95%.", "<b>C:</b> Flaviviridae, Hepacivirus, ARN+ con envoltura. La mayoría cronifica; los antivirales curan más del 95%.") },
+        { id: "D", r: "D", d: T("<b>D:</b> RNA de fita simples negativa, circular. Depende do <b>HBsAg do B</b> para se formar: só infecta quem tem o B (coinfecção ou superinfecção).", "<b>D:</b> ARN simple cadena negativo, circular. Depende del <b>HBsAg del B</b> para formarse: solo infecta a quien tiene el B (coinfección o sobreinfección).") },
+        { id: "E", r: "E", d: T("<b>E:</b> Hepeviridae, RNA+ sem envelope. Água (genótipos 1 e 2) ou carne de porco (3 e 4); grave na gestante no 3º trimestre.", "<b>E:</b> Hepeviridae, ARN+ sin envoltura. Agua (genotipos 1 y 2) o carne de cerdo (3 y 4); grave en la embarazada en el 3º trimestre.") }],
+        { cap: T("Ilustração própria e simplificada: formas aproximadas e tamanhos fora de escala. Confira com o material da aula.", "Ilustración propia y simplificada: formas aproximadas y tamaños fuera de escala. Verificá con el material de la clase.") });
+    },
+    hepRN: () => {
+      const cx1 = 213, cx2 = 309;
+      const caixa = (x, y, l1, l2) => `<rect x="${x - 45}" y="${y - 20}" width="90" height="40" rx="8" fill="var(--sunk)"/>${tx(x, y - 3, l1, { a: "middle" })}${tx(x, y + 11, l2, { a: "middle", c: "mut" })}`;
+      const lin = (y, cor, rot1, rot2, a1, a2, b1, b2) => `<circle cx="22" cy="${y}" r="11" fill="${cor}" stroke="#222" stroke-opacity=".25"/>${tx(40, y - 2, rot1)}${tx(40, y + 12, rot2, { c: "mut" })}${caixa(cx1, y, a1, a2)}${caixa(cx2, y, b1, b2)}`;
+      const svg = `<svg class="sv" viewBox="0 0 360 222" role="img" aria-label="${T("Semáforo do recém-nascido e da hepatite B", "Semáforo del recién nacido y la hepatitis B")}">
+        ${tx(261, 12, T("peso do RN", "peso del RN"), { a: "middle", c: "mut" })}${tx(cx1, 28, "> 2000 g", { a: "middle" })}${tx(cx2, 28, "&lt; 2000 g", { a: "middle" })}
+        <rect x="6" y="36" width="32" height="178" rx="16" fill="#2b2d36"/>
+        ${lin(64, "#d23a32", T("Mãe HBsAg +", "Madre HBsAg +"), T("vacina + HBIG", "vacuna + HBIG"), T("vacina + HBIG", "vacuna + HBIG"), T("em 12 h", "en 12 h"), T("vacina + HBIG", "vacuna + HBIG"), T("em 12 h", "en 12 h"))}
+        ${lin(124, "#e7b424", T("Mãe desconhecida", "Madre desconocida"), T("vacina em 12 h", "vacuna en 12 h"), T("vacina 12 h", "vacuna 12 h"), T("HBIG em 7 dias", "HBIG en 7 días"), T("vacina 12 h", "vacuna 12 h"), T("HBIG em 12 h", "HBIG en 12 h"))}
+        ${lin(184, "#3c9a5a", T("Mãe negativa", "Madre negativa"), T("só vacina", "solo vacuna"), T("vacina 24 h", "vacuna 24 h"), T("sem HBIG", "sin HBIG"), T("vacina 1 mês", "vacuna al mes"), T("ou na alta", "o al alta"))}
+      </svg>`;
+      return U.el("figure", { class: "fig" }, U.el("h3", null, T("Recém-nascido e hepatite B: o semáforo", "Recién nacido y hepatitis B: el semáforo")), U.el("div", { html: svg }),
+        U.el("div", { class: "desc" }, T("Vermelho é a mãe com HBsAg positivo: vacina e imunoglobulina nas primeiras 12 horas, seja qual for o peso.", "Rojo es la madre con HBsAg positivo: vacuna e inmunoglobulina en las primeras 12 horas, sea cual sea el peso.")),
+        U.el("figcaption", null, T("Esquema feito a partir das aulas. Confira com o material da aula.", "Esquema hecho a partir de las clases. Verificá con el material de la clase.")));
+    },
   };
   const temas = [
     { id: "mono", n: "6.1", nome: T("Mononucleose infecciosa (EBV)", "Mononucleosis infecciosa (VEB)"), curto: T("Mononucleose", "Mononucleosis"),
@@ -375,7 +457,49 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
           e: T("Rubéola é Togaviridae. Paramyxoviridae é o sarampo.", "Rubéola es Togaviridae. Paramyxoviridae es el sarampión."), d: 0 }
       ],
       termos: [["surdez", "hipoacusia"], ["catarata", "cataratas"], ["retardo mental", "retraso mental"]],
-      erro: T("Trocar a família: rubéola é Togaviridae, sarampo é Paramyxoviridae.", "Confundir la familia: rubéola es Togaviridae, sarampión es Paramyxoviridae.") },
+      erro: T("Trocar a família: rubéola é Togaviridae, sarampo é Paramyxoviridae.", "Confundir la familia: rubéola es Togaviridae, sarampión es Paramyxoviridae.") },,
+    { id: "hepatites", n: "6.8", nome: T("Hepatites virais: comparativo A a E", "Hepatitis virales: comparativo A a E"), curto: T("Hepatites", "Hepatitis"),
+  sub: T("Vogais pela boca, consoantes pelo sangue", "Vocales por la boca, consonantes por la sangre"),
+  estudado: "2026-11-17", figuras: ["hepQuadro", "hepVirions", "hepRN"],
+  chave: T("A e E são de transmissão fecal-oral e sem envelope; B, C e D são parenterais. B é a única de DNA, C é a que mais cronifica, D depende do HBsAg do B e E é grave na gestante no 3º trimestre.", "A y E son de transmisión fecal-oral y desnudos; B, C y D son parenterales. B es el único ADN, C es el que más cronifica, D depende del HBsAg del B y E es grave en la embarazada en el 3º trimestre."),
+  resumo: [
+   [T("Clínica geral (Taller)", "Clínica general (Taller)"), [
+    T("Pré-ictérica: febre, astenia, mialgias, anorexia e náuseas.", "Preictérica: fiebre, astenia, mialgias, anorexia y náuseas."),
+    T("Ictérica: icterícia, colúria, hipocolia/acolia, hepatomegalia dolorosa, transaminases mais de 10 vezes o normal.", "Ictérica: ictericia, coluria, hipocolia/acolia, hepatomegalia dolorosa, transaminasas >10 veces lo normal."),
+    T("Crônica (mais de 6 meses): cirrose, hipertensão portal, esplenomegalia, ascite, varizes, encefalopatia e coagulopatia.", "Crónica (>6 meses): cirrosis, hipertensión portal, esplenomegalia, ascitis, várices, encefalopatía y coagulopatía.")]],
+   [T("Marcadores da hepatite B", "Marcadores de la hepatitis B"), [
+    T("HBsAg: 1º marcador, infecção ativa; mais de 6 meses = crônica.", "HBsAg: 1º marcador, infección activa; >6 meses = crónica."),
+    T("HBeAg: alta replicação e infectividade. Anti-HBe: replicação diminuindo.", "HBeAg: alta replicación e infectividad. Anti-HBe: replicación en descenso."),
+    T("IgM anti-HBc: aguda recente. IgG anti-HBc: contato prévio, para sempre.", "IgM anti-HBc: aguda reciente. IgG anti-HBc: contacto previo, de por vida."),
+    T("Anti-HBs + anti-HBc = curou. Anti-HBs sem anti-HBc = vacinado. Protetor: acima de 10 mUI/mL.", "Anti-HBs + anti-HBc = curación. Anti-HBs sin anti-HBc = vacunado. Protector: >10 mUI/mL."),
+    T("Crônica em 4 fases: imunotolerância, imunoeliminação, portador inativo, reativação.", "Crónica en 4 fases: inmunotolerancia, inmunoeliminación, portador inactivo, reactivación.")]],
+   [T("Recém-nascido e hepatite B (semáforo)", "Recién nacido y hepatitis B (semáforo)"), [
+    T("Mãe HBsAg+: vacina + HBIG em 12 h, qualquer peso.", "Madre HBsAg+: vacuna + HBIG en 12 h, cualquier peso."),
+    T("Mãe negativa: só vacina; mais de 2000 g em 24 h, menos de 2000 g com 1 mês ou na alta.", "Madre negativa: solo vacuna; >2000 g en 24 h, <2000 g al mes o al alta."),
+    T("Mãe desconhecida: vacina em 12 h; HBIG em 7 dias (mais de 2000 g) ou em 12 h (menos de 2000 g).", "Madre desconocida: vacuna en 12 h; HBIG en 7 días (>2000 g) o en 12 h (<2000 g).")]],
+   [T("Hepatite C: diagnóstico", "Hepatitis C: diagnóstico"), [
+    T("Anti-HCV (ELISA): exposição, não diferencia ativa de passada; aparece em média em 2 meses.", "Anti-HCV (ELISA): exposición, no distingue activa de pasada; aparece en promedio a los 2 meses."),
+    T("RT-PCR: infecção ativa, positiva em 7 a 14 dias; RNA mais de 6 meses = crônica; genotipagem antes do tratamento.", "RT-PCR: infección activa, positiva a los 7-14 días; ARN >6 meses = crónica; genotipado antes del tratamiento."),
+    T("Bebê: anticorpos maternos até 18 meses; 2 PCR positivas entre 2 e 6 meses.", "Lactante: anticuerpos maternos hasta 18 meses; 2 PCR positivas entre 2 y 6 meses.")]]
+  ],
+  memo: [[T("A e E", "A y E"), "=", T("vogais pela boca", "vocales por la boca")], [T("B, C e D", "B, C y D"), "=", T("consoantes pelo sangue", "consonantes por la sangre")], [T("Coinfecção", "Coinfección"), "=", T("90% curam", "90% cura")], [T("Superinfecção", "Sobreinfección"), "=", T("90% cronificam", "90% cronifica")], [T("Fibrose", "Fibrosis"), ">", T("cirrose", "cirrosis"), ">", T("câncer", "cáncer")]],
+  mapa: { c: T("Hepatites", "Hepatitis"), r: [
+   { t: "A", f: [T("Picornaviridae", "Picornaviridae"), T("Fecal-oral", "Fecal-oral"), T("Vacina 12 meses", "Vacuna 12 meses")] },
+   { t: "B", f: [T("Hepadnaviridae, DNA", "Hepadnaviridae, ADN"), T("Sangue, sexo, parto", "Sangre, sexo, parto"), T("RN cronifica", "RN cronifica")] },
+   { t: "C", f: [T("Flaviviridae, Hepacivirus", "Flaviviridae, Hepacivirus"), T("Maioria cronifica", "Mayoría cronifica"), T("Cura > 95%", "Curación > 95%")] },
+   { t: "D", f: [T("Deltavirus, RNA− circular", "Deltavirus, ARN− circular"), T("Depende do HBsAg", "Depende del HBsAg"), T("Anti-LKM", "Anti-LKM")] },
+   { t: "E", f: [T("Hepeviridae", "Hepeviridae"), T("Água (1-2) / carne (3-4)", "Agua (1-2) / carne (3-4)"), T("Gestante 3º tri: 25%", "Embarazada 3º tri: 25%")] }] },
+  guiada: { q: T("Por que a superinfecção pelo D cronifica mais que a coinfecção?", "¿Por qué la sobreinfección por D cronifica más que la coinfección?"),
+   dicas: [T("De que o D precisa para formar o vírus?", "¿Qué necesita el D para formar el virus?"), T("Na superinfecção, o que já está sobrando no fígado?", "En la sobreinfección, ¿qué ya sobra en el hígado?")],
+   r: T("Porque o D usa a casca do B (HBsAg). Na superinfecção o HBsAg já é abundante, então o D se replica rápido e 90% cronificam.", "Porque el D usa la envoltura del B (HBsAg). En la sobreinfección el HBsAg ya es abundante, el D se replica rápido y el 90% cronifica.") },
+  quiz: [
+   { q: T("Paciente com anti-HBs positivo e anti-HBc negativo. Interpretação?", "Paciente con anti-HBs positivo y anti-HBc negativo. ¿Interpretación?"), o: [T("Vacinado", "Vacunado"), T("Curou de infecção natural", "Curado de infección natural"), T("Infecção aguda", "Infección aguda"), T("Infecção crônica", "Infección crónica")], c: 0,
+    e: T("A vacina tem só o HBsAg (a casca), então gera anti-HBs sem anti-HBc.", "La vacuna tiene solo HBsAg, genera anti-HBs sin anti-HBc."), d: 1 },
+   { q: T("Gestante no 3º trimestre, após inundação, com hepatite aguda grave. Vírus mais provável?", "Embarazada en 3º trimestre, tras inundación, con hepatitis aguda grave. ¿Virus más probable?"), o: [T("Hepatite E", "Hepatitis E"), T("Hepatite C", "Hepatitis C"), T("Hepatite D", "Hepatitis D"), T("Hepatite B", "Hepatitis B")], c: 0,
+    e: T("Hepatite E: água contaminada (genótipos 1 e 2) e mortalidade materna de até 25% no 3º trimestre.", "Hepatitis E: agua contaminada (genotipos 1 y 2) y mortalidad materna de hasta 25% en el 3º trimestre."), d: 1 }
+  ],
+  termos: [["colúria", "coluria"], ["acolia", "acolia"], ["gestante", "embarazada"], ["transaminases", "transaminasas"]],
+  erro: T("Trocar anti-HBs (imunidade) com IgG anti-HBc (contato prévio para sempre).", "Confundir anti-HBs (inmunidad) con IgG anti-HBc (contacto previo de por vida).") }
   ];
   const cartoes = [
     ["mono", 0, T("Qual é o agente principal da mononucleose?", "¿Cuál es el agente principal de la mononucleosis?"), T("EBV, gama-herpesvírus de DNA dupla fita, envelopado.", "VEB, gamma herpesvirus ADN bicatenario, envuelto.")],
@@ -406,9 +530,23 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
     ["rubeola", 0, T("Adenopatias típicas da rubéola?", "¿Adenopatías típicas de la rubéola?"), T("Retroauriculares, occipitais e cervicais posteriores, indolores.", "Retroauriculares, occipitales y cervicales posteriores, indoloras.")],
     ["rubeola", 0, T("Quando a rubéola na gestação é grave?", "¿Cuándo es grave la rubéola en el embarazo?"), T("No 1º trimestre.", "En el 1º trimestre.")],
     ["rubeola", 0, T("Achados da rubéola congênita?", "¿Hallazgos de la rubéola congénita?"), T("Cegueira, catarata, hipoacusia, cardiopatia e retardo mental.", "Ceguera, cataratas, hipoacusia, cardiopatía y retraso mental.")],
-    ["rubeola", 0, T("Exclusão escolar na rubéola?", "¿Exclusión escolar en la rubéola?"), T("Até 7 dias depois do exantema.", "Hasta 7 días después del exantema.")]
+    ["rubeola", 0, T("Exclusão escolar na rubéola?", "¿Exclusión escolar en la rubéola?"), T("Até 7 dias depois do exantema.", "Hasta 7 días después del exantema.")],
+    ["hepatites", 1, T("Marcador que fica para sempre e indica contato prévio com o B?", "¿Marcador de contacto previo de por vida con el B?"), T("IgG anti-HBc.", "IgG anti-HBc.")],
+    ["hepatites", 1, T("Anti-HBs + e anti-HBc +?", "¿Anti-HBs + y anti-HBc +?"), T("Teve a infecção e curou.", "Tuvo la infección y se curó.")],
+    ["hepatites", 1, T("Sorotipos e genótipos do vírus B?", "¿Serotipos y genotipos del virus B?"), T("1 sorotipo, 9 genótipos (A-J).", "1 serotipo, 9 genotipos (A-J).")],
+    ["hepatites", 1, T("4 fases da hepatite B crônica?", "¿4 fases de la hepatitis B crónica?"), T("Imunotolerância, imunoeliminação, portador inativo, reativação.", "Inmunotolerancia, inmunoeliminación, portador inactivo, reactivación.")],
+    ["hepatites", 1, T("Coinfecção B+D: desfecho?", "¿Coinfección B+D: desenlace?"), T("90% eliminam; risco de hepatite grave e fulminante.", "90% elimina; riesgo de hepatitis grave y fulminante.")],
+    ["hepatites", 1, T("Superinfecção pelo D: desfecho?", "¿Sobreinfección por D: desenlace?"), T("90% cronificam: cirrose e hepatocarcinoma.", "90% cronifica: cirrosis y hepatocarcinoma.")],
+    ["hepatites", 1, T("Genoma do vírus D?", "¿Genoma del virus D?"), T("RNA de fita simples negativa, circular.", "ARN simple cadena negativo, circular.")],
+    ["hepatites", 1, T("Família e gênero do vírus C?", "¿Familia y género del virus C?"), T("Flaviviridae, Hepacivirus.", "Flaviviridae, Hepacivirus.")],
+    ["hepatites", 1, T("Quando a RT-PCR do C fica positiva?", "¿Cuándo es positiva la RT-PCR del C?"), T("7 a 14 dias após o contágio.", "7-14 días tras el contagio.")],
+    ["hepatites", 1, T("Doenças por imunocomplexos no C?", "¿Enfermedades por inmunocomplejos en el C?"), T("Glomerulonefrite, poliarterite nodosa, artrite e púrpura.", "Glomerulonefritis, poliarteritis nudosa, artritis y púrpura.")],
+    ["hepatites", 1, T("Família e gênero do vírus A?", "¿Familia y género del virus A?"), T("Picornaviridae, Hepatovirus.", "Picornaviridae, Hepatovirus.")],
+    ["hepatites", 1, T("Genótipos da E em países em desenvolvimento?", "¿Genotipos de la E en países en desarrollo?"), T("1 e 2, pela água.", "1 y 2, por agua.")],
+    ["hepatites", 0, T("Hepatite E grave na gestante: quando?", "¿Hepatitis E grave en embarazada: cuándo?"), T("3º trimestre, mortalidade até 25%.", "3º trimestre, mortalidad hasta 25%.")],
+    ["hepatites", 0, T("Bebê de mãe HBsAg+: conduta?", "¿RN de madre HBsAg+: conducta?"), T("Vacina + HBIG em 12 h.", "Vacuna + HBIG en 12 h.")]
   ];
   return { figuras, cartoes, unidade: { id: "virologia", nome: T("Virologia", "Virología"), curto: T("Virologia", "Virología"), fonte: "Aulas UCES 2026 (4º parcial)", temas,
-    pendentes: [T("Vias aéreas superiores", "Vías aéreas superiores"), T("Hepatites", "Hepatitis"), T("HPV", "HPV"), T("Gastroenterites", "Gastroenteritis"), T("Arbovírus", "Arbovirus"), T("Retrovírus", "Retrovirus"), T("Encefalite", "Encefalitis"), T("Raiva e hantavírus", "Rabia y hantavirus")],
+    pendentes: [T("Vias aéreas superiores", "Vías aéreas superiores"), T("HPV", "HPV"), T("Gastroenterites", "Gastroenteritis"), T("Arbovírus", "Arbovirus"), T("Retrovírus", "Retrovirus"), T("Encefalite", "Encefalitis"), T("Raiva e hantavírus", "Rabia y hantavirus")],
     nota: T("Alfa-herpesvírus para o VZV e a lista de evasão aplicada ao EBV não estão nos slides: confirmar com a professora.", "Alfa herpesvirus para el VVZ y la lista de evasión aplicada al VEB no están en los slides: confirmar con la profesora.") } };
 });
