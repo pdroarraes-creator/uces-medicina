@@ -1,29 +1,161 @@
 window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
+  /* ===== figuras: ilustração própria em SVG (padrão atlas-ux, seção 6). Tudo bilíngue. ===== */
+  const f = n => (Math.round(n * 10) / 10).toString();
+  const mk = s => () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const CAP = T("Ilustração própria e simplificada, com formas aproximadas. Confira com o material da aula.", "Ilustración propia y simplificada, con formas aproximadas. Verificá con el material de la clase.");
+  const tx = (x, y, s, o) => `<text x="${x}" y="${y}"${o && o.a ? ` text-anchor="${o.a}"` : ""}${o && o.c ? ` class="${o.c}"` : ""}>${s}</text>`;
+  /* rótulo com linha de chamada: ponto (px,py) na figura, texto em (x,y); linhas extras descem 14 */
+  const lab = (px, py, x, y, linhas) => `<path d="M${px} ${py}L${x - 5} ${y - 4}" stroke="var(--muted)" stroke-width=".9" fill="none"/><circle cx="${px}" cy="${py}" r="2" fill="var(--ink)" stroke="var(--surface)" stroke-width=".8"/>` + linhas.map((s, i) => tx(x, y + i * 14, s, i ? { c: "mut" } : null)).join("");
+  /* corpo de frente (0..200 x 0..400), contorno + pele + máscara para o exantema */
+  const corpo = id => {
+    const pecas = (cor, extra) => { const L = (d, w) => `<path d="${d}" fill="none" stroke="${cor}" stroke-width="${w + extra}" stroke-linecap="round"/>`, E = (cx, cy, rx, ry) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${cor}" stroke="${cor}" stroke-width="${extra}"/>`;
+      return L("M64 99C49 105 45 140 43 170C41 196 37 214 34 231", 17) + L("M136 99C151 105 155 140 157 170C159 196 163 214 166 231", 17) + E(33, 240, 8, 10) + E(167, 240, 8, 10) +
+        L("M84 222C82 270 82 320 80 370", 28) + L("M116 222C118 270 118 320 120 370", 28) + E(76, 382, 13, 7) + E(124, 382, 13, 7) + L("M100 66L100 88", 20) +
+        `<path d="M62 92Q100 82 138 92L132 150Q128 182 134 222Q100 236 66 222Q72 182 68 150Z" fill="${cor}" stroke="${cor}" stroke-width="${extra}" stroke-linejoin="round"/>` + E(74, 45, 4, 7) + E(126, 45, 4, 7) + E(100, 42, 25, 30); };
+    return { defs: `<mask id="${id}M" maskUnits="userSpaceOnUse" x="0" y="0" width="200" height="400">${pecas("#fff", 0)}</mask>`,
+      base: pecas("#a7785c", 2.4) + pecas("#edc9b0", 0) + `<path d="M62 92Q100 82 138 92" fill="none" stroke="#d9ad90" stroke-width="1"/><circle cx="91" cy="40" r="1.7" fill="#4a3a33"/><circle cx="109" cy="40" r="1.7" fill="#4a3a33"/><path d="M94 57Q100 60 106 57" fill="none" stroke="#9a6a55" stroke-width="1.2" stroke-linecap="round"/>` };
+  };
+  /* pontos espalhados por região do corpo: n por região, com densidade própria */
+  const REG = { cab: [78, 122, 14, 68], tro: [64, 136, 90, 226], bra: [26, 68, 100, 236], brb: [132, 174, 100, 236], pea: [68, 100, 232, 372], peb: [100, 132, 232, 372] };
+  const espalha = (rnd, qtd, fn) => Object.keys(qtd).map(k => { const [x0, x1, y0, y1] = REG[k]; let s = ""; for (let i = 0; i < qtd[k]; i++) s += fn(x0 + rnd() * (x1 - x0), y0 + rnd() * (y1 - y0), rnd, k); return s; }).join("");
+  const seta = (id, cor) => `<marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${cor}"/></marker>`;
+
+  const exantemas = primeiro => {
+    const C = corpo("ex"), r1 = mk(11), r2 = mk(23);
+    const sar = espalha(r1, { cab: 22, tro: 150, bra: 26, brb: 26, pea: 22, peb: 22 }, (x, y, r, k) => { const s = k === "tro" ? 3.2 + r() * 3 : k === "cab" ? 1.8 + r() * 1.8 : 2.2 + r() * 2; return `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(s)}" ry="${f(s * .78)}" transform="rotate(${f(r() * 180)} ${f(x)} ${f(y)})" fill="#c4332b" opacity=".72"/>`; });
+    const rub = espalha(r2, { cab: 20, tro: 80, bra: 16, brb: 16, pea: 16, peb: 16 }, (x, y, r) => `<circle cx="${f(x)}" cy="${f(y)}" r="${f(1.5 + r() * 1.7)}" fill="#e0688a" opacity=".8"/>`);
+    const nodo = (x, y, a) => `<ellipse cx="${x}" cy="${y}" rx="3.2" ry="4.6" transform="rotate(${a} ${x} ${y})" fill="#8fb36b" stroke="#476b2c" stroke-width="1"/>`;
+    const svg = `<svg class="sv" viewBox="0 0 360 410" role="img" aria-label="${T("Corpo de frente com o exantema de cada doença", "Cuerpo de frente con el exantema de cada enfermedad")}"><defs>${C.defs}${seta("exS", "var(--ink)")}
+      <pattern id="exRet" width="13" height="13" patternUnits="userSpaceOnUse"><circle cx="6.5" cy="6.5" r="6.6" fill="none" stroke="#d1486c" stroke-width="1.5"/><circle cx="0" cy="0" r="3" fill="none" stroke="#d1486c" stroke-width="1"/><circle cx="13" cy="13" r="3" fill="none" stroke="#d1486c" stroke-width="1"/></pattern>
+      <radialGradient id="exBo"><stop offset="0" stop-color="#d8362f" stop-opacity=".95"/><stop offset=".7" stop-color="#d8362f" stop-opacity=".7"/><stop offset="1" stop-color="#d8362f" stop-opacity="0"/></radialGradient></defs>
+      <g transform="translate(6 6)">${C.base}
+        <g data-show="sar"><g mask="url(#exM)">${sar}</g><ellipse cx="91" cy="40" rx="5" ry="3.2" fill="#d8362f" opacity=".6"/><ellipse cx="109" cy="40" rx="5" ry="3.2" fill="#d8362f" opacity=".6"/><circle cx="91" cy="40" r="1.7" fill="#4a3a33"/><circle cx="109" cy="40" r="1.7" fill="#4a3a33"/></g>
+        <g data-show="rub"><g mask="url(#exM)">${rub}</g>${nodo(131, 53, 12)}${nodo(69, 53, -12)}${nodo(119, 75, 20)}${nodo(81, 75, -20)}${nodo(127, 64, 10)}${nodo(73, 64, -10)}</g>
+        <g data-show="par"><ellipse cx="86" cy="51" rx="9" ry="7.5" fill="url(#exBo)"/><ellipse cx="114" cy="51" rx="9" ry="7.5" fill="url(#exBo)"/><g mask="url(#exM)" opacity=".85"><rect x="20" y="100" width="52" height="124" fill="url(#exRet)"/><rect x="128" y="100" width="52" height="124" fill="url(#exRet)"/><rect x="66" y="230" width="68" height="76" fill="url(#exRet)"/></g></g>
+      </g>
+      <g data-show="sar">${lab(118, 46, 200, 30, [T("conjuntivite", "conjuntivitis"), T("+ febre alta e tos", "+ fiebre alta y tos")])}${lab(109, 64, 200, 78, [T("manchas brancas", "manchas blancas"), T("na mucosa jugal", "en la mucosa yugal")])}${lab(134, 150, 200, 136, [T("morbiliforme", "morbiliforme"), T("vermelho, confluente", "rojo, confluente")])}</g>
+      <g data-show="rub">${lab(138, 59, 200, 30, [T("adenopatias", "adenopatías"), T("retroauricular, occipital", "retroauricular, occipital"), T("e cervical posterior", "y cervical posterior"), T("móveis e indolores", "móviles e indoloras")])}${lab(134, 150, 200, 136, [T("exantema rosado", "exantema rosado"), T("confluente, febre baixa", "confluente, fiebre baja")])}</g>
+      <g data-show="sar rub"><path d="M196 190L196 330" stroke="var(--ink)" stroke-width="1.6" fill="none" marker-end="url(#exS)"/>${tx(206, 258, T("crânio-caudal", "cráneo-caudal"))}${tx(206, 272, T("da cabeça aos pés", "de la cabeza a los pies"), { c: "mut" })}</g>
+      <g data-show="par">${lab(128, 57, 200, 30, [T("1ª fase", "1ª fase"), T("sinal da bofetada", "signo de la cachetada"), T("nas duas bochechas", "en las dos mejillas")])}${lab(166, 170, 200, 136, [T("2ª fase", "2ª fase"), T("exantema reticulado", "exantema reticulado"), T("braços, coxas e nádegas", "brazos, muslos y nalgas")])}${lab(132, 276, 200, 250, [T("reaparece", "reaparece"), T("com calor e exercício", "con calor y ejercicio")])}</g>
+    </svg>`;
+    const est = [
+      { id: "sar", r: T("Sarampo", "Sarampión"), d: T("<b>Sarampo:</b> pródromo de febre alta, tos e conjuntivite; depois exantema maculopapular morbiliforme, avermelhado e confluente, de progressão crânio-caudal, com descamação fina.", "<b>Sarampión:</b> pródromo de fiebre alta, tos y conjuntivitis; luego exantema maculopapular morbiliforme, rojo y confluente, de progresión cráneo-caudal, con descamación fina.") },
+      { id: "rub", r: T("Rubéola", "Rubéola"), d: T("<b>Rubéola:</b> exantema maculopapular rosado, confluente e crânio-caudal, com febre baixa e adenopatias retroauriculares, occipitais e cervicais posteriores, móveis e indolores.", "<b>Rubéola:</b> exantema maculopapular rosado, confluente y cráneo-caudal, con fiebre baja y adenopatías retroauriculares, occipitales y cervicales posteriores, móviles e indoloras.") },
+      { id: "par", r: T("Parvovírus", "Parvovirus"), d: T("<b>Parvovírus B19:</b> primeiro a vermelhidão nas duas bochechas (sinal da bofetada); depois o exantema reticulado, mais nos braços, coxas e nádegas, que reaparece com calor e atividade física.", "<b>Parvovirus B19:</b> primero el enrojecimiento de las dos mejillas (signo de la cachetada); luego el exantema reticulado, más en brazos, muslos y nalgas, que reaparece con calor y actividad física.") }];
+    est.sort((a, b) => (b.id === primeiro) - (a.id === primeiro));
+    return U.estados(T("Exantemas lado a lado", "Exantemas lado a lado"), svg, est, { cap: CAP });
+  };
+
   const figuras = {
-    ebvAssoc: () => U.el("figure", { class: "fig" },
-      U.el("h3", null, T("EBV: do beijo ao baço", "VEB: del beso al bazo")),
-      U.el("div", { html:
-        "<svg viewBox='0 0 360 210' role='img' aria-label='Esquema EBV'>" +
-        "<rect x='5' y='20' width='80' height='44' rx='8' fill='#fde2e4' stroke='#333'/><text x='45' y='38' text-anchor='middle' font-size='11'>1 SALIVA</text><text x='45' y='54' text-anchor='middle' font-size='9'>beijo</text>" +
-        "<text x='95' y='46' font-size='16'>&#8594;</text>" +
-        "<rect x='112' y='20' width='110' height='44' rx='8' fill='#e2ecfd' stroke='#333'/><text x='167' y='38' text-anchor='middle' font-size='11'>2 LINFÓCITO B</text><text x='167' y='54' text-anchor='middle' font-size='9'>receptor CD21</text>" +
-        "<text x='230' y='46' font-size='16'>&#8594;</text>" +
-        "<rect x='248' y='20' width='106' height='44' rx='8' fill='#fff3cd' stroke='#333'/><text x='301' y='38' text-anchor='middle' font-size='11'>3 LT CD8+</text><text x='301' y='54' text-anchor='middle' font-size='9'>resposta exagerada</text>" +
-        "<text x='180' y='92' text-anchor='middle' font-size='11'>&#8595; sintomas = resposta imune, não dano direto</text>" +
-        "<rect x='20' y='105' width='320' height='40' rx='8' fill='#e6f4ea' stroke='#333'/><text x='180' y='122' text-anchor='middle' font-size='11'>TRÍADE: febre + adenopatia + faringite</text><text x='180' y='138' text-anchor='middle' font-size='9'>linfocitose atípica &#8805;10% / Monospot</text>" +
-        "<rect x='20' y='155' width='320' height='40' rx='8' fill='#f8d7da' stroke='#333'/><text x='180' y='172' text-anchor='middle' font-size='11'>&#9888; BAÇO: risco de ruptura até 8 semanas</text><text x='180' y='188' text-anchor='middle' font-size='9'>sem esporte de contato / sem antibiótico</text>" +
-        "</svg>" }),
-      U.el("p", { class: "aviso" }, T("Modelo simplificado para memorizar.", "Modelo simplificado para memorizar."))),
-    vzvAssoc: () => U.el("figure", { class: "fig" },
-      U.el("h3", null, T("Varicela x Zóster", "Varicela x Zóster")),
-      U.el("div", { html:
-        "<svg viewBox='0 0 360 170' role='img' aria-label='Varicela e zóster'>" +
-        "<rect x='5' y='10' width='170' height='150' rx='8' fill='#e2ecfd' stroke='#333'/><text x='90' y='30' text-anchor='middle' font-size='12'>VARICELA</text>" +
-        "<text x='90' y='52' text-anchor='middle' font-size='10'>disseminada, centrípeta</text><text x='90' y='70' text-anchor='middle' font-size='10'>pápula &#8594; vesícula &#8594; crosta</text><text x='90' y='88' text-anchor='middle' font-size='10'>250 a 500 lesões, prurido</text><text x='90' y='106' text-anchor='middle' font-size='10'>incubação 10 a 21 dias</text><text x='90' y='124' text-anchor='middle' font-size='10'>vacina &#8804; 3-5 d / IG &#8804; 96 h</text>" +
-        "<rect x='185' y='10' width='170' height='150' rx='8' fill='#fff3cd' stroke='#333'/><text x='270' y='30' text-anchor='middle' font-size='12'>ZÓSTER</text>" +
-        "<text x='270' y='52' text-anchor='middle' font-size='10'>latência no gânglio sensitivo</text><text x='270' y='70' text-anchor='middle' font-size='10'>UNILATERAL, 1 dermátomo</text><text x='270' y='88' text-anchor='middle' font-size='10'>não cruza a linha média</text><text x='270' y='106' text-anchor='middle' font-size='10'>vesículas em cacho</text><text x='270' y='124' text-anchor='middle' font-size='10'>dor antes das lesões</text>" +
-        "</svg>" }),
-      U.el("p", { class: "aviso" }, T("Modelo simplificado para memorizar.", "Modelo simplificado para memorizar.")))
+    ebvAssoc: () => {
+      const r = mk(7); let esp = "", cd = "", mini = "";
+      for (let i = 0; i < 20; i++) { const a = i / 20 * 6.2832, c = Math.cos(a), s = Math.sin(a); esp += `<path d="M${f(62 + 44 * c)} ${f(78 + 44 * s)}L${f(62 + 51 * c)} ${f(78 + 51 * s)}" stroke="#2f6f5f" stroke-width="1.6"/><circle cx="${f(62 + 53 * c)}" cy="${f(78 + 53 * s)}" r="2.5" fill="#3f9a82" stroke="#1f5446" stroke-width=".6"/>`; }
+      [150, 165, 180, 195, 210, 60, 20, 300, 255].forEach(g => { const a = g * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), x = 236 + 58 * c, y = 96 + 58 * s, x2 = 236 + 66 * c, y2 = 96 + 66 * s; cd += `<path d="M${f(x)} ${f(y)}L${f(x2)} ${f(y2)}M${f(x2)} ${f(y2)}L${f(x2 + 4 * Math.cos(a + .8))} ${f(y2 + 4 * Math.sin(a + .8))}M${f(x2)} ${f(y2)}L${f(x2 + 4 * Math.cos(a - .8))} ${f(y2 + 4 * Math.sin(a - .8))}" stroke="#b5651d" stroke-width="2" stroke-linecap="round" fill="none"/>`; });
+      for (let i = 0; i < 10; i++) { const a = i / 10 * 6.2832; mini += `<circle cx="${f(155 + 13.5 * Math.cos(a))}" cy="${f(96 + 13.5 * Math.sin(a))}" r="1.5" fill="#3f9a82"/>`; }
+      let hex = ""; for (let i = 0; i < 6; i++) { const a = i / 6 * 6.2832 + .5236; hex += f(62 + 25 * Math.cos(a)) + "," + f(78 + 25 * Math.sin(a)) + " "; }
+      let dna = "M48 78"; for (let i = 1; i <= 14; i++) dna += `Q${f(48 + (i - .5) * 2)} ${f(78 + (i % 2 ? -1 : 1) * (9 + r() * 5))} ${f(48 + i * 2)} 78`;
+      const cd8 = (x, y) => `<circle cx="${x}" cy="${y}" r="21" fill="url(#ebT)" stroke="#a8641c" stroke-width="1.6"/><circle cx="${x + 2}" cy="${y + 1}" r="13" fill="#c97a2b" opacity=".9"/><circle cx="${x - 2}" cy="${y - 3}" r="4" fill="#e9a55b" opacity=".6"/>`;
+      const chip = (x, w, s) => `<rect x="${x}" y="262" width="${w}" height="24" rx="12" fill="var(--sunk)" stroke="var(--line)"/>` + tx(x + w / 2, 278, s, { a: "middle" });
+      const svg = `<svg class="sv" viewBox="0 0 360 336" role="img" aria-label="${T("EBV: vírus, entrada no linfócito B, resposta dos LT CD8+ e latência", "VEB: virus, entrada al linfocito B, respuesta de los LT CD8+ y latencia")}"><defs>${seta("ebS", "#c4332b")}${seta("ebG", "var(--muted)")}
+        <radialGradient id="ebB" cx=".4" cy=".35"><stop offset="0" stop-color="#eef2ff"/><stop offset="1" stop-color="#b4c2ee"/></radialGradient><radialGradient id="ebN" cx=".4" cy=".35"><stop offset="0" stop-color="#9d8fd6"/><stop offset="1" stop-color="#57479a"/></radialGradient>
+        <radialGradient id="ebT" cx=".4" cy=".35"><stop offset="0" stop-color="#fdebd0"/><stop offset="1" stop-color="#f0c189"/></radialGradient><radialGradient id="ebE" cx=".4" cy=".35"><stop offset="0" stop-color="#fbf1d8"/><stop offset="1" stop-color="#ecd29a"/></radialGradient></defs>
+        <g data-on="virus">${esp}<circle cx="62" cy="78" r="44" fill="url(#ebE)" stroke="#b07c2c" stroke-width="3.2"/><circle cx="62" cy="78" r="40.6" fill="none" stroke="#e6c27a" stroke-width="1.1"/>
+          <polygon points="${hex}" fill="#dfe4f6" stroke="#4f5b9c" stroke-width="1.8" stroke-linejoin="round"/><path d="${dna}" fill="none" stroke="#7b2d8e" stroke-width="1.5"/><path d="${dna}" fill="none" stroke="#c07fd0" stroke-width="1.2" transform="translate(0 2.6)"/>
+          ${tx(62, 16, T("EBV", "VEB"), { a: "middle" })}</g>
+        <g data-show="virus">${lab(95, 49, 104, 34, [T("envelope", "envoltura")])}${lab(62, 86, 44, 152, [T("DNA linear de dupla fita", "ADN lineal bicatenario")])}${lab(19, 106, 14, 174, [T("glicoproteínas", "glicoproteínas"), T("entrada e tropismo", "entrada y tropismo")])}</g>
+        <path data-on="entrada" d="M112 84L136 92" stroke="var(--muted)" stroke-width="1.4" stroke-dasharray="3 3" fill="none" marker-end="url(#ebG)"/>
+        <g data-on="entrada resp lat"><circle cx="236" cy="96" r="58" fill="url(#ebB)" stroke="#4a5aa8" stroke-width="2"/><circle cx="240" cy="98" r="35" fill="url(#ebN)" stroke="#3d3078" stroke-width="1"/>${tx(236, 22, T("linfócito B", "linfocito B"), { a: "middle" })}</g>
+        <g data-on="entrada">${cd}${mini}<circle cx="155" cy="96" r="12" fill="url(#ebE)" stroke="#b07c2c" stroke-width="2"/><circle cx="155" cy="96" r="5" fill="#dfe4f6" stroke="#4f5b9c"/></g>
+        <g data-show="entrada">${lab(172, 110, 150, 180, [T("receptor CD21 (CR2)", "receptor CD21 (CR2)"), T("porta de entrada do EBV", "puerta de entrada del VEB")])}</g>
+        <g data-show="lat"><circle cx="232" cy="92" r="8" fill="none" stroke="#f6d55c" stroke-width="2.6"/><circle cx="252" cy="110" r="6" fill="none" stroke="#f6d55c" stroke-width="2.2"/>${lab(240, 92, 190, 180, [T("EBV latente no núcleo", "VEB latente en el núcleo"), T("EBNA · LB de memória", "EBNA · LB de memoria")])}</g>
+        <g data-on="resp">${cd8(322, 196)}${cd8(274, 222)}<path d="M308 180L286 146" stroke="#c4332b" stroke-width="1.8" fill="none" marker-end="url(#ebS)"/><path d="M266 202L252 160" stroke="#c4332b" stroke-width="1.8" fill="none" marker-end="url(#ebS)"/></g>
+        <g data-show="resp">${tx(298, 252, "LT CD8+", { a: "middle" })}${tx(8, 218, T("resposta exagerada", "respuesta exagerada"))}${tx(8, 232, T("dos LT CD8+ = sintomas", "de los LT CD8+ = síntomas"), { c: "mut" })}
+          ${chip(8, 60, T("febre", "fiebre"))}${tx(74, 278, "+", { a: "middle" })}${chip(80, 86, T("adenopatia", "adenopatía"))}${tx(172, 278, "+", { a: "middle" })}${chip(178, 76, T("faringite", "faringitis"))}
+          <path d="M22 312C22 300 40 296 52 302C62 307 62 322 50 326C38 330 22 326 22 312Z" fill="#8a3557" stroke="#5a1e37" stroke-width="1.4"/><path d="M30 310C36 304 46 306 50 312" fill="none" stroke="#b4607f" stroke-width="1.2"/>
+          ${tx(70, 310, T("baço: esplenomegalia ~50%", "bazo: esplenomegalia ~50%"))}${tx(70, 324, T("ruptura: risco até 8 semanas", "rotura: riesgo hasta 8 semanas"), { c: "mut" })}</g>
+      </svg>`;
+      return U.estados(T("EBV: do vírus aos sintomas", "VEB: del virus a los síntomas"), svg, [
+        { id: "virus", r: T("O vírus", "El virus"), d: T("<b>EBV:</b> gama-herpesvírus, DNA linear de dupla fita. É envelopado: o envelope vem do brotamento, e as glicoproteínas da superfície fazem a entrada e o tropismo.", "<b>VEB:</b> gamma herpesvirus, ADN lineal bicatenario. Es envuelto: la envoltura viene de la brotación, y las glicoproteínas de superficie hacen la entrada y el tropismo.") },
+        { id: "entrada", r: T("Entrada", "Entrada"), d: T("<b>Saliva</b> (beijo, talheres, tosse). O vírus se liga ao <b>CD21 (CR2)</b> do linfócito B.", "<b>Saliva</b> (beso, cubiertos, tos). El virus se une al <b>CD21 (CR2)</b> del linfocito B.") },
+        { id: "resp", r: T("Resposta", "Respuesta"), d: T("Os sintomas vêm da <b>resposta exagerada dos LT CD8+</b> contra os linfócitos B infectados, não do dano direto do vírus. Tríade: febre, linfadenopatia e faringite. Com esplenomegalia, sem esporte de contato.", "Los síntomas vienen de la <b>respuesta exagerada de los LT CD8+</b> contra los linfocitos B infectados, no del daño directo del virus. Tríada: fiebre, linfadenopatía y faringitis. Con esplenomegalia, sin deporte de contacto.") },
+        { id: "lat", r: T("Latência", "Latencia"), d: T("Ciclo bifásico (lítico e latente). O EBV fica <b>latente nos linfócitos B de memória</b> (EBNA e proteína latente de membrana) e persiste a vida toda.", "Ciclo bifásico (lítico y latente). El VEB queda <b>latente en los linfocitos B de memoria</b> (EBNA y proteína latente de membrana) y persiste toda la vida.") }], { cap: CAP });
+    },
+    vzvAssoc: () => {
+      const C = corpo("vz"), r = mk(41);
+      const les = (x, y, rr, forca) => { const t = forca || rr(); return t < .34 ? `<circle cx="${f(x)}" cy="${f(y)}" r="2.1" fill="#cf4337"/>` : t < .7 ? `<circle cx="${f(x)}" cy="${f(y)}" r="3.3" fill="#e2574a" opacity=".55"/><circle cx="${f(x)}" cy="${f(y)}" r="2.1" fill="#f7f3cf" stroke="#b9862f" stroke-width=".7"/>` : `<circle cx="${f(x)}" cy="${f(y)}" r="2.2" fill="#7b4a2a" stroke="#4d2c16" stroke-width=".5"/>`; };
+      const vari = espalha(r, { cab: 22, tro: 84, bra: 6, brb: 6, pea: 6, peb: 6 }, (x, y, rr) => les(x, y, rr));
+      let zo = ""; for (let i = 0; i < 9; i++) { const u = (i + .5) / 9, cx = 99 - u * 36, cy = 152 - u * 12 + (r() - .5) * 6; for (let k = 0; k < 5; k++) zo += les(cx + (r() - .5) * 8, cy + (r() - .5) * 9, r, .5); }
+      const svg = `<svg class="sv" viewBox="0 0 360 410" role="img" aria-label="${T("Distribuição das lesões na varicela e no herpes zóster", "Distribución de las lesiones en la varicela y el herpes zóster")}"><defs>${C.defs}</defs>
+        <g transform="translate(6 6)">${C.base}
+          <g data-show="var" mask="url(#vzM)">${vari}</g>
+          <g data-show="zos"><g mask="url(#vzM)"><path d="M100 140L100 166L60 152L60 126Z" fill="#d8362f" opacity=".28"/>${zo}</g><path d="M100 84L100 232" stroke="var(--ink)" stroke-width="1.3" stroke-dasharray="4 3"/></g></g>
+        <g data-show="var">${lab(114, 26, 200, 26, [T("começa aqui", "empieza acá"), T("couro cabeludo, rosto", "cuero cabelludo, cara"), T("ou tronco", "o tronco")])}${lab(134, 150, 200, 130, [T("centrípeta", "centrípeta"), T("predomina no tronco", "predomina en el tronco"), T("250 a 500 lesões, prurido", "250 a 500 lesiones, prurito")])}${lab(164, 196, 200, 204, [T("poucas nos membros", "pocas en los miembros")])}
+          <circle cx="206" cy="262" r="2.1" fill="#cf4337"/>${tx(214, 266, T("pápula", "pápula"), { c: "mut" })}<circle cx="206" cy="280" r="3.3" fill="#e2574a" opacity=".55"/><circle cx="206" cy="280" r="2.1" fill="#f7f3cf" stroke="#b9862f" stroke-width=".7"/>${tx(214, 284, T("vesícula", "vesícula"), { c: "mut" })}<circle cx="206" cy="298" r="2.2" fill="#7b4a2a"/>${tx(214, 302, T("crosta", "costra"), { c: "mut" })}</g>
+        <g data-show="zos">${lab(106, 110, 200, 60, [T("linha média", "línea media"), T("a lesão não cruza", "la lesión no la cruza")])}${lab(78, 150, 200, 130, [T("1 dermátomo, unilateral", "1 dermatoma, unilateral"), T("vesículas em cacho", "vesículas en racimo"), T("dor ou parestesia antes", "dolor o parestesia antes")])}${tx(200, 250, T("resolve em 1 a 3 semanas", "resuelve en 1 a 3 semanas"), { c: "mut" })}</g>
+      </svg>`;
+      return U.estados(T("Onde ficam as lesões", "Dónde están las lesiones"), svg, [
+        { id: "var", r: T("Varicela", "Varicela"), d: T("<b>Varicela:</b> disseminada. Começa no couro cabeludo, rosto ou tronco e tem evolução centrípeta (predomina no tronco). Lesões em pápula, vesícula e crosta ao mesmo tempo, com prurido.", "<b>Varicela:</b> diseminada. Empieza en cuero cabelludo, cara o tronco y tiene evolución centrípeta (predomina en el tronco). Lesiones en pápula, vesícula y costra al mismo tiempo, con prurito.") },
+        { id: "zos", r: T("Zóster", "Zóster"), d: T("<b>Herpes zóster:</b> reativação do vírus latente no gânglio sensitivo, que desce pelo nervo até o dermátomo. Unilateral, não cruza a linha média; dor ou parestesia antes das vesículas em cacho.", "<b>Herpes zóster:</b> reactivación del virus latente en el ganglio sensitivo, que baja por el nervio hasta el dermatoma. Unilateral, no cruza la línea media; dolor o parestesia antes de las vesículas en racimo.") }], { cap: CAP });
+    },
+    vzvLesao: () => {
+      const r = mk(3);
+      const painel = (x, id, forma) => { let cel = "", col = ""; for (let i = 0; i < 9; i++) cel += `<ellipse cx="${f(x + 8 + i * 11)}" cy="97" rx="4.6" ry="3.4" fill="#c98aa0" stroke="#8d5069" stroke-width=".5"/>`;
+        for (let i = 0; i < 7; i++) { const y = 110 + i * 6 + r() * 3; col += `<path d="M${x + 2} ${f(y)}q13 ${f(-3 - r() * 3)} 26 0t26 0t26 0t26 0" fill="none" stroke="#e7a9b4" stroke-width=".9" opacity=".8"/>`; }
+        return `<g data-on="${id} tudo"><clipPath id="vl${id}"><rect x="${x}" y="20" width="104" height="136" rx="8"/></clipPath><g clip-path="url(#vl${id})"><rect x="${x}" y="100" width="104" height="56" fill="#f7dfe2"/>${col}<path d="M${x + 14} 140C${x + 34} 126 ${x + 60} 146 ${x + 92} 130" fill="none" stroke="#c4332b" stroke-width="3.4" opacity=".75"/>${forma(x)}${cel}</g></g>`; };
+      const epi = (x, d) => `<path d="${d}" fill="#eec7b4" stroke="#a7785c" stroke-width="1.1"/>`;
+      const svg = `<svg class="sv" viewBox="0 0 360 196" role="img" aria-label="${T("Corte da pele: pápula, vesícula e crosta", "Corte de la piel: pápula, vesícula y costra")}">
+        ${painel(8, "pap", x => `<ellipse cx="${x + 52}" cy="118" rx="30" ry="14" fill="#d8362f" opacity=".3"/>` + epi(x, `M${x} 78L${x + 26} 78Q${x + 52} 56 ${x + 78} 78L${x + 104} 78L${x + 104} 100L${x} 100Z`))}
+        ${painel(128, "ves", x => `<ellipse cx="${x + 52}" cy="118" rx="34" ry="15" fill="#d8362f" opacity=".3"/>` + epi(x, `M${x} 78L${x + 20} 78Q${x + 52} 30 ${x + 84} 78L${x + 104} 78L${x + 104} 100L${x} 100Z`) + `<path d="M${x + 27} 80Q${x + 52} 42 ${x + 77} 80Q${x + 52} 92 ${x + 27} 80Z" fill="#f8f4d2" stroke="#b9862f" stroke-width="1"/><circle cx="${x + 46}" cy="72" r="1.6" fill="#7b2d8e"/><circle cx="${x + 56}" cy="66" r="1.6" fill="#7b2d8e"/><circle cx="${x + 60}" cy="78" r="1.6" fill="#7b2d8e"/><circle cx="${x + 40}" cy="80" r="1.6" fill="#7b2d8e"/>`)}
+        ${painel(248, "cro", x => epi(x, `M${x} 78L${x + 104} 78L${x + 104} 100L${x} 100Z`) + `<path d="M${x + 24} 79Q${x + 30} 64 ${x + 44} 68Q${x + 56} 60 ${x + 66} 68Q${x + 80} 66 ${x + 82} 79Z" fill="#7b4a2a" stroke="#4d2c16" stroke-width="1"/><path d="M${x + 36} 72l8 3M${x + 56} 68l6 6" stroke="#4d2c16" stroke-width=".8"/>`)}
+        <defs>${seta("vlS", "var(--ink)")}</defs><path d="M114 92l9 0" stroke="var(--ink)" stroke-width="1.6" marker-end="url(#vlS)"/><path d="M234 92l9 0" stroke="var(--ink)" stroke-width="1.6" marker-end="url(#vlS)"/>
+        ${tx(60, 174, T("1 · pápula", "1 · pápula"), { a: "middle" })}${tx(180, 174, T("2 · vesícula", "2 · vesícula"), { a: "middle" })}${tx(300, 174, T("3 · crosta", "3 · costra"), { a: "middle" })}
+        ${tx(60, 190, T("elevação vermelha", "elevación roja"), { a: "middle", c: "mut" })}${tx(180, 190, T("líquido com vírus", "líquido con virus"), { a: "middle", c: "mut" })}${tx(300, 190, T("lesão secando", "lesión secándose"), { a: "middle", c: "mut" })}
+        ${tx(12, 14, T("epiderme em cima, derme embaixo", "epidermis arriba, dermis abajo"), { c: "mut" })}</svg>`;
+      return U.estados(T("A lesão da varicela em corte", "La lesión de la varicela en corte"), svg, [
+        { id: "tudo", r: T("As três", "Las tres"), d: T("Na varicela as lesões passam por <b>pápula, vesícula e crosta</b>, e as três fases aparecem ao mesmo tempo no corpo.", "En la varicela las lesiones pasan por <b>pápula, vesícula y costra</b>, y las tres fases aparecen al mismo tiempo en el cuerpo.") },
+        { id: "pap", r: T("Pápula", "Pápula"), d: T("<b>Pápula:</b> a primeira lesão, uma elevação avermelhada da pele.", "<b>Pápula:</b> la primera lesión, una elevación rojiza de la piel.") },
+        { id: "ves", r: T("Vesícula", "Vesícula"), d: T("<b>Vesícula:</b> bolha com líquido. O contágio é pelo líquido das vesículas ou por secreções respiratórias.", "<b>Vesícula:</b> ampolla con líquido. El contagio es por el líquido de las vesículas o por secreciones respiratorias.") },
+        { id: "cro", r: T("Crosta", "Costra"), d: T("<b>Crosta:</b> a vesícula seca e forma a crosta, última fase da lesão.", "<b>Costra:</b> la vesícula se seca y forma la costra, última fase de la lesión.") }], { cap: CAP });
+    },
+    exSarampo: () => exantemas("sar"), exParvo: () => exantemas("par"), exRubeola: () => exantemas("rub"),
+    prazos: () => {
+      const X0 = 122, D = 31, xa = d => X0 + d * D, Z0 = 196, E = 12.4, xb = d => Z0 + d * E;
+      const linha = (y, nome, sub) => tx(6, y + 4, nome) + tx(6, y + 18, sub, { c: "mut" });
+      const barra = (x1, x2, y, cls, fim) => `<rect x="${f(x1)}" y="${y - 6}" width="${f(x2 - x1)}" height="16" rx="5" class="${cls}"/>` + tx(f(x2 + 5), y + 6, fim);
+      let ta = `<path d="M${X0} 196L${xa(7)} 196" stroke="var(--muted)" stroke-width="1"/>`, tb = `<path d="M${xb(-5)} 196L${xb(8)} 196" stroke="var(--muted)" stroke-width="1"/>`;
+      for (let d = 0; d <= 7; d++) ta += `<path d="M${xa(d)} 30L${xa(d)} 196" stroke="var(--line)" stroke-width="1"/>` + tx(xa(d), 210, String(d), { a: "middle", c: "mut" });
+      for (let d = -4; d <= 8; d += 2) tb += `<path d="M${f(xb(d))} 30L${f(xb(d))} 196" stroke="var(--line)" stroke-width="1"/>` + tx(f(xb(d)), 210, (d > 0 ? "+" : "") + d, { a: "middle", c: "mut" });
+      const svg = `<svg class="sv" viewBox="0 0 360 232" role="img" aria-label="${T("Prazos de bloqueio e de contágio", "Plazos de bloqueo y de contagio")}"><style>.pzV{fill:var(--c)}.pzI{fill:#8b90b5}.pzH{fill:var(--c);opacity:.35}.pzC{fill:#c4332b;opacity:.8}.pzE{fill:#8b90b5}</style>
+        <g data-show="pos">${ta}${linha(44, T("Varicela", "Varicela"), T("vacina", "vacuna"))}<rect x="${xa(3)}" y="38" width="${2 * D}" height="16" rx="5" class="pzH"/>${barra(xa(0), xa(3), 44, "pzV", "")}${tx(xa(5) + 5, 50, T("3 a 5 d", "3 a 5 d"))}
+          ${linha(84, T("Varicela", "Varicela"), T("imunoglobulina", "inmunoglobulina"))}${barra(xa(0), xa(4), 84, "pzI", "96 h")}
+          ${linha(124, T("Sarampo", "Sarampión"), T("vacina", "vacuna"))}${barra(xa(0), xa(3), 124, "pzV", "72 h")}
+          ${linha(164, T("Sarampo", "Sarampión"), T("imunoglobulina", "inmunoglobulina"))}${barra(xa(0), xa(6), 164, "pzI", T("6 d", "6 d"))}
+          ${tx(xa(3.5), 226, T("dias depois do contato", "días después del contacto"), { a: "middle", c: "mut" })}</g>
+        <g data-show="exa">${tb}<path d="M${Z0} 24L${Z0} 196" stroke="var(--ink)" stroke-width="1.6"/>${tx(Z0, 18, T("dia do exantema", "día del exantema"), { a: "middle" })}
+          ${linha(44, T("Sarampo", "Sarampión"), T("contágio", "contagio"))}${barra(xb(-4), xb(4), 44, "pzC", T("−4 a +4", "−4 a +4"))}
+          ${linha(84, T("Sarampo", "Sarampión"), T("sem escola", "sin escuela"))}<rect x="${f(xb(4))}" y="78" width="${f(E)}" height="16" rx="5" class="pzH"/>${barra(xb(0), xb(4), 84, "pzE", "")}${tx(f(xb(5) + 5), 90, T("4 a 5 d", "4 a 5 d"))}
+          ${linha(124, T("Rubéola", "Rubéola"), T("maior contágio", "mayor contagio"))}${barra(xb(1), xb(5), 124, "pzC", T("+1 a +5", "+1 a +5"))}
+          ${linha(164, T("Rubéola", "Rubéola"), T("sem escola", "sin escuela"))}${barra(xb(0), xb(7), 164, "pzE", T("7 d", "7 d"))}
+          ${tx(6, 226, T("Parvovírus: não exclui da escola", "Parvovirus: no excluye de la escuela"))}</g>
+      </svg>`;
+      return U.estados(T("Prazos que se confundem", "Plazos que se confunden"), svg, [
+        { id: "pos", r: T("Depois do contato", "Después del contacto"), d: T("<b>Bloqueio pós-contato.</b> Varicela: vacina até 3 a 5 dias, imunoglobulina até 96 h. Sarampo: vacina até 72 h, imunoglobulina de pool até 6 dias (menores de 6 meses, imunocomprometidos e gestantes).", "<b>Bloqueo postcontacto.</b> Varicela: vacuna hasta 3 a 5 días, inmunoglobulina hasta 96 h. Sarampión: vacuna hasta 72 h, inmunoglobulina de pool hasta 6 días (menores de 6 meses, inmunocomprometidos y embarazadas).") },
+        { id: "exa", r: T("Contágio e escola", "Contagio y escuela"), d: T("<b>Em torno do exantema.</b> Sarampo: contagia de 4 dias antes a 4 dias depois; exclusão escolar até 4 a 5 dias depois. Rubéola: maior contágio de 1 a 5 dias depois; exclusão até 7 dias depois. Parvovírus não exclui.", "<b>Alrededor del exantema.</b> Sarampión: contagia de 4 días antes a 4 días después; exclusión escolar hasta 4 a 5 días después. Rubéola: mayor contagio de 1 a 5 días después; exclusión hasta 7 días después. Parvovirus no excluye.") }]);
+    },
+    src: () => {
+      const g = (x, s) => `<g transform="translate(${x} 128)">${s}</g>`;
+      const svg = `<svg class="sv" viewBox="0 0 360 212" role="img" aria-label="${T("Rubéola congênita: 1º trimestre e órgãos afetados", "Rubéola congénita: 1º trimestre y órganos afectados")}">
+        <rect x="14" y="22" width="110" height="20" rx="6" fill="#c4332b"/><rect x="127" y="22" width="108" height="20" rx="6" fill="var(--sunk)" stroke="var(--line)"/><rect x="238" y="22" width="108" height="20" rx="6" fill="var(--sunk)" stroke="var(--line)"/>
+        ${tx(69, 58, T("1º trimestre: GRAVE", "1º trimestre: GRAVE"), { a: "middle" })}${tx(181, 58, T("2º trimestre", "2º trimestre"), { a: "middle", c: "mut" })}${tx(292, 58, T("3º trimestre", "3º trimestre"), { a: "middle", c: "mut" })}
+        ${tx(14, 14, T("gestação", "gestación"), { c: "mut" })}${tx(14, 80, T("aborto, morte fetal ou malformações:", "aborto, muerte fetal o malformaciones:"), { c: "mut" })}
+        ${g(50, `<path d="M-26 0Q0 -22 26 0Q0 22 -26 0Z" fill="#fff" stroke="#6b5a55" stroke-width="1.6"/><circle r="12" fill="#7c93b5" stroke="#4d607e"/><circle r="6.8" fill="#e3e6ec" stroke="#aab0bd"/><circle cx="-2" cy="-2" r="2" fill="#fff"/>`)}
+        ${g(137, `<path d="M6 -24C-14 -27 -20 -8 -14 6C-11 13 -7 14 -5 21C-3 27 7 26 7 18C8 8 18 4 18 -9C18 -17 14 -23 6 -24Z" fill="#edc9b0" stroke="#a7785c" stroke-width="1.6"/><path d="M6 -15C-5 -17 -10 -5 -5 3C-1 8 4 3 2 -2" fill="none" stroke="#a7785c" stroke-width="1.5" stroke-linecap="round"/><path d="M26 -10Q32 0 26 10M32 -15Q41 0 32 15" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round"/><path d="M22 14L40 -14" stroke="#c4332b" stroke-width="2.2" stroke-linecap="round"/>`)}
+        ${g(224, `<path d="M-4 -16C-4 -27 8 -29 11 -20" fill="none" stroke="#8a2620" stroke-width="5" stroke-linecap="round"/><path d="M0 24C-27 6 -25 -18 -10 -18C-4 -18 0 -14 0 -10C0 -14 4 -18 10 -18C25 -18 27 6 0 24Z" fill="#cf4337" stroke="#7d1f18" stroke-width="1.6"/><path d="M-12 -6C-10 4 -4 12 2 16" fill="none" stroke="#e98a80" stroke-width="1.6" stroke-linecap="round"/>`)}
+        ${g(311, `<path d="M-24 2C-26 -14 -10 -23 2 -19C16 -23 28 -12 25 2C26 14 12 19 2 15C-10 20 -24 14 -24 2Z" fill="#ebb9c3" stroke="#9c586a" stroke-width="1.6"/><path d="M2 -19C-2 -8 6 -2 0 15M-16 -8C-10 -6 -8 0 -14 6M14 -10C8 -6 10 2 18 6M-6 -14C-4 -10 -8 -6 -6 -2" fill="none" stroke="#9c586a" stroke-width="1.2" stroke-linecap="round"/>`)}
+        ${tx(50, 174, T("catarata", "cataratas"), { a: "middle" })}${tx(50, 188, T("e cegueira", "y ceguera"), { a: "middle", c: "mut" })}${tx(137, 174, T("hipoacusia", "hipoacusia"), { a: "middle" })}${tx(224, 174, T("cardiopatia", "cardiopatía"), { a: "middle" })}${tx(224, 188, T("congênita", "congénita"), { a: "middle", c: "mut" })}${tx(311, 174, T("retardo", "retraso"), { a: "middle" })}${tx(311, 188, T("mental", "mental"), { a: "middle", c: "mut" })}
+      </svg>`;
+      return U.el("figure", { class: "fig" }, U.el("h3", null, T("Síndrome da rubéola congênita", "Síndrome de rubéola congénita")), U.el("div", { html: svg }), U.el("figcaption", null, CAP));
+    }
   };
   const temas = [
     { id: "mono", n: "6.1", nome: T("Mononucleose infecciosa (EBV)", "Mononucleosis infecciosa (VEB)"), curto: T("Mononucleose", "Mononucleosis"),
@@ -72,7 +204,7 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
       erro: T("Achar que os sintomas vêm do dano direto do vírus: vêm da resposta dos LT CD8+.", "Creer que los síntomas vienen del daño viral directo: vienen de la respuesta de los LT CD8+.") },
     { id: "varicela", n: "6.2", nome: T("Varicela e herpes zóster (VZV)", "Varicela y herpes zóster (VVZ)"), curto: T("Varicela", "Varicela"),
       sub: T("Contágio, lesões, zóster e profilaxia", "Contagio, lesiones, zóster y profilaxis"),
-      estudado: "2026-11-14", figuras: ["vzvAssoc"],
+      estudado: "2026-11-14", figuras: ["vzvAssoc", "vzvLesao"],
       chave: T("A varicela é disseminada e centrípeta, com lesões em pápula, vesícula e crosta; o zóster é a reativação unilateral num dermátomo, sem cruzar a linha média.", "La varicela es diseminada y centrípeta, con lesiones en pápula, vesícula y costra; el zóster es la reactivación unilateral en un dermatoma, sin cruzar la línea media."),
       resumo: [
         [T("Epidemiologia", "Epidemiología"), [
@@ -113,7 +245,7 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
       erro: T("Confundir centrípeta com 'vai para as extremidades': centrípeta é predomínio no tronco.", "Confundir centrípeta con 'va hacia las extremidades': centrípeta es predominio en el tronco.") },
     { id: "sarampo", n: "6.3", nome: T("Sarampo", "Sarampión"), curto: T("Sarampo", "Sarampión"),
       sub: T("Paramyxoviridae, via aérea, morbiliforme", "Paramyxoviridae, vía aérea, morbiliforme"),
-      estudado: "2026-11-14", figuras: [],
+      estudado: "2026-11-14", figuras: ["exSarampo", "prazos"],
       chave: T("O sarampo é um Paramyxoviridae (Morbillivirus) de transmissão aérea, com pródromo de febre, tos e conjuntivite e exantema morbiliforme crânio-caudal; não tem antiviral específico.", "El sarampión es un Paramyxoviridae (Morbillivirus) de transmisión aérea, con pródromo de fiebre, tos y conjuntivitis y exantema morbiliforme cráneo-caudal; no tiene antiviral específico."),
       resumo: [
         [T("O vírus e a transmissão", "El virus y la transmisión"), [
@@ -152,7 +284,7 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
 
     { id: "parvo", n: "6.4", nome: T("Parvovírus B19 (5ª doença)", "Parvovirus B19 (5ª enfermedad)"), curto: T("Parvovírus", "Parvovirus"),
       sub: T("Bochecha esbofeteada e exantema rendilhado", "Signo de la cachetada y exantema reticulado"),
-      estudado: "2026-11-14", figuras: [],
+      estudado: "2026-11-14", figuras: ["exParvo"],
       chave: T("O parvovírus causa a 5ª doença: primeiro a face esbofeteada, depois um exantema reticulado que volta com calor e exercício; não exclui da escola.", "El parvovirus causa la 5ª enfermedad: primero el signo de la cachetada, luego un exantema reticulado que reaparece con calor y ejercicio; no excluye de la escuela."),
       resumo: [
         [T("Clínica", "Clínica"), [
@@ -183,7 +315,7 @@ window.registrarUnidade("microbiologia", "virologia", 6, (T, U, H) => {
 
     { id: "rubeola", n: "6.5", nome: T("Rubéola", "Rubéola"), curto: T("Rubéola", "Rubéola"),
       sub: T("Togaviridae, adenopatia retroauricular, congênita", "Togaviridae, adenopatía retroauricular, congénita"),
-      estudado: "2026-11-14", figuras: [],
+      estudado: "2026-11-14", figuras: ["exRubeola", "src"],
       chave: T("A rubéola (Togaviridae) é leve na criança, mas no 1º trimestre da gestação causa a síndrome da rubéola congênita: catarata, surdez e cardiopatia.", "La rubéola (Togaviridae) es leve en el niño, pero en el 1º trimestre del embarazo causa el síndrome de rubéola congénita: cataratas, hipoacusia y cardiopatía."),
       resumo: [
         [T("O vírus", "El virus"), [
